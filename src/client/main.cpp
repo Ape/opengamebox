@@ -343,7 +343,9 @@ void Game::addMessage(std::string text){
 
 // Send a chat packet
 void Game::sendChat(std::string text){
-	if (al_ustr_length(input->getTextUstr()) > 0){
+	if (text.at(0) == '/'){
+		this->chatCommand(text);
+	}else if (al_ustr_length(input->getTextUstr()) > 0){
 		std::string data;
 		data.push_back(net::PACKET_CHAT);
 		data.append(this->input->getText());
@@ -353,6 +355,10 @@ void Game::sendChat(std::string text){
 
 	delete input;
 	this->input = nullptr;
+}
+
+void Game::chatCommand(std::string command){
+	this->addMessage(command + ": command not found!");
 }
 
 void Game::askNick(){

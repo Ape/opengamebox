@@ -9,10 +9,6 @@
 #include "vector2.h"
 
 class Object{
-protected:
-	unsigned int id;
-	Vector2 location;
-
 public:
 	Object(unsigned int id, Vector2 location);
 
@@ -22,6 +18,10 @@ public:
 	void setLocation(Vector2 location);
 
 	virtual void draw(IRenderer *renderer);
+
+protected:
+	unsigned int id;
+	Vector2 location;
 };
 
 #endif

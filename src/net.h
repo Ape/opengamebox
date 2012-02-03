@@ -14,8 +14,7 @@ namespace net{
 	const unsigned int DEFAULT_PORT   = 13355;
 	const unsigned int CHANNELS       = 2;
 	const unsigned char MAX_CLIENTS   = 32;
-	const int TABLE_WIDTH             = 10;
-	const int TABLE_HEIGHT            = 10; // TODO: Change to dynamic, controlled by server
+	const float MAX_FLOAT = 100.0f;
 
 	// Client control packets
 	const unsigned char PACKET_HANDSHAKE  = 0x01;
@@ -25,7 +24,9 @@ namespace net{
 
 	// Command packets
 	const unsigned char PACKET_CHAT       = 0x20;
-	const unsigned char PACKET_CMD        = 0x21;
+	const unsigned char PACKET_CREATE     = 0x21; // Create a new object
+	const unsigned char PACKET_REMOVE     = 0x21; // Remove an object
+	const unsigned char PACKET_MOVE       = 0x21; // Move an object
 
 	// Stream packets
 	const unsigned char PACKET_PINGS      = 0xE0;
@@ -51,6 +52,9 @@ namespace net{
 
 	template <class T>
 	unsigned char firstUnusedKey(std::map<unsigned char, T*> map);
+
+	void floatToBytes(unsigned char *bytes, float value);
+	float bytesToFloat(unsigned char *bytes);
 
 	std::string IPIntegerToString(unsigned int ip);
 	std::string AddressToString(ENetAddress address);

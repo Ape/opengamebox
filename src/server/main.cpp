@@ -179,13 +179,6 @@ void Server::receivePacket(ENetEvent event){
 			break;
 		}
 
-		case net::PACKET_CMD:{
-			if (event.packet->dataLength == 2){
-				std::cout << "NICK=" << clients[*id]->nick << "; CMD=0x" << std::hex << (unsigned int) event.packet->data[1] << std::endl;
-			}
-			break;
-		}
-
 		case net::PACKET_CHAT:{
 			if (event.packet->dataLength >= 2 && event.packet->dataLength <= 257){
 				std::string data;

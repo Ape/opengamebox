@@ -86,6 +86,7 @@ private:
 	void sendAction(unsigned char action, bool enable);
 
 	void addMessage(std::string message);
+	void chatCommand(std::string command);
 	void askNick(void);
 
 	void render(void);
