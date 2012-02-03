@@ -27,6 +27,9 @@ Game::Game(void){
 	this->redraw = true;
 	this->disconnecting = false;
 	this->input = nullptr;
+
+	this->screenZoom = 2.0f;
+
 	this->selectedObject = nullptr;
 
 	this->localClient = net::MAX_CLIENTS;
@@ -81,7 +84,6 @@ int Game::run(std::string address, int port){
 		std::cerr << "Failed to create a display!" << std::endl;
 		return EXIT_FAILURE;
 	}
-	this->screenZoom = 2.0f;
 	this->resize();
 
 	// Initialize fonts
@@ -217,14 +219,18 @@ void Game::localEvents(){
 			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
 
 			if (this->selectedObject == nullptr){
-				for (auto& object : this->objects){
-					if (object.second->testLocation(location)){
-						std::cout << object.second->getName() << " selected." << std::endl;
-						this->selectedObject = object.second;
-						this->selectedObject->setLocation(location);
+				for (auto object = this->objects.rbegin(); object != this->objects.rend(); ++object){
+					if (object->second->testLocation(location)){
+						std::cout << object->second->getName() << " selected." << std::endl;
+						this->selectedObject = object->second;
+						this->selectionOffset = location - this->selectedObject->getLocation();
+
+						break;
 					}
 				}
 			}else{
+				location -= this->selectionOffset;
+
 				std::string data;
 				data.push_back(net::PACKET_MOVE);
 
@@ -252,7 +258,7 @@ void Game::localEvents(){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
 
-			this->selectedObject->setLocation(location);
+			this->selectedObject->setLocation(location - this->selectionOffset);
 		}
 	}
 }

@@ -74,6 +74,7 @@ private:
 	InputBox* input;
 
 	Object* selectedObject;
+	Vector2 selectionOffset;
 	
 	void mainLoop(void);
 	void quit(void);
