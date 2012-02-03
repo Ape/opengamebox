@@ -305,7 +305,35 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CHAT:{
-			this->addMessage(this->clients[event.packet->data[1]]->nick + ": " + std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+			if (event.packet->dataLength >= 1 + 1 + 1 && event.packet->dataLength <= 1 + 1 + 1 + 255){
+				this->addMessage(this->clients[event.packet->data[1]]->nick + ": " + std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+			}
+
+			break;
+		}
+
+		case net::PACKET_CREATE:{
+			if (event.packet->dataLength >= 1 + 2 + 6 + 1 && event.packet->dataLength <= 1 + 2 + 6 + 255){
+				unsigned int objId = event.packet->data[2];
+
+				Vector2 location;
+				unsigned char bytes[3];
+
+				std::copy(event.packet->data + 3, event.packet->data + 6, bytes);
+				location.x = net::bytesToFloat(bytes);
+
+				std::copy(event.packet->data + 6, event.packet->data + 9, bytes);
+				location.y = net::bytesToFloat(bytes);
+
+				std::string objectId = std::string((char*) event.packet->data + 9, event.packet->dataLength - 9);
+
+				Object *object = new Object(objectId, objId, location);
+				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
+
+				this->addMessage(this->clients[event.packet->data[1]]->nick + " created a new " + objectId);
+			}
+
+			break;
 		}
 
 		/*case net::PACKET_MOVE:{
@@ -344,7 +372,7 @@ void Game::addMessage(std::string text){
 // Send a chat packet
 void Game::sendChat(std::string text){
 	if (text.at(0) == '/'){
-		this->chatCommand(text);
+		this->chatCommand(text.substr(1));
 	}else if (al_ustr_length(input->getTextUstr()) > 0){
 		std::string data;
 		data.push_back(net::PACKET_CHAT);
@@ -357,8 +385,38 @@ void Game::sendChat(std::string text){
 	this->input = nullptr;
 }
 
-void Game::chatCommand(std::string command){
-	this->addMessage(command + ": command not found!");
+void Game::chatCommand(std::string commandstr){
+	std::istringstream command(commandstr);
+	std::vector<std::string> parameters;
+	std::copy(std::istream_iterator<std::string>(command), std::istream_iterator<std::string>(), std::back_inserter<std::vector<std::string>>(parameters));
+
+	if (parameters.at(0) == "create"){
+		if (parameters.size() == 2){
+			this->createObject(parameters.at(1));
+		}else{
+			this->addMessage("Usage: /" + parameters.at(0) + " object");
+		}
+	}else{
+		this->addMessage(parameters.at(0) + ": command not found!");
+	}
+}
+
+void Game::createObject(std::string objectId){
+	std::string data;
+	data.push_back(net::PACKET_CREATE);
+
+	Vector2 location = Vector2(1.1f, 1.1f);
+	
+	unsigned char bytes[3];
+	net::floatToBytes(bytes, location.x);
+	data.append((char*) bytes, 3);
+
+	net::floatToBytes(bytes, location.y);
+	data.append((char*) bytes, 3);
+
+	data.append(objectId);
+
+	net::sendCommand(connection, data.c_str(), data.length());
 }
 
 void Game::askNick(){

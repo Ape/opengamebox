@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <iterator>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -86,7 +87,9 @@ private:
 	void sendAction(unsigned char action, bool enable);
 
 	void addMessage(std::string message);
-	void chatCommand(std::string command);
+	void chatCommand(std::string commandstr);
+	void createObject(std::string object);
+
 	void askNick(void);
 
 	void render(void);

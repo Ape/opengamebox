@@ -10,16 +10,21 @@
 
 class Object{
 public:
-	Object(unsigned int id, Vector2 location);
+	Object(std::string objectId, unsigned int id, Vector2 location);
 
-	unsigned int getId(void);
-	Vector2 getLocation(void);
+	std::string getObjectId(void) const;
+	std::string getName(void) const;
+	unsigned int getId(void) const;
+	Vector2 getLocation(void) const;
 
 	void setLocation(Vector2 location);
 
-	virtual void draw(IRenderer *renderer);
+	virtual void draw(IRenderer *renderer) const;
 
-protected:
+private:
+	std::string objectId;
+	std::string name;
+	std::string image;
 	unsigned int id;
 	Vector2 location;
 };

@@ -180,7 +180,7 @@ void Server::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CHAT:{
-			if (event.packet->dataLength >= 2 && event.packet->dataLength <= 257){
+			if (event.packet->dataLength >= 1 + 1 && event.packet->dataLength <= 1 + 1 + 255){
 				std::string data;
 				data += net::PACKET_CHAT;
 				data += *id;
@@ -191,6 +191,42 @@ void Server::receivePacket(ENetEvent event){
 			}
 			break;
 		}
+
+		case net::PACKET_CREATE:{
+			if (event.packet->dataLength >= 1 + 6 + 1 && event.packet->dataLength <= 1 + 6 + 255){
+				Vector2 location;
+				unsigned char bytes[3];
+
+				std::copy(event.packet->data + 1, event.packet->data + 4, bytes);
+				location.x = net::bytesToFloat(bytes);
+
+				std::copy(event.packet->data + 4, event.packet->data + 7, bytes);
+				location.y = net::bytesToFloat(bytes);
+
+				std::string objectId = std::string((char*) event.packet->data + 7, event.packet->dataLength - 7);
+
+				unsigned int objId = net::firstUnusedKey(this->objects);
+				Object *object = new Object(objectId, objId, location);
+				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
+				
+				if (! object->getName().empty()){
+					std::string data;
+					data += net::PACKET_CREATE;
+					data += *id;
+					data += objId;
+					std::cout << data.size() << std::endl;
+					data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
+
+					std::cout << clients[*id]->nick << " created a new " << object->getName() << " to " << location.x << "," << location.y << std::endl;
+					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 2);
+				}else{
+					std::cout << "Error: object " << objectId << " is not recognized by the server!" << std::endl;
+					this->objects.erase(objId);
+				}
+			}
+			break;
+		}
+
 	}
 }
 

@@ -8,6 +8,8 @@
 #include <enet/enet.h>
 
 #include "../net.h"
+#include "../vector2.h"
+#include "../object.h"
 
 class Server{
 private:
