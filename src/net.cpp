@@ -79,3 +79,13 @@ std::string net::AddressToString(ENetAddress address){
 
 	return string.str();
 }
+
+void net::removeObject(std::vector<Object*> &objectOrder, Object* object){
+	for (std::vector<Object*>::size_type i = 0; i < objectOrder.size(); ++i){
+		if (objectOrder.at(i)->getId() == object->getId()){
+			objectOrder.erase(objectOrder.begin() + i);
+
+			break; 
+		}
+	}
+}

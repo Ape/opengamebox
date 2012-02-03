@@ -6,10 +6,7 @@ General:
 	- loading settings from a file
 
 Mechanics:
-	- containers that can hold objects
-		- card decks
-		- private hands
-	- ability to set drawing order
+	- private areas
 	- ability to flip objects so that a flipside is shown instead of the usual
 	  picture
 	- loading objects from the filesystem

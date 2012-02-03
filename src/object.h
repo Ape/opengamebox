@@ -17,6 +17,8 @@ public:
 	unsigned int getId(void) const;
 	Vector2 getLocation(void) const;
 	bool testLocation(Vector2 location) const;
+	bool testCollision(Object *object) const;
+	bool isUnder(std::vector<Object*> objectOrder) const;
 
 	void setLocation(Vector2 location);
 

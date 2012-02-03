@@ -7,6 +7,8 @@
 #include <vector>
 #include <enet/enet.h>
 
+#include "object.h"
+
 class Object;
 
 namespace net{
@@ -58,6 +60,8 @@ namespace net{
 
 	std::string IPIntegerToString(unsigned int ip);
 	std::string AddressToString(ENetAddress address);
+
+	void removeObject(std::vector<Object*> &objectOrder, Object* object);
 }
 
 template <class T>

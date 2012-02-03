@@ -41,6 +41,31 @@ bool Object::testLocation(Vector2 location) const{
 	}
 }
 
+bool Object::testCollision(Object *object) const{
+	if (object->testLocation(this->location - this->size/2.0f) || object->testLocation(this->location + this->size/2.0f)
+	        || object->testLocation(Vector2(this->location.x - this->size.x/2.0f, this->location.y + this->size.y/2.0f))
+	        || object->testLocation(Vector2(this->location.x + this->size.x/2.0f, this->location.y - this->size.y/2.0f))){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+bool Object::isUnder(std::vector<Object*> objectOrder) const{
+	bool thisFound = false;
+	for (auto& object : objectOrder){
+		if (! thisFound){
+			if (object->getId() == this->getId()){
+				thisFound = true;
+			}
+		}else if (this->testCollision(object)){
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void Object::setLocation(Vector2 location){
 	this->location = location;
 }

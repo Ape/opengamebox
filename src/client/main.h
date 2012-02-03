@@ -61,6 +61,7 @@ private:
 	double previousTime;
 
 	std::map<unsigned char, Object*> objects;
+	std::vector<Object*> objectOrder;
 	std::map<unsigned char, net::Client*> clients;
 	unsigned char localClient;
 
@@ -73,7 +74,7 @@ private:
 	std::vector<Widget*> widgets;
 	InputBox* input;
 
-	Object* selectedObject;
+	std::vector<Object*> selectedObjects;
 	Vector2 selectionOffset;
 	
 	void mainLoop(void);

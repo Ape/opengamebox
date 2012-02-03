@@ -30,8 +30,6 @@ Game::Game(void){
 
 	this->screenZoom = 2.0f;
 
-	this->selectedObject = nullptr;
-
 	this->localClient = net::MAX_CLIENTS;
 }
 
@@ -218,23 +216,26 @@ void Game::localEvents(){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
 
-			if (this->selectedObject == nullptr){
+			if (this->selectedObjects.size() == 0){
 				for (auto object = this->objects.rbegin(); object != this->objects.rend(); ++object){
-					if (object->second->testLocation(location)){
+					if (object->second->testLocation(location) && ! object->second->isUnder(this->objectOrder)){
 						std::cout << object->second->getName() << " selected." << std::endl;
-						this->selectedObject = object->second;
-						this->selectionOffset = location - this->selectedObject->getLocation();
+						this->selectedObjects.push_back(object->second);
+						//this->selectionOffset = location - this->selectedObject->getLocation();
+
+						net::removeObject(this->objectOrder, object->second);
+						this->objectOrder.push_back(object->second);
 
 						break;
 					}
 				}
 			}else{
-				location -= this->selectionOffset;
+				//location -= this->selectionOffset;
 
 				std::string data;
 				data.push_back(net::PACKET_MOVE);
 
-				data += this->selectedObject->getId();
+				data += this->selectedObjects.back()->getId(); // TODO
 
 				unsigned char bytes[3];
 				net::floatToBytes(bytes, location.x);
@@ -245,20 +246,20 @@ void Game::localEvents(){
 
 				net::sendCommand(connection, data.c_str(), data.length());
 
-				std::cout << this->selectedObject->getName() << " dropped at " << location.x << "," << location.y << std::endl;
+				std::cout << this->selectedObjects.back()->getName() << " dropped at " << location.x << "," << location.y << std::endl; // TODO
 
-				this->selectedObject = nullptr;
+				this->selectedObjects.pop_back();
 			}
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
 		if (event.mouse.dz != 0){
 			this->screenZoom *= 1 - 0.25f * event.mouse.dz;
 			this->resize();
-		}else if (this->selectedObject != nullptr && (event.mouse.dx != 0 || event.mouse.dy != 0)){
+		}else if (! this->selectedObjects.empty() && (event.mouse.dx != 0 || event.mouse.dy != 0)){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
 
-			this->selectedObject->setLocation(location - this->selectionOffset);
+			this->selectedObjects.back()->setLocation(location); // - this->selectionOffset); // TODO
 		}
 	}
 }
@@ -381,6 +382,7 @@ void Game::receivePacket(ENetEvent event){
 
 				Object *object = new Object(objectId, objId, location);
 				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
+				this->objectOrder.push_back(object);
 
 				this->addMessage(this->clients[event.packet->data[1]]->nick + " created a new " + object->getName());
 			}
@@ -401,6 +403,9 @@ void Game::receivePacket(ENetEvent event){
 
 				Object *object = this->objects.find(event.packet->data[2])->second;
 				object->setLocation(location);
+
+				net::removeObject(this->objectOrder, object);
+				this->objectOrder.push_back(object);
 
 				this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + object->getName());
 			}
@@ -523,12 +528,8 @@ void Game::render(){
 void Game::renderGame(){
 	al_use_transform(&this->camera);
 
-	for (auto& object : this->objects){
-		object.second->draw(renderer);
-	}
-
-	if (this->selectedObject != nullptr){
-		this->selectedObject->draw(renderer);
+	for (auto& object : this->objectOrder){
+		object->draw(renderer);
 	}
 }
 
