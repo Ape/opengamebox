@@ -386,6 +386,7 @@ void Game::receivePacket(ENetEvent event){
 			}
 
 			break;
+		}
 
 		case net::PACKET_MOVE:{
 			if (event.packet->dataLength == 9){
@@ -406,12 +407,6 @@ void Game::receivePacket(ENetEvent event){
 
 			break;
 		}
-	}
-
-		/*case net::PACKET_MOVE:{
-			// TODO: Write this
-			break;
-		}*/
 
 		case net::PACKET_PINGS:{
 			// TODO: Do we want this?
