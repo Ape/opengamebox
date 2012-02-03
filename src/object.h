@@ -16,6 +16,7 @@ public:
 	std::string getName(void) const;
 	unsigned int getId(void) const;
 	Vector2 getLocation(void) const;
+	bool testLocation(Vector2 location) const;
 
 	void setLocation(Vector2 location);
 
@@ -24,8 +25,9 @@ public:
 private:
 	std::string objectId;
 	std::string name;
-	std::string image;
 	unsigned int id;
+	std::string image;
+	Vector2 size;
 	Vector2 location;
 };
 

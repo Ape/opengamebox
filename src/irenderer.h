@@ -3,13 +3,14 @@
 
 #include <string>
 
+#include "vector2.h"
 #include "coordinates.h"
 
 class IRenderer{
 public:
-	virtual void drawBitmap(std::string texture, Coordinates source_location,
-	                        Coordinates source_size, Coordinates dest_location,
-	                        Coordinates dest_size) = 0;
+	virtual void drawBitmap(std::string texture, Vector2 source_location,
+	                        Vector2 source_size, Vector2 dest_location,
+	                        Vector2 dest_size) = 0;
 
 	virtual Coordinates getTextureSize(std::string texture) = 0;
 };

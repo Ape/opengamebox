@@ -62,7 +62,7 @@ int Game::run(std::string address, int port){
 	}
 
 	// Initialize input
-	if (! al_install_keyboard()){
+	if (! al_install_keyboard() || ! al_install_mouse()){
 		std::cerr << "Failed to initialize the input components!" << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -80,6 +80,7 @@ int Game::run(std::string address, int port){
 		std::cerr << "Failed to create a display!" << std::endl;
 		return EXIT_FAILURE;
 	}
+	this->screenZoom = 2.0f;
 	this->resize();
 
 	// Initialize fonts
@@ -123,6 +124,7 @@ int Game::run(std::string address, int port){
 	al_register_event_source(this->event_queue, al_get_display_event_source(this->display));
 	al_register_event_source(this->event_queue, al_get_timer_event_source(this->timer));
 	al_register_event_source(this->event_queue, al_get_keyboard_event_source());
+	al_register_event_source(this->event_queue, al_get_mouse_event_source());
 
 	al_start_timer(this->timer);
 
@@ -207,6 +209,24 @@ void Game::localEvents(){
 			if (event.keyboard.keycode == ALLEGRO_KEY_F10){
 				this->quit();
 			}
+		}
+	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
+		if (event.mouse.button == 1){
+			Vector2 location(event.mouse.x, event.mouse.y);
+			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
+
+			std::cout << location.x << "," << location.y << std::endl;
+
+			for (auto& object : this->objects){
+				if (object.second->testLocation(location)){
+					std::cout << object.second->getName() << std::endl;
+				}
+			}
+		}
+	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
+		if (event.mouse.dz != 0){
+			this->screenZoom *= 1 - 0.25f * event.mouse.dz;
+			this->resize();
 		}
 	}
 }
@@ -438,7 +458,7 @@ void Game::identifyToServer(std::string nick){
 
 void Game::render(){
 	// Clear the screen
-	al_clear_to_color(al_map_rgb_f(0.0f, 0.0f, 0.0f));
+	al_clear_to_color(al_map_rgb_f(0.1f, 0.1f, 0.1f));
 
 	// Begin render
 	al_hold_bitmap_drawing(true);
@@ -502,11 +522,9 @@ void Game::renderUI(){
 void Game::resize(){
 	al_acknowledge_resize(this->display);
 
-	this->screenZoom = al_get_display_width(this->display) / 5.0f;
-
 	al_identity_transform(&this->camera);
-	al_translate_transform(&this->camera, al_get_display_width(this->display) / this->screenZoom, -al_get_display_height(display) / this->screenZoom);
-	al_scale_transform(&this->camera, this->screenZoom / 2.0f, -this->screenZoom / 2.0f);
+	al_translate_transform(&this->camera, al_get_display_width(this->display) / this->screenZoom, al_get_display_height(display) / this->screenZoom);
+	al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
 
 	al_identity_transform(&this->camera_inverse);
 	al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, -2.0f / this->screenZoom);

@@ -19,9 +19,9 @@ public:
 	Renderer();
 	~Renderer();
 
-	virtual void drawBitmap(std::string texture, Coordinates source_location,
-	                        Coordinates source_size, Coordinates dest_location,
-	                        Coordinates dest_size);
+	virtual void drawBitmap(std::string texture, Vector2 source_location,
+	                        Vector2 source_size, Vector2 dest_location,
+	                        Vector2 dest_size);
 	virtual Coordinates getTextureSize(std::string texture);
 };
 

@@ -20,13 +20,14 @@ void Renderer::loadTexture(std::string texture){
 	}
 }
 
-void Renderer::drawBitmap(std::string texture, Coordinates source_location, Coordinates source_size,
-                          Coordinates dest_location, Coordinates dest_size){
+void Renderer::drawBitmap(std::string texture, Vector2 source_location, Vector2 source_size,
+                          Vector2 dest_location, Vector2 dest_size){
 	if (this->textures[texture] == nullptr){
 		this->loadTexture(texture);
 	}
 
-	al_draw_scaled_bitmap(this->textures[texture], source_location.x, source_location.y, source_size.x, source_size.y,
+	al_draw_scaled_bitmap(this->textures[texture], source_location.x, source_location.y,
+	                      source_size.x * this->getTextureSize(texture).x, source_size.y * this->getTextureSize(texture).y,
 	                      dest_location.x, dest_location.y, dest_size.x, dest_size.y, 0);
 }
 

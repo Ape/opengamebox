@@ -23,8 +23,8 @@
 #include "widgets/inputBox.h"
 
 // Default screen configuration
-const int SCREEN_W = 640;
-const int SCREEN_H = 480;
+const int SCREEN_W = 1024;
+const int SCREEN_H = 768;
 const float FPS_LIMIT = 60.0f;
 const bool FULLSCREEN = false;
 

@@ -13,6 +13,7 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 	}
 
 	this->image = this->objectId + ".png";
+	this->size = Vector2(135, 189);
 }
 
 std::string Object::getObjectId() const{
@@ -31,10 +32,19 @@ Vector2 Object::getLocation() const{
 	return this->location;
 }
 
+bool Object::testLocation(Vector2 location) const{
+	if (location.x > this->location.x - this->size.x/2.0f && location.x < this->location.x + this->size.x/2.0f
+	    && location.y > this->location.y - this->size.y/2.0f && location.y < this->location.y + this->size.y/2.0f){
+		return true;
+	}else{
+		return false;
+	}
+}
+
 void Object::setLocation(Vector2 location){
 	this->location = location;
 }
 
 void Object::draw(IRenderer *renderer) const{
-	renderer->drawBitmap(this->image, Coordinates(0, 0), renderer->getTextureSize(this->image), Coordinates(0, 0), Coordinates(1, 1));
+	renderer->drawBitmap(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
 }
