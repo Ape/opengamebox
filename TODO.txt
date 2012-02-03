@@ -1,0 +1,26 @@
+Networking:
+	- synchronize objects on join
+	- send 32-bit object id instead of 8-bit
+
+General:
+	- loading settings from a file
+
+Mechanics:
+	- containers that can hold objects
+		- card decks
+		- private hands
+	- ability to set drawing order
+	- ability to flip objects so that a flipside is shown instead of the usual
+	  picture
+	- loading objects from the filesystem
+	- downloading objects from the server
+	- uploading objects to the server
+
+Graphics:
+	- ability to move and rotate the camera
+
+Resources:
+	- create a full set of 52 playing cards
+	- dice
+	- classic board game sets
+		- chess
