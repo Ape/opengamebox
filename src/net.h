@@ -14,7 +14,7 @@ namespace net{
 	const unsigned int DEFAULT_PORT   = 13355;
 	const unsigned int CHANNELS       = 2;
 	const unsigned char MAX_CLIENTS   = 32;
-	const float MAX_FLOAT = 100.0f;
+	const float MAX_FLOAT = 1000.0f;
 
 	// Client control packets
 	const unsigned char PACKET_HANDSHAKE  = 0x01;
@@ -25,8 +25,8 @@ namespace net{
 	// Command packets
 	const unsigned char PACKET_CHAT       = 0x20;
 	const unsigned char PACKET_CREATE     = 0x21; // Create a new object
-	const unsigned char PACKET_REMOVE     = 0x21; // Remove an object
-	const unsigned char PACKET_MOVE       = 0x21; // Move an object
+	const unsigned char PACKET_REMOVE     = 0x22; // Remove an object
+	const unsigned char PACKET_MOVE       = 0x23; // Move an object
 
 	// Stream packets
 	const unsigned char PACKET_PINGS      = 0xE0;

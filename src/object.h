@@ -20,7 +20,7 @@ public:
 
 	void setLocation(Vector2 location);
 
-	virtual void draw(IRenderer *renderer) const;
+	void draw(IRenderer *renderer) const;
 
 private:
 	std::string objectId;

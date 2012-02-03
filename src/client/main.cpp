@@ -27,6 +27,7 @@ Game::Game(void){
 	this->redraw = true;
 	this->disconnecting = false;
 	this->input = nullptr;
+	this->selectedObject = nullptr;
 
 	this->localClient = net::MAX_CLIENTS;
 }
@@ -215,18 +216,43 @@ void Game::localEvents(){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
 
-			std::cout << location.x << "," << location.y << std::endl;
-
-			for (auto& object : this->objects){
-				if (object.second->testLocation(location)){
-					std::cout << object.second->getName() << std::endl;
+			if (this->selectedObject == nullptr){
+				for (auto& object : this->objects){
+					if (object.second->testLocation(location)){
+						std::cout << object.second->getName() << " selected." << std::endl;
+						this->selectedObject = object.second;
+						this->selectedObject->setLocation(location);
+					}
 				}
+			}else{
+				std::string data;
+				data.push_back(net::PACKET_MOVE);
+
+				data += this->selectedObject->getId();
+
+				unsigned char bytes[3];
+				net::floatToBytes(bytes, location.x);
+				data.append((char*) bytes, 3);
+
+				net::floatToBytes(bytes, location.y);
+				data.append((char*) bytes, 3);
+
+				net::sendCommand(connection, data.c_str(), data.length());
+
+				std::cout << this->selectedObject->getName() << " dropped at " << location.x << "," << location.y << std::endl;
+
+				this->selectedObject = nullptr;
 			}
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
 		if (event.mouse.dz != 0){
 			this->screenZoom *= 1 - 0.25f * event.mouse.dz;
 			this->resize();
+		}else if (this->selectedObject != nullptr && (event.mouse.dx != 0 || event.mouse.dy != 0)){
+			Vector2 location(event.mouse.x, event.mouse.y);
+			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
+
+			this->selectedObject->setLocation(location);
 		}
 	}
 }
@@ -350,11 +376,31 @@ void Game::receivePacket(ENetEvent event){
 				Object *object = new Object(objectId, objId, location);
 				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
 
-				this->addMessage(this->clients[event.packet->data[1]]->nick + " created a new " + objectId);
+				this->addMessage(this->clients[event.packet->data[1]]->nick + " created a new " + object->getName());
+			}
+
+			break;
+
+		case net::PACKET_MOVE:{
+			if (event.packet->dataLength == 9){
+				Vector2 location;
+				unsigned char bytes[3];
+
+				std::copy(event.packet->data + 3, event.packet->data + 6, bytes);
+				location.x = net::bytesToFloat(bytes);
+
+				std::copy(event.packet->data + 6, event.packet->data + 9, bytes);
+				location.y = net::bytesToFloat(bytes);
+
+				Object *object = this->objects.find(event.packet->data[2])->second;
+				object->setLocation(location);
+
+				this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + object->getName());
 			}
 
 			break;
 		}
+	}
 
 		/*case net::PACKET_MOVE:{
 			// TODO: Write this
@@ -425,7 +471,7 @@ void Game::createObject(std::string objectId){
 	std::string data;
 	data.push_back(net::PACKET_CREATE);
 
-	Vector2 location = Vector2(1.1f, 1.1f);
+	Vector2 location = Vector2(0.0f, 0.0f);
 	
 	unsigned char bytes[3];
 	net::floatToBytes(bytes, location.x);
@@ -479,6 +525,10 @@ void Game::renderGame(){
 	for (auto& object : this->objects){
 		object.second->draw(renderer);
 	}
+
+	if (this->selectedObject != nullptr){
+		this->selectedObject->draw(renderer);
+	}
 }
 
 void Game::renderUI(){
@@ -527,8 +577,8 @@ void Game::resize(){
 	al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
 
 	al_identity_transform(&this->camera_inverse);
-	al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, -2.0f / this->screenZoom);
-	al_translate_transform(&this->camera_inverse, -al_get_display_width(this->display) / this->screenZoom, al_get_display_height(this->display) / this->screenZoom);
+	al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
+	al_translate_transform(&this->camera_inverse, -al_get_display_width(this->display) / this->screenZoom, -al_get_display_height(this->display) / this->screenZoom);
 
 	// TODO: Use al_invert_transform
 	/*al_copy_transform(&this->camera, &this->camera_inverse);

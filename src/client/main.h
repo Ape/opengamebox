@@ -73,8 +73,8 @@ private:
 	std::vector<Widget*> widgets;
 	InputBox* input;
 
-	unsigned char currentAction;
-
+	Object* selectedObject;
+	
 	void mainLoop(void);
 	void quit(void);
 	void dispose(void);
