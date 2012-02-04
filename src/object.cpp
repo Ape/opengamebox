@@ -49,8 +49,8 @@ Vector2 Object::getLocation() const{
 }
 
 bool Object::testLocation(Vector2 location) const{
-	if (location.x > this->location.x - this->size.x/2.0f && location.x < this->location.x + this->size.x/2.0f
-	    && location.y > this->location.y - this->size.y/2.0f && location.y < this->location.y + this->size.y/2.0f){
+	if (location.x >= this->location.x - this->size.x/2.0f && location.x <= this->location.x + this->size.x/2.0f
+	    && location.y >= this->location.y - this->size.y/2.0f && location.y <= this->location.y + this->size.y/2.0f){
 		return true;
 	}else{
 		return false;

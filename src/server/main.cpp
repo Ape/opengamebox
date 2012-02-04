@@ -159,6 +159,8 @@ void Server::receivePacket(ENetEvent event){
 						net::sendCommand(event.peer, data.c_str(), data.length());
 					}
 
+					// TODO: Send the list of objects
+
 					// Broadcast a join event
 					{
 						std::string data;
