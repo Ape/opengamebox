@@ -252,6 +252,33 @@ void Server::receivePacket(ENetEvent event){
 			}
 			break;
 		}
+
+		case net::PACKET_SELECT:{
+			if (event.packet->dataLength >= 1){
+				std::string data;
+				data += net::PACKET_SELECT;
+				data += *id;
+				data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
+
+				for (auto& object : this->objects){
+					if (object.second->isSelectedBy(this->clients.find(*id)->second)){
+						object.second->select(nullptr);
+					}
+				}
+
+				size_t i = 1;
+				while (i < event.packet->dataLength){
+					Object* object = this->objects.find(event.packet->data[i])->second;
+					object->select(clients[*id]);
+
+					std::cout << clients[*id]->nick << " selected " << object->getName() << std::endl;
+					++i;
+				}
+
+				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
+			}
+			break;
+		}
 	}
 }
 

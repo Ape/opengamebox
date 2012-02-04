@@ -10,6 +10,10 @@
 #include "irenderer.h"
 #include "vector2.h"
 
+namespace net{
+	struct Client;
+}
+
 class Object{
 public:
 	Object(std::string objectId, unsigned int id, Vector2 location);
@@ -24,12 +28,13 @@ public:
 	bool isUnder(void) const;
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
 	bool checkIfUnder(std::vector<Object*> objectOrder);
+	bool isSelectedBy(net::Client *client);
 
 	void setLocation(Vector2 location);
-	void select(bool selected);
+	void select(net::Client *client);
 	void flip(void);
 
-	void draw(IRenderer *renderer) const;
+	void draw(IRenderer *renderer, net::Client *localClient) const;
 
 private:
 	std::string objectId;
@@ -41,7 +46,7 @@ private:
 	std::string image;
 	std::string backside;
 
-	bool selected;
+	net::Client *selected;
 	std::list<Object*> objectsAbove;
 };
 

@@ -5,7 +5,7 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 	this->id       = id;
 	this->location = location;
 	this->flipped  = false;
-	this->selected = false;
+	this->selected = nullptr;
 
 	// TODO: Load this object data from the filesystem
 	this->size = Vector2(135.0f, 189.0f);
@@ -71,7 +71,6 @@ bool Object::isUnder() const{
 	return ! this->objectsAbove.empty();
 }
 
-#include <iostream>
 std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 	visited.insert(this);
 
@@ -89,6 +88,7 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 	return allAbove;
 }
 
+#include <iostream>
 bool Object::checkIfUnder(std::vector<Object*> objectOrder){
 	std::cout << "object.checkIfUnder()" << std::endl; //TODO
 
@@ -111,19 +111,23 @@ bool Object::checkIfUnder(std::vector<Object*> objectOrder){
 	}
 }
 
+bool Object::isSelectedBy(net::Client *client){
+	return this->selected == client;
+}
+
 void Object::setLocation(Vector2 location){
 	this->location = location;
 }
 
-void Object::select(bool selected){
-	this->selected = selected;
+void Object::select(net::Client* client){
+	this->selected = client;
 }
 
 void Object::flip(){
 	this->flipped = ! this->flipped;
 }
 
-void Object::draw(IRenderer *renderer) const{
+void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 	std::string image;
 	if (! this->flipped){
 		image = this->image;
@@ -131,8 +135,27 @@ void Object::draw(IRenderer *renderer) const{
 		image = this->backside;
 	}
 
-	if (this->selected){
-		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.25f, 1.0f, 0.25f, 1.0f);
+	if (this->selected != nullptr){
+		renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
+
+		float r, g, b;
+		if (this->selected == localClient){
+			r = 0.0f;
+			g = 1.0f;
+			b = 0.0f;
+		}else{
+			r = 1.0f;
+			g = 0.0f;
+			b = 0.0f;
+		}
+
+		Vector2 pointA = this->location - this->size/2.0f - Vector2(1.0f, 1.0f);
+		Vector2 pointB = this->location + this->size/2.0f + Vector2(1.0f, 1.0f);
+
+		renderer->transformLocation(CAMERA, pointA);
+		renderer->transformLocation(CAMERA, pointB);
+
+		renderer->drawRectangle(pointA, pointB, r, g, b, 1.0f, 2.0f);
 	}else if (!this->isUnder()){
 		renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
 	}else{

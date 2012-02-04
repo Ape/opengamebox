@@ -260,17 +260,20 @@ void Game::localEvents(){
 
 		if (! this->dragging){
 			for (auto& object : this->selectedObjects){
-				object->select(false);
+				object->select(nullptr);
 			}
 			this->selectedObjects.clear();
 
+			std::string data;
+			data.push_back(net::PACKET_SELECT);
+
 			for (auto object = this->objectOrder.rbegin(); object != this->objectOrder.rend(); ++object){
-				if ((*object)->testLocation(location)){
+				if ((*object)->isSelectedBy(nullptr) && (*object)->testLocation(location)){
 					std::set<Object*> visited;
 					this->selectedObjects = (*object)->getObjectsAbove(visited);
 
 					for (auto& objectA : this->selectedObjects){
-						objectA->select(true);
+						data += objectA->getId();
 
 						net::removeObject(this->objectOrder, objectA);
 						this->objectOrder.push_back(objectA);
@@ -279,6 +282,8 @@ void Game::localEvents(){
 					break;
 				}
 			}
+
+			net::sendCommand(connection, data.c_str(), data.length());
 		}
 
 		if (!this->selectedObjects.empty()){
@@ -493,6 +498,28 @@ void Game::receivePacket(ENetEvent event){
 			break;
 		}
 
+		case net::PACKET_SELECT:{
+			if (event.packet->dataLength >= 2){
+				net::Client *client = this->clients.find(event.packet->data[1])->second;
+
+				for (auto& object : this->objects){
+					if (object.second->isSelectedBy(client)){
+						object.second->select(nullptr);
+					}
+				}
+
+				size_t i = 2;
+				while (i < event.packet->dataLength){
+					this->objects.find(event.packet->data[i])->second->select(client);
+					std::cout << i << std::endl;
+
+					++i;
+				}
+			}
+
+			break;
+		}
+
 		case net::PACKET_PINGS:{
 			// TODO: Do we want this?
 			/*if (event.packet->dataLength >= 4 && event.packet->dataLength <= 1 + 3 * net::MAX_CLIENTS){
@@ -615,7 +642,7 @@ void Game::renderGame(){
 	this->renderer->useTransform(CAMERA);
 
 	for (auto& object : this->objectOrder){
-		object->draw(this->renderer);
+		object->draw(this->renderer, this->clients.find(this->localClient)->second);
 	}
 }
 

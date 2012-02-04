@@ -25,6 +25,10 @@
 #include "widget.h"
 #include "widgets/inputBox.h"
 
+namespace net{
+	struct Client;
+}
+
 // Default screen configuration
 const int SCREEN_W = 1024;
 const int SCREEN_H = 768;

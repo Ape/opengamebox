@@ -10,8 +10,6 @@ General:
 Mechanics:
 	- ability to remove selected objects
 	- private areas
-	- ability to flip objects so that a flipside is shown instead of the usual
-	  picture
 	- loading objects from the filesystem
 	- downloading objects from the server
 	- uploading objects to the server
