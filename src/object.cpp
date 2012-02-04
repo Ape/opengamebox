@@ -6,6 +6,7 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 	this->location = location;
 	this->flipped  = false;
 	this->selected = nullptr;
+	this->owner    = nullptr;
 
 	// TODO: Load this object data from the filesystem
 	this->size = Vector2(135.0f, 189.0f);
@@ -135,12 +136,20 @@ bool Object::isSelectedBy(net::Client *client){
 	return this->selected == client;
 }
 
+bool Object::isOwnedBy(net::Client *client){
+	return this->owner == client;
+}
+
 void Object::setLocation(Vector2 location){
 	this->location = location;
 }
 
 void Object::select(net::Client* client){
 	this->selected = client;
+}
+
+void Object::own(net::Client* client){
+	this->owner = client;
 }
 
 void Object::flip(){
@@ -175,10 +184,22 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 
 		renderer->drawRectangle(pointA, pointB, r, g, b, 1.0f, 2.0f);
 	}
+
+	if (this->owner == localClient){
+		Vector2 pointA = this->location - this->size/2.0f - Vector2(3.0f, 3.0f);
+		Vector2 pointB = this->location + this->size/2.0f + Vector2(3.0f, 3.0f);
+
+		renderer->transformLocation(CAMERA, pointA);
+		renderer->transformLocation(CAMERA, pointB);
+
+		renderer->drawRectangle(pointA, pointB, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f);
+	}
 	
-	if (!this->isUnder()){
-		renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
-	}else{
-		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.75f, 0.75f, 0.75f, 1.0f);
+	if (this->owner != nullptr || this->owner != localClient){
+		if (!this->isUnder()){
+			renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
+		}else{
+			renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.75f, 0.75f, 0.75f, 1.0f);
+		}
 	}
 }

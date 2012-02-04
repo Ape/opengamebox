@@ -32,6 +32,7 @@ namespace net{
 	const unsigned char PACKET_REMOVE   = 0x24; // Remove objects
 	const unsigned char PACKET_MOVE     = 0x25; // Move objects
 	const unsigned char PACKET_FLIP     = 0x26; // Flip objects
+	const unsigned char PACKET_OWN      = 0x27; // Make objects private
 
 	// Stream packets
 	const unsigned char PACKET_PINGS = 0xE0;

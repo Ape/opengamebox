@@ -30,9 +30,11 @@ public:
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
 	bool checkIfUnder(std::vector<Object*> objectOrder);
 	bool isSelectedBy(net::Client *client);
+	bool isOwnedBy(net::Client *client);
 
 	void setLocation(Vector2 location);
 	void select(net::Client *client);
+	void own(net::Client *client);
 	void flip(void);
 
 	void draw(IRenderer *renderer, net::Client *localClient) const;
@@ -49,6 +51,7 @@ private:
 	Vector2 stackDelta;
 
 	net::Client *selected;
+	net::Client *owner;
 	std::list<Object*> objectsAbove;
 };
 

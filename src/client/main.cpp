@@ -210,6 +210,14 @@ void Game::localEvents(){
 		if (input == nullptr){
 			if (event.keyboard.keycode == ALLEGRO_KEY_F10){
 				this->quit();
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE){
+				for (auto& object : this->selectedObjects){
+					if (object->isOwnedBy(this->clients.find(localClient)->second)){
+						object->own(nullptr);
+					}else if (object->isOwnedBy(nullptr)){
+						object->own(this->clients.find(localClient)->second);
+					}
+				}
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_C){
 				this->chatCommand("create card_7c");
 				this->chatCommand("create card_Kh");
@@ -313,7 +321,6 @@ void Game::localEvents(){
 
 			for (auto& object : this->selectedObjects){
 				// TODO: combine all moves to one packet
-				// TODO: include flip info
 				Vector2 destination = object->getLocation() + (location - this->draggingStart);
 
 				std::string data;
