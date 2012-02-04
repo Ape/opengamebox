@@ -214,6 +214,12 @@ void Game::localEvents(){
 				this->chatCommand("create card_7c");
 				this->chatCommand("create card_Kh");
 				this->chatCommand("create card_As");
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_V){
+				this->chatCommand("create chessboard");
+				for (int i = 0; i < 12; ++i){
+					this->chatCommand("create piece_red");
+					this->chatCommand("create piece_blue");
+				}
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_S){
 				if (this->dragging){
 					std::vector<Object*> objects;

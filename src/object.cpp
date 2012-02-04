@@ -8,15 +8,25 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 	this->selected = false;
 
 	// TODO: Load this object data from the filesystem
+	this->size = Vector2(135.0f, 189.0f);
+
 	if (this->objectId == "card_7c"){
 		this->name = "Seven of Clubs";
 	}else if (this->objectId == "card_Kh"){
 		this->name = "King of Hearts";
 	}else if (this->objectId == "card_As"){
 		this->name = "Ace of Spades";
+	}else if (this->objectId == "chessboard"){
+		this->name = "Chessboard";
+		this->size = Vector2(512.0f, 512.0f);
+	}else if (this->objectId == "piece_red"){
+		this->name = "Red piece";
+		this->size = Vector2(50.0f, 50.0f);
+	}else if (this->objectId == "piece_blue"){
+		this->name = "Blue piece";
+		this->size = Vector2(50.0f, 50.0f);
 	}
 
-	this->size = Vector2(135, 189);
 	this->image = this->objectId + ".png";
 	this->backside = "card_backside.png";
 }
@@ -46,10 +56,11 @@ bool Object::testLocation(Vector2 location) const{
 	}
 }
 
-bool Object::testCollision(Object *object) const{
+bool Object::testCollision(Object *object, bool second){
 	if (object->testLocation(this->location - this->size/2.0f) || object->testLocation(this->location + this->size/2.0f)
 	        || object->testLocation(Vector2(this->location.x - this->size.x/2.0f, this->location.y + this->size.y/2.0f))
-	        || object->testLocation(Vector2(this->location.x + this->size.x/2.0f, this->location.y - this->size.y/2.0f))){
+	        || object->testLocation(Vector2(this->location.x + this->size.x/2.0f, this->location.y - this->size.y/2.0f))
+	        || (! second && object->testCollision(this, true))){
 		return true;
 	}else{
 		return false;

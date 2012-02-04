@@ -19,7 +19,7 @@ public:
 	unsigned int getId(void) const;
 	Vector2 getLocation(void) const;
 	bool testLocation(Vector2 location) const;
-	bool testCollision(Object *object) const;
+	bool testCollision(Object *object, bool second = false);
 
 	bool isUnder(void) const;
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
