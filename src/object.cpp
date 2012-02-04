@@ -60,20 +60,27 @@ bool Object::isUnder() const{
 	return ! this->objectsAbove.empty();
 }
 
-std::list<Object*> Object::getObjectsAbove(){
+#include <iostream>
+std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
+	visited.insert(this);
+
 	std::list<Object*> allAbove;
 	allAbove.push_back(this);
 
 	for (auto& object : this->objectsAbove){
-		std::list<Object*> objects = object->getObjectsAbove();
+		if (visited.count(object) == 0){
+			std::list<Object*> objects = object->getObjectsAbove(visited);
 
-		allAbove.splice(allAbove.end(), objects);
+			allAbove.splice(allAbove.end(), objects);
+		}
 	}
 
 	return allAbove;
 }
 
 bool Object::checkIfUnder(std::vector<Object*> objectOrder){
+	std::cout << "object.checkIfUnder()" << std::endl; //TODO
+
 	this->objectsAbove.clear();
 	bool thisFound = false;
 	for (auto& object : objectOrder){

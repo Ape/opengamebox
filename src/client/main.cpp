@@ -260,19 +260,8 @@ void Game::localEvents(){
 
 			for (auto object = this->objectOrder.rbegin(); object != this->objectOrder.rend(); ++object){
 				if ((*object)->testLocation(location)){
-					this->selectedObjects = (*object)->getObjectsAbove();
-
-					// Remove duplicates
-					std::list<Object*>::iterator iter = this->selectedObjects.begin();
 					std::set<Object*> visited;
-					while (iter != this->selectedObjects.end()){
-						if (visited.find(*iter) != visited.end()){
-							iter = this->selectedObjects.erase(iter);
-						}else{
-							visited.insert(*iter);
-							++iter;
-						}
-					}
+					this->selectedObjects = (*object)->getObjectsAbove(visited);
 
 					for (auto& objectA : this->selectedObjects){
 						objectA->select(true);

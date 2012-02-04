@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <set>
 
 #include "net.h"
 #include "irenderer.h"
@@ -21,7 +22,7 @@ public:
 	bool testCollision(Object *object) const;
 
 	bool isUnder(void) const;
-	std::list<Object*> getObjectsAbove();
+	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
 	bool checkIfUnder(std::vector<Object*> objectOrder);
 
 	void setLocation(Vector2 location);
