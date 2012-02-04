@@ -10,6 +10,8 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 		this->name = "Seven of Clubs";
 	}else if (this->objectId == "card_Kh"){
 		this->name = "King of Hearts";
+	}else if (this->objectId == "card_As"){
+		this->name = "Ace of Spades";
 	}
 
 	this->image = this->objectId + ".png";
@@ -55,6 +57,19 @@ bool Object::isUnder() const{
 	return ! this->objectsAbove.empty();
 }
 
+std::list<Object*> Object::getObjectsAbove(){
+	std::list<Object*> allAbove;
+	allAbove.push_back(this);
+
+	for (auto& object : this->objectsAbove){
+		std::list<Object*> objects = object->getObjectsAbove();
+
+		allAbove.splice(allAbove.end(), objects);
+	}
+
+	return allAbove;
+}
+
 bool Object::checkIfUnder(std::vector<Object*> objectOrder){
 	this->objectsAbove.clear();
 	bool thisFound = false;
@@ -83,7 +98,7 @@ void Object::draw(IRenderer *renderer) const{
 	if (!this->isUnder()){
 		renderer->drawBitmap(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
 	}else{
-		renderer->drawBitmapTinted(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.5f, 0.5f, 0.5f, 1.0f);
+		renderer->drawBitmapTinted(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.75f, 0.75f, 0.75f, 1.0f);
 	}
 }
 

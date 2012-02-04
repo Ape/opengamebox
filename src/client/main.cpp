@@ -29,6 +29,7 @@ Game::Game(void){
 	this->input = nullptr;
 
 	this->screenZoom = 2.0f;
+	this->dragging = false;
 
 	this->localClient = net::MAX_CLIENTS;
 }
@@ -209,61 +210,97 @@ void Game::localEvents(){
 		if (input == nullptr){
 			if (event.keyboard.keycode == ALLEGRO_KEY_F10){
 				this->quit();
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_C){
+				this->chatCommand("create card_7c");
+				this->chatCommand("create card_Kh");
+				this->chatCommand("create card_As");
 			}
 		}
-	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
-		if (event.mouse.button == 1){
+	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1){
+		Vector2 location(event.mouse.x, event.mouse.y);
+		this->renderer->transformLocation(CAMERA_INVERSE, location);
+
+		if (! this->dragging){
+			this->selectedObjects.clear();
+
+			for (auto object = this->objectOrder.rbegin(); object != this->objectOrder.rend(); ++object){
+				if ((*object)->testLocation(location)){
+					this->selectedObjects = (*object)->getObjectsAbove();
+
+					// Remove duplicates
+					std::list<Object*>::iterator iter = this->selectedObjects.begin();
+					std::set<Object*> visited;
+					while (iter != this->selectedObjects.end()){
+						if (visited.find(*iter) != visited.end()){
+							iter = this->selectedObjects.erase(iter);
+						}else{
+							visited.insert(*iter);
+							++iter;
+						}
+					}
+
+					for (auto& objectA : this->selectedObjects){
+						std::cout << ":" << objectA->getName() << std::endl;
+
+						net::removeObject(this->objectOrder, objectA);
+						this->objectOrder.push_back(objectA);
+					}
+
+					break;
+				}
+			}
+		}
+
+		if (!this->selectedObjects.empty()){
+			for (auto& object : this->selectedObjects){
+				if (object->testLocation(location)){
+					this->dragging = true;
+					this->draggingStart = location;
+
+					break;
+				}
+			}
+		}
+	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1){
+		if (this->dragging){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
-			if (this->selectedObjects.size() == 0){
-				for (auto object = this->objects.rbegin(); object != this->objects.rend(); ++object){
-					if (object->second->testLocation(location) && ! object->second->isUnder()){
-						std::cout << object->second->getName() << " selected." << std::endl;
-						this->selectedObjects.push_back(object->second);
-						//this->selectionOffset = location - this->selectedObject->getLocation();
-
-						net::removeObject(this->objectOrder, object->second);
-						this->objectOrder.push_back(object->second);
-
-						break;
-					}
-				}
-			}else{
-				//location -= this->selectionOffset;
+			for (auto& object : this->selectedObjects){
+				// TODO: combine all moves to one packet
+				Vector2 destination = object->getLocation() + (location - this->draggingStart);
 
 				std::string data;
 				data.push_back(net::PACKET_MOVE);
 
-				data += this->selectedObjects.back()->getId(); // TODO
+				data += object->getId();
 
 				unsigned char bytes[3];
-				net::floatToBytes(bytes, location.x);
+				net::floatToBytes(bytes, destination.x);
 				data.append((char*) bytes, 3);
 
-				net::floatToBytes(bytes, location.y);
+				net::floatToBytes(bytes, destination.y);
 				data.append((char*) bytes, 3);
 
 				net::sendCommand(connection, data.c_str(), data.length());
 
-				std::cout << this->selectedObjects.back()->getName() << " dropped at " << location.x << "," << location.y << std::endl; // TODO
-
-				for (auto& object : this->objectOrder){
-					object->checkIfUnder(this->objectOrder);
-				}
-
-				this->selectedObjects.pop_back();
+				std::cout << object->getName() << " dropped at " << destination.x << "," << destination.y << std::endl;
 			}
-		}
+
+			this->dragging = false;
+		}	
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
 		if (event.mouse.dz != 0){
 			this->screenZoom *= 1 - 0.25f * event.mouse.dz;
 			this->resize();
-		}else if (! this->selectedObjects.empty() && (event.mouse.dx != 0 || event.mouse.dy != 0)){
+		}else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
-			this->selectedObjects.back()->setLocation(location); // - this->selectionOffset); // TODO
+			for (auto& object : this->selectedObjects){
+				object->setLocation(object->getLocation() + (location - this->draggingStart)); // - this->selectionOffset); // TODO
+			}
+			this->draggingStart = location;
 		}
 	}
 }
@@ -389,6 +426,8 @@ void Game::receivePacket(ENetEvent event){
 				this->objectOrder.push_back(object);
 
 				this->addMessage(this->clients[event.packet->data[1]]->nick + " created a new " + object->getName());
+
+				this->checkObjectOrder();
 			}
 
 			break;
@@ -412,6 +451,8 @@ void Game::receivePacket(ENetEvent event){
 				this->objectOrder.push_back(object);
 
 				this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + object->getName());
+
+				this->checkObjectOrder();
 			}
 
 			break;
@@ -495,6 +536,12 @@ void Game::createObject(std::string objectId){
 	net::sendCommand(connection, data.c_str(), data.length());
 }
 
+void Game::checkObjectOrder(){
+	for (auto& object : this->objectOrder){
+		object->checkIfUnder(this->objectOrder);
+	}
+}
+
 void Game::askNick(){
 	this->input = new InputBox(this, &Game::identifyToServer, Vector2(SCREEN_H - 40, 0), Vector2(20, 100), this->font, 16);
 }
@@ -532,12 +579,12 @@ void Game::render(){
 void Game::renderGame(){
 	this->renderer->useTransform(CAMERA);
 
-	for (auto& object : this->objectOrder){
-		object->draw(this->renderer);
-	}
-
 	for (auto& object : this->selectedObjects){
 		object->drawSelection(this->renderer);
+	}
+
+	for (auto& object : this->objectOrder){
+		object->draw(this->renderer);
 	}
 }
 

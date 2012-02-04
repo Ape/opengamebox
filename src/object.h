@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <list>
 
 #include "net.h"
 #include "irenderer.h"
@@ -18,7 +19,9 @@ public:
 	Vector2 getLocation(void) const;
 	bool testLocation(Vector2 location) const;
 	bool testCollision(Object *object) const;
+
 	bool isUnder(void) const;
+	std::list<Object*> getObjectsAbove();
 	bool checkIfUnder(std::vector<Object*> objectOrder);
 
 	void setLocation(Vector2 location);
@@ -33,7 +36,7 @@ private:
 	std::string image;
 	Vector2 size;
 	Vector2 location;
-	std::vector<Object*> objectsAbove;
+	std::list<Object*> objectsAbove;
 };
 
 #endif

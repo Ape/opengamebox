@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <map>
+#include <list>
+#include <set>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -71,9 +73,10 @@ private:
 	std::vector<Widget*> widgets;
 	InputBox* input;
 
-	std::vector<Object*> selectedObjects;
-	Vector2 selectionOffset;
-	
+	std::list<Object*> selectedObjects;
+	bool dragging;
+	Vector2 draggingStart;
+
 	void mainLoop(void);
 	void quit(void);
 	void dispose(void);
@@ -88,6 +91,7 @@ private:
 	void addMessage(std::string message);
 	void chatCommand(std::string commandstr);
 	void createObject(std::string object);
+	void checkObjectOrder(void);
 
 	void askNick(void);
 
