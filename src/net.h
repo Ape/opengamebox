@@ -16,7 +16,7 @@ namespace net{
 	const unsigned int DEFAULT_PORT   = 13355;
 	const unsigned int CHANNELS       = 2;
 	const unsigned char MAX_CLIENTS   = 32;
-	const float MAX_FLOAT             = 1000.0f;
+	const float MAX_FLOAT             = 10000.0f;
 
 	// Client control packets
 	const unsigned char PACKET_HANDSHAKE  = 0x01;
@@ -56,6 +56,9 @@ namespace net{
 
 	template <class T>
 	unsigned char firstUnusedKey(std::map<unsigned char, T*> map);
+
+	void intToBytes(unsigned char *bytes, unsigned int value);
+	unsigned int bytesToInt(unsigned char *bytes);
 
 	void floatToBytes(unsigned char *bytes, float value);
 	float bytesToFloat(unsigned char *bytes);

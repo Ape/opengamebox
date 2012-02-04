@@ -41,21 +41,29 @@ void net::sendCommand(ENetPeer *peer, const char *data, size_t length){
 	enet_peer_send(peer, 0, packet);
 }
 
-// Convert a float in range [-MAX_FLOAT, MAX_FLOAT] to a byte array (loses precision)
-void net::floatToBytes(unsigned char* bytes, float value)
-{
-	unsigned int out = (value + MAX_FLOAT) / (2 * MAX_FLOAT) * 16777216;
+// Convert an unsigned int to a byte array
+void net::intToBytes(unsigned char* bytes, unsigned int value){
+	bytes[0] = value & 0xFF;
+	bytes[1] = (value >> 8) & 0xFF;
+	bytes[2] = (value >> 16) & 0xFF;
+	bytes[3] = (value >> 24) & 0xFF;
+}
 
-	bytes[0] = out & 0xFF;
-	bytes[1] = (out >> 8) & 0xFF;
-	bytes[2] = (out >> 16) & 0xFF;
+// Convert a byte array created with intToBytes() back to an unsigned it
+unsigned int net::bytesToInt(unsigned char* bytes){
+	return (bytes[3] << 24) + (bytes[2] << 16) + (bytes[1] << 8) + bytes[0];
+}
+
+// Convert a float in range [-MAX_FLOAT, MAX_FLOAT] to a byte array (loses precision)
+void net::floatToBytes(unsigned char* bytes, float value){
+	unsigned int out = (value + MAX_FLOAT) / (2 * MAX_FLOAT) * 4294967296;
+
+	net::intToBytes(bytes, out);
 }
 
 // Convert a byte array created with floatToBytes() back to a float
-float net::bytesToFloat(unsigned char* bytes)
-{
-	unsigned int in = (bytes[2] << 16) + (bytes[1] << 8) + bytes[0];
-	return in * (2.0f * MAX_FLOAT) / 16777216.0f - MAX_FLOAT;
+float net::bytesToFloat(unsigned char* bytes){
+	return net::bytesToInt(bytes) * (2.0f * MAX_FLOAT) / 4294967296.0f - MAX_FLOAT;
 }
 
 // Convert an integer format IP address to a string representation

@@ -193,17 +193,17 @@ void Server::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CREATE:{
-			if (event.packet->dataLength >= 1 + 6 + 1 && event.packet->dataLength <= 1 + 6 + 255){
+			if (event.packet->dataLength >= 1 + 8 + 1 && event.packet->dataLength <= 1 + 8 + 255){
 				Vector2 location;
-				unsigned char bytes[3];
+				unsigned char bytes[4];
 
-				std::copy(event.packet->data + 1, event.packet->data + 4, bytes);
+				std::copy(event.packet->data + 1, event.packet->data + 5, bytes);
 				location.x = net::bytesToFloat(bytes);
 
-				std::copy(event.packet->data + 4, event.packet->data + 7, bytes);
+				std::copy(event.packet->data + 5, event.packet->data + 9, bytes);
 				location.y = net::bytesToFloat(bytes);
 
-				std::string objectId = std::string((char*) event.packet->data + 7, event.packet->dataLength - 7);
+				std::string objectId = std::string((char*) event.packet->data + 9, event.packet->dataLength - 9);
 
 				unsigned int objId = net::firstUnusedKey(this->objects);
 				Object *object = new Object(objectId, objId, location);
@@ -227,15 +227,15 @@ void Server::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_MOVE:{
-			if (event.packet->dataLength == 2 + 6){
+			if (event.packet->dataLength == 2 + 8){
 				if (this->objects.count(event.packet->data[1]) > 0){
 					Vector2 location;
-					unsigned char bytes[3];
+					unsigned char bytes[4];
 
-					std::copy(event.packet->data + 2, event.packet->data + 5, bytes);
+					std::copy(event.packet->data + 2, event.packet->data + 6, bytes);
 					location.x = net::bytesToFloat(bytes);
 
-					std::copy(event.packet->data + 5, event.packet->data + 8, bytes);
+					std::copy(event.packet->data + 6, event.packet->data + 10, bytes);
 					location.y = net::bytesToFloat(bytes);
 
 					Object *object = this->objects.find(event.packet->data[1])->second;

@@ -321,12 +321,12 @@ void Game::localEvents(){
 
 				data += object->getId();
 
-				unsigned char bytes[3];
+				unsigned char bytes[4];
 				net::floatToBytes(bytes, destination.x);
-				data.append((char*) bytes, 3);
+				data.append((char*) bytes, 4);
 
 				net::floatToBytes(bytes, destination.y);
-				data.append((char*) bytes, 3);
+				data.append((char*) bytes, 4);
 
 				net::sendCommand(connection, data.c_str(), data.length());
 			}
@@ -451,19 +451,19 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CREATE:{
-			if (event.packet->dataLength >= 1 + 2 + 6 + 1 && event.packet->dataLength <= 1 + 2 + 6 + 255){
+			if (event.packet->dataLength >= 1 + 2 + 8 + 1 && event.packet->dataLength <= 1 + 2 + 8 + 255){
 				unsigned int objId = event.packet->data[2];
 
 				Vector2 location;
-				unsigned char bytes[3];
+				unsigned char bytes[4];
 
-				std::copy(event.packet->data + 3, event.packet->data + 6, bytes);
+				std::copy(event.packet->data + 3, event.packet->data + 7, bytes);
 				location.x = net::bytesToFloat(bytes);
 
-				std::copy(event.packet->data + 6, event.packet->data + 9, bytes);
+				std::copy(event.packet->data + 7, event.packet->data + 11, bytes);
 				location.y = net::bytesToFloat(bytes);
 
-				std::string objectId = std::string((char*) event.packet->data + 9, event.packet->dataLength - 9);
+				std::string objectId = std::string((char*) event.packet->data + 11, event.packet->dataLength - 11);
 
 				Object *object = new Object(objectId, objId, location);
 				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
@@ -478,14 +478,14 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_MOVE:{
-			if (event.packet->dataLength == 9){
+			if (event.packet->dataLength == 11){
 				Vector2 location;
-				unsigned char bytes[3];
+				unsigned char bytes[4];
 
-				std::copy(event.packet->data + 3, event.packet->data + 6, bytes);
+				std::copy(event.packet->data + 3, event.packet->data + 7, bytes);
 				location.x = net::bytesToFloat(bytes);
 
-				std::copy(event.packet->data + 6, event.packet->data + 9, bytes);
+				std::copy(event.packet->data + 7, event.packet->data + 11, bytes);
 				location.y = net::bytesToFloat(bytes);
 
 				Object *object = this->objects.find(event.packet->data[2])->second;
@@ -590,12 +590,12 @@ void Game::createObject(std::string objectId){
 
 	Vector2 location = Vector2(0.0f, 0.0f);
 	
-	unsigned char bytes[3];
+	unsigned char bytes[4];
 	net::floatToBytes(bytes, location.x);
-	data.append((char*) bytes, 3);
+	data.append((char*) bytes, 4);
 
 	net::floatToBytes(bytes, location.y);
-	data.append((char*) bytes, 3);
+	data.append((char*) bytes, 4);
 
 	data.append(objectId);
 
