@@ -12,12 +12,17 @@
 #include "../object.h"
 
 class Server{
+public:
+	Server(unsigned int port);
+
+	int run(void);
+
 private:
 	ENetAddress address;
 	ENetHost *connection;
 
 	std::map<unsigned char, net::Client*> clients;
-	std::map<unsigned char, Object*> objects;
+	std::map<unsigned short, Object*> objects;
 
 	bool exiting;
 
@@ -30,11 +35,6 @@ private:
 	void networkEvents(void);
 	void receivePacket(ENetEvent event);
 	void sendStream(void);
-
-public:
-	Server(unsigned int port);
-
-	int run(void);
 };
 
 #endif

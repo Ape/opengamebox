@@ -195,29 +195,31 @@ void Server::receivePacket(ENetEvent event){
 		case net::PACKET_CREATE:{
 			if (event.packet->dataLength >= 1 + 8 + 1 && event.packet->dataLength <= 1 + 8 + 255){
 				Vector2 location;
-				unsigned char bytes[4];
+				{
+					unsigned char bytes[4];
 
-				std::copy(event.packet->data + 1, event.packet->data + 5, bytes);
-				location.x = net::bytesToFloat(bytes);
+					std::copy(event.packet->data + 1, event.packet->data + 5, bytes);
+					location.x = net::bytesToFloat(bytes);
 
-				std::copy(event.packet->data + 5, event.packet->data + 9, bytes);
-				location.y = net::bytesToFloat(bytes);
+					std::copy(event.packet->data + 5, event.packet->data + 9, bytes);
+					location.y = net::bytesToFloat(bytes);
+				}
 
 				std::string objectId = std::string((char*) event.packet->data + 9, event.packet->dataLength - 9);
 
-				unsigned int objId = net::firstUnusedKey(this->objects);
+				unsigned short objId = net::firstUnusedKey(this->objects);
 				Object *object = new Object(objectId, objId, location);
-				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
+				this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
 				
 				if (! object->getName().empty()){
 					std::string data;
 					data += net::PACKET_CREATE;
 					data += *id;
-					data += objId;
+					net::dataAppendShort(data, objId);
 					data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
 
 					std::cout << clients[*id]->nick << " created a new " << object->getName() << std::endl;
-					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 2);
+					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 3);
 				}else{
 					std::cout << "Error: object " << objectId << " is not recognized by the server!" << std::endl;
 					this->objects.erase(objId);
@@ -227,18 +229,28 @@ void Server::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_MOVE:{
-			if (event.packet->dataLength == 2 + 8){
+			if (event.packet->dataLength == 3 + 8){
 				if (this->objects.count(event.packet->data[1]) > 0){
+					unsigned short objId;
+					{
+						unsigned char bytes[2];
+
+						std::copy(event.packet->data + 1, event.packet->data + 3, bytes);
+						objId = net::bytesToShort(bytes);
+					}
+
 					Vector2 location;
-					unsigned char bytes[4];
+					{
+						unsigned char bytes[4];
 
-					std::copy(event.packet->data + 2, event.packet->data + 6, bytes);
-					location.x = net::bytesToFloat(bytes);
+						std::copy(event.packet->data + 3, event.packet->data + 7, bytes);
+						location.x = net::bytesToFloat(bytes);
 
-					std::copy(event.packet->data + 6, event.packet->data + 10, bytes);
-					location.y = net::bytesToFloat(bytes);
+						std::copy(event.packet->data + 7, event.packet->data + 11, bytes);
+						location.y = net::bytesToFloat(bytes);
+					}
 
-					Object *object = this->objects.find(event.packet->data[1])->second;
+					Object *object = this->objects.find(objId)->second;
 					object->setLocation(location);
 
 					std::string data;
@@ -247,7 +259,7 @@ void Server::receivePacket(ENetEvent event){
 					data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
 
 					std::cout << clients[*id]->nick << " moved " << object->getName() << std::endl;
-					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
+					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 2);
 				}
 			}
 			break;
@@ -268,11 +280,19 @@ void Server::receivePacket(ENetEvent event){
 
 				size_t i = 1;
 				while (i < event.packet->dataLength){
-					Object* object = this->objects.find(event.packet->data[i])->second;
+					unsigned short objId;
+					{
+						unsigned char bytes[2];
+
+						std::copy(event.packet->data + i, event.packet->data + 2*i + 2, bytes);
+						objId = net::bytesToShort(bytes);
+					}
+
+					Object* object = this->objects.find(objId)->second;
 					object->select(clients[*id]);
 
 					std::cout << clients[*id]->nick << " selected " << object->getName() << std::endl;
-					++i;
+					i += 2;
 				}
 
 				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);

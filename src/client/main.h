@@ -64,7 +64,7 @@ private:
 	float screenZoom;
 	double previousTime;
 
-	std::map<unsigned char, Object*> objects;
+	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;
 	std::map<unsigned char, net::Client*> clients;
 	unsigned char localClient;

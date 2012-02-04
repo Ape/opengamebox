@@ -41,7 +41,7 @@ void net::sendCommand(ENetPeer *peer, const char *data, size_t length){
 	enet_peer_send(peer, 0, packet);
 }
 
-// Convert an unsigned int to a byte array
+// Convert an unsigned int to a byte array (4-byte)
 void net::intToBytes(unsigned char* bytes, unsigned int value){
 	bytes[0] = value & 0xFF;
 	bytes[1] = (value >> 8) & 0xFF;
@@ -49,12 +49,23 @@ void net::intToBytes(unsigned char* bytes, unsigned int value){
 	bytes[3] = (value >> 24) & 0xFF;
 }
 
-// Convert a byte array created with intToBytes() back to an unsigned it
+// Convert a byte array created with intToBytes() back to an unsigned int
 unsigned int net::bytesToInt(unsigned char* bytes){
 	return (bytes[3] << 24) + (bytes[2] << 16) + (bytes[1] << 8) + bytes[0];
 }
 
-// Convert a float in range [-MAX_FLOAT, MAX_FLOAT] to a byte array (loses precision)
+// Same as intToBytes, but with an unsigned short (2-byte)
+void net::shortToBytes(unsigned char* bytes, unsigned short value){
+	bytes[0] = value & 0xFF;
+	bytes[1] = (value >> 8) & 0xFF;
+}
+
+// Convert a byte array created with shortToBytes() back to an unsigned short
+unsigned int net::bytesToShort(unsigned char* bytes){
+	return (bytes[1] << 8) + bytes[0];
+}
+
+// Convert a float in range [-MAX_FLOAT, MAX_FLOAT] to a byte array (4-bit)
 void net::floatToBytes(unsigned char* bytes, float value){
 	unsigned int out = (value + MAX_FLOAT) / (2 * MAX_FLOAT) * 4294967296;
 
@@ -64,6 +75,33 @@ void net::floatToBytes(unsigned char* bytes, float value){
 // Convert a byte array created with floatToBytes() back to a float
 float net::bytesToFloat(unsigned char* bytes){
 	return net::bytesToInt(bytes) * (2.0f * MAX_FLOAT) / 4294967296.0f - MAX_FLOAT;
+}
+
+// Appends the data with an unsigned int coded with intToBytes
+void net::dataAppendInt(std::string &data, unsigned int value){
+	unsigned char bytes[4];
+
+	net::intToBytes(bytes, value);
+	data.append((char*) bytes, 4);
+}
+
+// Appends the data with an unsigned short coded with shortToBytes
+void net::dataAppendShort(std::string &data, unsigned short value){
+	unsigned char bytes[2];
+
+	net::shortToBytes(bytes, value);
+	data.append((char*) bytes, 2);
+}
+
+// Appends the data with a Vector2 coded with floatToBytes
+void net::dataAppendVector2(std::string &data, Vector2 value){
+	unsigned char bytes[4];
+
+	net::shortToBytes(bytes, value.x);
+	data.append((char*) bytes, 4);
+
+	net::shortToBytes(bytes, value.y);
+	data.append((char*) bytes, 4);
 }
 
 // Convert an integer format IP address to a string representation

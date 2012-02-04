@@ -1,8 +1,16 @@
 Networking:
 	- synchronize objects on join
-	- send 32-bit object id instead of 8-bit
 	- send flip information
 	- send multiple selection move as one packet
+	- create a structured format for defining packets
+		- example code for sending a packet (client -> server):
+			Packet *packet = PacketMove(std::vector<Object*> objects, std::vector<Vector2> locations);
+			std::string data = packet.getData();
+			size_t length = packet.getLength();
+		- example code for parsing a received packet (client -> server):
+			Packet *packet = PacketMove(data);
+			std::vector<Objects*> objects = packet.getObjects();
+			std::vector<Vector2> locations = packet.getLocations();
 
 General:
 	- loading settings from a file
@@ -16,6 +24,7 @@ Mechanics:
 
 Graphics:
 	- ability to move the camera
+	- ability to rotate the camera
 
 Resources:
 	- create a full set of 52 playing cards

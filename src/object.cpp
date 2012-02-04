@@ -39,7 +39,7 @@ std::string Object::getName() const{
 	return this->name;
 }
 
-unsigned int Object::getId() const{
+unsigned short Object::getId() const{
 	return this->id;
 }
 
@@ -71,6 +71,7 @@ bool Object::isUnder() const{
 	return ! this->objectsAbove.empty();
 }
 
+#include <iostream>
 std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 	std::list<Object*> allAbove;
 	visited.insert(this);
@@ -81,6 +82,7 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 		allAbove.push_back(this);
 
 		for (auto& object : this->objectsAbove){
+	std::cout << "getOA:" << std::endl;
 			if (visited.count(object) == 0){
 				std::list<Object*> objects = object->getObjectsAbove(visited);
 
@@ -103,7 +105,6 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 	return allAbove;
 }
 
-#include <iostream>
 bool Object::checkIfUnder(std::vector<Object*> objectOrder){
 	std::cout << "object.checkIfUnder()" << std::endl; //TODO
 

@@ -277,7 +277,8 @@ void Game::localEvents(){
 					}
 
 					for (auto& objectA : this->selectedObjects){
-						data += objectA->getId();
+						net::dataAppendShort(data, objectA->getId());
+						std::cout << objectA->getId() << std::endl;
 
 						net::removeObject(this->objectOrder, objectA);
 						this->objectOrder.push_back(objectA);
@@ -319,14 +320,16 @@ void Game::localEvents(){
 				std::string data;
 				data.push_back(net::PACKET_MOVE);
 
-				data += object->getId();
+				net::dataAppendShort(data, object->getId());
 
-				unsigned char bytes[4];
-				net::floatToBytes(bytes, destination.x);
-				data.append((char*) bytes, 4);
+				{
+					unsigned char bytes[4];
+					net::floatToBytes(bytes, destination.x);
+					data.append((char*) bytes, 4);
 
-				net::floatToBytes(bytes, destination.y);
-				data.append((char*) bytes, 4);
+					net::floatToBytes(bytes, destination.y);
+					data.append((char*) bytes, 4);
+				}
 
 				net::sendCommand(connection, data.c_str(), data.length());
 			}
@@ -451,19 +454,28 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CREATE:{
-			if (event.packet->dataLength >= 1 + 2 + 8 + 1 && event.packet->dataLength <= 1 + 2 + 8 + 255){
-				unsigned int objId = event.packet->data[2];
+			if (event.packet->dataLength >= 1 + 3 + 8 + 1 && event.packet->dataLength <= 1 + 3 + 8 + 255){
+				unsigned short objId;
+				{
+					unsigned char bytes[2];
+
+					std::copy(event.packet->data + 2, event.packet->data + 4, bytes);
+					objId = net::bytesToShort(bytes);
+				}
 
 				Vector2 location;
-				unsigned char bytes[4];
+				{
+					unsigned char bytes[4];
 
-				std::copy(event.packet->data + 3, event.packet->data + 7, bytes);
-				location.x = net::bytesToFloat(bytes);
+					std::copy(event.packet->data + 4, event.packet->data + 8, bytes);
+					location.x = net::bytesToFloat(bytes);
 
-				std::copy(event.packet->data + 7, event.packet->data + 11, bytes);
-				location.y = net::bytesToFloat(bytes);
+					std::copy(event.packet->data + 8, event.packet->data + 12, bytes);
+					location.y = net::bytesToFloat(bytes);
+				}
 
-				std::string objectId = std::string((char*) event.packet->data + 11, event.packet->dataLength - 11);
+				std::string objectId = std::string((char*) event.packet->data + 12, event.packet->dataLength - 12);
+				std::cout << objectId << std::endl;
 
 				Object *object = new Object(objectId, objId, location);
 				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
@@ -478,17 +490,27 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_MOVE:{
-			if (event.packet->dataLength == 11){
+			if (event.packet->dataLength == 13){
+				unsigned short objId;
+				{
+					unsigned char bytes[2];
+
+					std::copy(event.packet->data + 2, event.packet->data + 4, bytes);
+					objId = net::bytesToShort(bytes);
+				}
+
 				Vector2 location;
-				unsigned char bytes[4];
+				{
+					unsigned char bytes[4];
 
-				std::copy(event.packet->data + 3, event.packet->data + 7, bytes);
-				location.x = net::bytesToFloat(bytes);
+					std::copy(event.packet->data + 4, event.packet->data + 8, bytes);
+					location.x = net::bytesToFloat(bytes);
 
-				std::copy(event.packet->data + 7, event.packet->data + 11, bytes);
-				location.y = net::bytesToFloat(bytes);
+					std::copy(event.packet->data + 8, event.packet->data + 12, bytes);
+					location.y = net::bytesToFloat(bytes);
+				}
 
-				Object *object = this->objects.find(event.packet->data[2])->second;
+				Object *object = this->objects.find(objId)->second;
 				object->setLocation(location);
 
 				net::removeObject(this->objectOrder, object);
@@ -514,10 +536,17 @@ void Game::receivePacket(ENetEvent event){
 
 				size_t i = 2;
 				while (i < event.packet->dataLength){
-					this->objects.find(event.packet->data[i])->second->select(client);
-					std::cout << i << std::endl;
+					unsigned short objId;
+					{
+						unsigned char bytes[2];
 
-					++i;
+						std::copy(event.packet->data + i, event.packet->data + i + 2, bytes);
+						objId = net::bytesToShort(bytes);
+					}
+
+					this->objects.find(objId)->second->select(client);
+
+					i += 2;
 				}
 			}
 

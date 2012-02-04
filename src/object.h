@@ -20,7 +20,7 @@ public:
 
 	std::string getObjectId(void) const;
 	std::string getName(void) const;
-	unsigned int getId(void) const;
+	unsigned short getId(void) const;
 	Vector2 getLocation(void) const;
 	bool testLocation(Vector2 location) const;
 	bool testCollision(Object *object, bool second = false);
@@ -39,7 +39,7 @@ public:
 private:
 	std::string objectId;
 	std::string name;
-	unsigned int id;
+	unsigned short id;
 	Vector2 size;
 	Vector2 location;
 	bool flipped;

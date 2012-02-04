@@ -7,6 +7,7 @@
 #include <vector>
 #include <enet/enet.h>
 
+#include "vector2.h"
 #include "object.h"
 
 class Object;
@@ -57,11 +58,21 @@ namespace net{
 	template <class T>
 	unsigned char firstUnusedKey(std::map<unsigned char, T*> map);
 
+	template <class T>
+	unsigned short firstUnusedKey(std::map<unsigned short, T*> map);
+
 	void intToBytes(unsigned char *bytes, unsigned int value);
 	unsigned int bytesToInt(unsigned char *bytes);
 
+	void shortToBytes(unsigned char *bytes, unsigned short value);
+	unsigned int bytesToShort(unsigned char *bytes);
+
 	void floatToBytes(unsigned char *bytes, float value);
 	float bytesToFloat(unsigned char *bytes);
+
+	void dataAppendInt(std::string &data, unsigned int value);
+	void dataAppendShort(std::string &data, unsigned short value);
+	void dataAppendVector2(std::string &data, Vector2 value);
 
 	std::string IPIntegerToString(unsigned int ip);
 	std::string AddressToString(ENetAddress address);
@@ -78,6 +89,17 @@ unsigned char net::firstUnusedKey(std::map<unsigned char, T*> map){
 	}
 
 	return 255;
+}
+
+template <class T>
+unsigned short net::firstUnusedKey(std::map<unsigned short, T*> map){
+	for (unsigned short i = 0; i < 65535; ++i){
+		if (map.count(i) == 0){
+			return i;
+		}
+	}
+
+	return 65535;
 }
 
 #endif
