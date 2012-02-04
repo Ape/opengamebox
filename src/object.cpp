@@ -4,6 +4,8 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 	this->objectId = objectId;
 	this->id       = id;
 	this->location = location;
+	this->flipped  = false;
+	this->selected = false;
 
 	// TODO: Load this object data from the filesystem
 	if (this->objectId == "card_7c"){
@@ -14,8 +16,9 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 		this->name = "Ace of Spades";
 	}
 
-	this->image = this->objectId + ".png";
 	this->size = Vector2(135, 189);
+	this->image = this->objectId + ".png";
+	this->backside = "card_backside.png";
 }
 
 std::string Object::getObjectId() const{
@@ -94,20 +97,27 @@ void Object::setLocation(Vector2 location){
 	this->location = location;
 }
 
-void Object::draw(IRenderer *renderer) const{
-	if (!this->isUnder()){
-		renderer->drawBitmap(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
-	}else{
-		renderer->drawBitmapTinted(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.75f, 0.75f, 0.75f, 1.0f);
-	}
+void Object::select(bool selected){
+	this->selected = selected;
 }
 
-void Object::drawSelection(IRenderer *renderer) const{
-	Vector2 pointA = this->location - this->size/2.0f;
-	Vector2 pointB = this->location + this->size/2.0f;
+void Object::flip(){
+	this->flipped = ! this->flipped;
+}
 
-	renderer->transformLocation(CAMERA, pointA);
-	renderer->transformLocation(CAMERA, pointB);
+void Object::draw(IRenderer *renderer) const{
+	std::string image;
+	if (! this->flipped){
+		image = this->image;
+	}else{
+		image = this->backside;
+	}
 
-	renderer->drawRectangle(pointA, pointB, 0.0f, 1.0f, 0.0f, 1.0f, 6.0f);
+	if (this->selected){
+		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.25f, 1.0f, 0.25f, 1.0f);
+	}else if (!this->isUnder()){
+		renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
+	}else{
+		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.75f, 0.75f, 0.75f, 1.0f);
+	}
 }

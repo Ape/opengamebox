@@ -1,15 +1,15 @@
 Networking:
 	- synchronize objects on join
 	- send 32-bit object id instead of 8-bit
+	- send flip information
+	- send multiple selection move as one packet
 
 General:
 	- loading settings from a file
 
 Mechanics:
-	- multiobject selection
-		- suffle selection
-		- stack / formate selection
-		- remove selected objects
+	- multiobject selection needs optimization
+	- ability to remove selected objects
 	- private areas
 	- ability to flip objects so that a flipside is shown instead of the usual
 	  picture

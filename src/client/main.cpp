@@ -214,6 +214,38 @@ void Game::localEvents(){
 				this->chatCommand("create card_7c");
 				this->chatCommand("create card_Kh");
 				this->chatCommand("create card_As");
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_S){
+				if (this->dragging){
+					std::vector<Object*> objects;
+					std::vector<Vector2> locations;
+					for (auto& object : this->selectedObjects){
+						objects.push_back(object);
+						locations.push_back(object->getLocation());
+					}
+
+					std::random_shuffle(objects.begin(), objects.end());
+
+					this->selectedObjects.clear();
+					std::vector<Vector2>::size_type location = 0;
+					for (auto& object : objects){
+						object->setLocation(locations.at(location));
+						++location;
+						this->selectedObjects.push_back(object);
+
+						net::removeObject(this->objectOrder, object);
+						this->objectOrder.push_back(object);
+					}
+
+					this->checkObjectOrder();
+				}
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_F){
+				if (this->dragging){
+					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
+					for (auto& object : this->selectedObjects){
+						object->setLocation(nextLocation);
+						nextLocation += Vector2(5.0f, 5.0f);
+					}
+				}
 			}
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1){
@@ -221,6 +253,9 @@ void Game::localEvents(){
 		this->renderer->transformLocation(CAMERA_INVERSE, location);
 
 		if (! this->dragging){
+			for (auto& object : this->selectedObjects){
+				object->select(false);
+			}
 			this->selectedObjects.clear();
 
 			for (auto object = this->objectOrder.rbegin(); object != this->objectOrder.rend(); ++object){
@@ -240,7 +275,7 @@ void Game::localEvents(){
 					}
 
 					for (auto& objectA : this->selectedObjects){
-						std::cout << ":" << objectA->getName() << std::endl;
+						objectA->select(true);
 
 						net::removeObject(this->objectOrder, objectA);
 						this->objectOrder.push_back(objectA);
@@ -261,6 +296,12 @@ void Game::localEvents(){
 				}
 			}
 		}
+	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 2){
+		if (this->dragging){
+			for (auto& object : this->selectedObjects){
+				object->flip();
+			}
+		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1){
 		if (this->dragging){
 			Vector2 location(event.mouse.x, event.mouse.y);
@@ -268,6 +309,7 @@ void Game::localEvents(){
 
 			for (auto& object : this->selectedObjects){
 				// TODO: combine all moves to one packet
+				// TODO: include flip info
 				Vector2 destination = object->getLocation() + (location - this->draggingStart);
 
 				std::string data;
@@ -283,12 +325,10 @@ void Game::localEvents(){
 				data.append((char*) bytes, 3);
 
 				net::sendCommand(connection, data.c_str(), data.length());
-
-				std::cout << object->getName() << " dropped at " << destination.x << "," << destination.y << std::endl;
 			}
 
 			this->dragging = false;
-		}	
+		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
 		if (event.mouse.dz != 0){
 			this->screenZoom *= 1 - 0.25f * event.mouse.dz;
@@ -578,10 +618,6 @@ void Game::render(){
 
 void Game::renderGame(){
 	this->renderer->useTransform(CAMERA);
-
-	for (auto& object : this->selectedObjects){
-		object->drawSelection(this->renderer);
-	}
 
 	for (auto& object : this->objectOrder){
 		object->draw(this->renderer);

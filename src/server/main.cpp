@@ -216,7 +216,7 @@ void Server::receivePacket(ENetEvent event){
 					data += objId;
 					data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
 
-					std::cout << clients[*id]->nick << " created a new " << object->getName() << " to " << location.x << "," << location.y << std::endl;
+					std::cout << clients[*id]->nick << " created a new " << object->getName() << std::endl;
 					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 2);
 				}else{
 					std::cout << "Error: object " << objectId << " is not recognized by the server!" << std::endl;
@@ -228,7 +228,6 @@ void Server::receivePacket(ENetEvent event){
 
 		case net::PACKET_MOVE:{
 			if (event.packet->dataLength == 2 + 6){
-				std::cout << event.packet->data[1] << ": " << this->objects.count(event.packet->data[1]) << std::endl;
 				if (this->objects.count(event.packet->data[1]) > 0){
 					Vector2 location;
 					unsigned char bytes[3];
@@ -239,14 +238,15 @@ void Server::receivePacket(ENetEvent event){
 					std::copy(event.packet->data + 5, event.packet->data + 8, bytes);
 					location.y = net::bytesToFloat(bytes);
 
-					this->objects.find(event.packet->data[1])->second->setLocation(location);
+					Object *object = this->objects.find(event.packet->data[1])->second;
+					object->setLocation(location);
 
 					std::string data;
 					data += net::PACKET_MOVE;
 					data += *id;
 					data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
 
-					std::cout << clients[*id]->nick << " moved object to " << location.x << "," << location.y << std::endl;
+					std::cout << clients[*id]->nick << " moved " << object->getName() << std::endl;
 					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
 				}
 			}

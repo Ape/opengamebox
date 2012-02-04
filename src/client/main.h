@@ -9,6 +9,7 @@
 #include <sstream>
 #include <iostream>
 #include <iterator>
+#include <algorithm>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>

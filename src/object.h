@@ -25,17 +25,22 @@ public:
 	bool checkIfUnder(std::vector<Object*> objectOrder);
 
 	void setLocation(Vector2 location);
+	void select(bool selected);
+	void flip(void);
 
 	void draw(IRenderer *renderer) const;
-	void drawSelection(IRenderer *renderer) const;
 
 private:
 	std::string objectId;
 	std::string name;
 	unsigned int id;
-	std::string image;
 	Vector2 size;
 	Vector2 location;
+	bool flipped;
+	std::string image;
+	std::string backside;
+
+	bool selected;
 	std::list<Object*> objectsAbove;
 };
 
