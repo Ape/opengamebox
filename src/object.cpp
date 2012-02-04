@@ -77,7 +77,6 @@ Vector2 Object::getStackDelta() const{
 	return this->stackDelta;
 }
 
-#include <iostream>
 std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 	std::list<Object*> allAbove;
 	visited.insert(this);
@@ -111,8 +110,6 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 }
 
 bool Object::checkIfUnder(std::vector<Object*> objectOrder){
-	std::cout << "object.checkIfUnder()" << std::endl; //TODO
-
 	this->objectsAbove.clear();
 	bool thisFound = false;
 	for (auto& object : objectOrder){
@@ -136,8 +133,16 @@ bool Object::isSelectedBy(net::Client *client){
 	return this->selected == client;
 }
 
+net::Client* Object::getSelected(){
+	return this->selected;
+}
+
 bool Object::isOwnedBy(net::Client *client){
 	return this->owner == client;
+}
+
+net::Client* Object::getOwner(){
+	return this->owner;
 }
 
 void Object::setLocation(Vector2 location){

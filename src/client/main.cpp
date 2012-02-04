@@ -319,26 +319,17 @@ void Game::localEvents(){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
+			std::string data;
+			data.push_back(net::PACKET_MOVE);
+
 			for (auto& object : this->selectedObjects){
-				// TODO: combine all moves to one packet
 				Vector2 destination = object->getLocation() + (location - this->draggingStart);
 
-				std::string data;
-				data.push_back(net::PACKET_MOVE);
-
 				net::dataAppendShort(data, object->getId());
-
-				{
-					unsigned char bytes[4];
-					net::floatToBytes(bytes, destination.x);
-					data.append((char*) bytes, 4);
-
-					net::floatToBytes(bytes, destination.y);
-					data.append((char*) bytes, 4);
-				}
-
-				net::sendCommand(connection, data.c_str(), data.length());
+				net::dataAppendVector2(data, destination);
 			}
+
+			net::sendCommand(connection, data.c_str(), data.length());
 
 			this->dragging = false;
 		}
@@ -443,6 +434,17 @@ void Game::receivePacket(ENetEvent event){
 			if (event.packet->dataLength == 2){
 				this->addMessage(this->clients[event.packet->data[1]]->nick + " has left the server!");
 
+				// Release selected and owned objects
+				for (auto& object : this->objects){
+					if (object.second->isSelectedBy(this->clients[event.packet->data[1]])){
+						object.second->select(nullptr);
+					}
+
+					if (object.second->isOwnedBy(this->clients[event.packet->data[1]])){
+						object.second->own(nullptr);
+					}
+				}
+
 				// Clear the client information
 				delete this->clients.find(event.packet->data[1])->second;
 				this->clients.erase(event.packet->data[1]);
@@ -460,34 +462,27 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CREATE:{
-			if (event.packet->dataLength >= 1 + 3 + 8 + 1 && event.packet->dataLength <= 1 + 3 + 8 + 255){
-				unsigned short objId;
-				{
-					unsigned char bytes[2];
-
-					std::copy(event.packet->data + 2, event.packet->data + 4, bytes);
-					objId = net::bytesToShort(bytes);
+			if (event.packet->dataLength >= 1 + 5 + 8 + 1 && event.packet->dataLength <= 1 + 5 + 8 + 255){
+				net::Client *client;
+				if (event.packet->data[1] != 255){
+					client = this->clients.find(event.packet->data[1])->second;
 				}
 
-				Vector2 location;
-				{
-					unsigned char bytes[4];
-
-					std::copy(event.packet->data + 4, event.packet->data + 8, bytes);
-					location.x = net::bytesToFloat(bytes);
-
-					std::copy(event.packet->data + 8, event.packet->data + 12, bytes);
-					location.y = net::bytesToFloat(bytes);
-				}
-
-				std::string objectId = std::string((char*) event.packet->data + 12, event.packet->dataLength - 12);
-				std::cout << objectId << std::endl;
+				unsigned short objId = net::bytesToShort(event.packet->data + 2);
+				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[4]);
+                net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
+				Vector2 location = net::bytesToVector2(event.packet->data + 6);
+				std::string objectId = std::string((char*) event.packet->data + 14, event.packet->dataLength - 14);
 
 				Object *object = new Object(objectId, objId, location);
+				object->select(selected);
+				object->own(owner);
 				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
 				this->objectOrder.push_back(object);
 
-				this->addMessage(this->clients[event.packet->data[1]]->nick + " created a new " + object->getName());
+				if (event.packet->data[1] != 255){
+					this->addMessage(client->nick + " created a new " + object->getName());
+				}
 
 				this->checkObjectOrder();
 			}
@@ -496,33 +491,36 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_MOVE:{
-			if (event.packet->dataLength == 13){
-				unsigned short objId;
-				{
-					unsigned char bytes[2];
+			if (event.packet->dataLength >= 2 + 10){
+				unsigned int numberObjects = 0;
+				Object *lastObject;
 
-					std::copy(event.packet->data + 2, event.packet->data + 4, bytes);
-					objId = net::bytesToShort(bytes);
+				size_t i = 2;
+				while (i < event.packet->dataLength){
+					++numberObjects;
+
+					unsigned short objId = net::bytesToShort(event.packet->data + i);
+					Vector2 location = net::bytesToVector2(event.packet->data + i + 2);
+
+					Object *object = this->objects.find(objId)->second;
+					object->setLocation(location);
+
+					net::removeObject(this->objectOrder, object);
+					this->objectOrder.push_back(object);
+
+					lastObject = object;
+
+					i += 10;
 				}
 
-				Vector2 location;
-				{
-					unsigned char bytes[4];
+				if (numberObjects == 1){
+					this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + lastObject->getName() + ".");
+				}else if (numberObjects >= 2){
+					std::ostringstream stream;
+					stream << numberObjects;
 
-					std::copy(event.packet->data + 4, event.packet->data + 8, bytes);
-					location.x = net::bytesToFloat(bytes);
-
-					std::copy(event.packet->data + 8, event.packet->data + 12, bytes);
-					location.y = net::bytesToFloat(bytes);
+					this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + stream.str() + " objects.");
 				}
-
-				Object *object = this->objects.find(objId)->second;
-				object->setLocation(location);
-
-				net::removeObject(this->objectOrder, object);
-				this->objectOrder.push_back(object);
-
-				this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + object->getName());
 
 				this->checkObjectOrder();
 			}
@@ -542,13 +540,7 @@ void Game::receivePacket(ENetEvent event){
 
 				size_t i = 2;
 				while (i < event.packet->dataLength){
-					unsigned short objId;
-					{
-						unsigned char bytes[2];
-
-						std::copy(event.packet->data + i, event.packet->data + i + 2, bytes);
-						objId = net::bytesToShort(bytes);
-					}
+					unsigned short objId = net::bytesToShort(event.packet->data + i);
 
 					this->objects.find(objId)->second->select(client);
 
@@ -634,14 +626,9 @@ void Game::chatCommand(std::string commandstr){
 void Game::createObject(std::string objectId, Vector2 location){
 	std::string data;
 	data.push_back(net::PACKET_CREATE);
-
-	unsigned char bytes[4];
-	net::floatToBytes(bytes, location.x);
-	data.append((char*) bytes, 4);
-
-	net::floatToBytes(bytes, location.y);
-	data.append((char*) bytes, 4);
-
+	data += 255; // No selection
+	data += 255; // No owner
+	net::dataAppendVector2(data, location);
 	data.append(objectId);
 
 	net::sendCommand(connection, data.c_str(), data.length());

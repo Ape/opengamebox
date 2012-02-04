@@ -70,10 +70,14 @@ namespace net{
 
 	void floatToBytes(unsigned char *bytes, float value);
 	float bytesToFloat(unsigned char *bytes);
+	Vector2 bytesToVector2(unsigned char *bytes);
 
 	void dataAppendInt(std::string &data, unsigned int value);
 	void dataAppendShort(std::string &data, unsigned short value);
 	void dataAppendVector2(std::string &data, Vector2 value);
+
+	net::Client* clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId);
+	unsigned char clientToClientId(Client *client);
 
 	std::string IPIntegerToString(unsigned int ip);
 	std::string AddressToString(ENetAddress address);

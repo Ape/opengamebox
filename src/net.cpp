@@ -77,6 +77,10 @@ float net::bytesToFloat(unsigned char* bytes){
 	return net::bytesToInt(bytes) * (2.0f * MAX_FLOAT) / 4294967296.0f - MAX_FLOAT;
 }
 
+Vector2 net::bytesToVector2(unsigned char* bytes){
+	return Vector2(net::bytesToFloat(bytes), net::bytesToFloat(bytes + 4));
+}
+
 // Appends the data with an unsigned int coded with intToBytes
 void net::dataAppendInt(std::string &data, unsigned int value){
 	unsigned char bytes[4];
@@ -97,11 +101,27 @@ void net::dataAppendShort(std::string &data, unsigned short value){
 void net::dataAppendVector2(std::string &data, Vector2 value){
 	unsigned char bytes[4];
 
-	net::shortToBytes(bytes, value.x);
+	net::floatToBytes(bytes, value.x);
 	data.append((char*) bytes, 4);
 
-	net::shortToBytes(bytes, value.y);
+	net::floatToBytes(bytes, value.y);
 	data.append((char*) bytes, 4);
+}
+
+net::Client* net::clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId){
+	if (clients.count(clientId) != 0){
+		return clients.find(clientId)->second;
+	}else{
+		return nullptr;
+	}
+}
+
+unsigned char net::clientToClientId(net::Client *client){
+	if (client == nullptr){
+		return 255;
+	}else{
+		return client->id;
+	}
 }
 
 // Convert an integer format IP address to a string representation

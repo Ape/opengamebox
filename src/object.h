@@ -30,7 +30,9 @@ public:
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
 	bool checkIfUnder(std::vector<Object*> objectOrder);
 	bool isSelectedBy(net::Client *client);
+	net::Client* getSelected(void);
 	bool isOwnedBy(net::Client *client);
+	net::Client* getOwner(void);
 
 	void setLocation(Vector2 location);
 	void select(net::Client *client);

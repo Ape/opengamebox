@@ -112,6 +112,17 @@ void Server::networkEvents(){
 
 					net::sendCommand(this->connection, data, 2);
 
+					// Release selected and owned objects
+					for (auto& object : this->objects){
+						if (object.second->isSelectedBy(this->clients[*id])){
+							object.second->select(nullptr);
+						}
+
+						if (object.second->isOwnedBy(this->clients[*id])){
+							object.second->own(nullptr);
+						}
+					}
+
 					// Reset the peer's client information.
 					delete this->clients.find(*id)->second;
 					this->clients.erase(*id);
@@ -159,7 +170,19 @@ void Server::receivePacket(ENetEvent event){
 						net::sendCommand(event.peer, data.c_str(), data.length());
 					}
 
-					// TODO: Send the list of objects
+					// Send the list of objects
+					for (auto& object : this->objects){
+						std::string data;
+						data += net::PACKET_CREATE;
+						data += 255;
+						net::dataAppendShort(data, object.second->getId());
+						data += net::clientToClientId(object.second->getSelected());
+						data += net::clientToClientId(object.second->getOwner());
+						net::dataAppendVector2(data, object.second->getLocation());
+						data.append(object.second->getObjectId());
+
+						net::sendCommand(event.peer, data.c_str(), data.length());
+					}
 
 					// Broadcast a join event
 					{
@@ -196,21 +219,15 @@ void Server::receivePacket(ENetEvent event){
 
 		case net::PACKET_CREATE:{
 			if (event.packet->dataLength >= 1 + 8 + 1 && event.packet->dataLength <= 1 + 8 + 255){
-				Vector2 location;
-				{
-					unsigned char bytes[4];
-
-					std::copy(event.packet->data + 1, event.packet->data + 5, bytes);
-					location.x = net::bytesToFloat(bytes);
-
-					std::copy(event.packet->data + 5, event.packet->data + 9, bytes);
-					location.y = net::bytesToFloat(bytes);
-				}
-
-				std::string objectId = std::string((char*) event.packet->data + 9, event.packet->dataLength - 9);
+				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[1]);
+				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[2]);
+				Vector2 location = net::bytesToVector2(event.packet->data + 3);
+				std::string objectId = std::string((char*) event.packet->data + 11, event.packet->dataLength - 11);
 
 				unsigned short objId = net::firstUnusedKey(this->objects);
 				Object *object = new Object(objectId, objId, location);
+				object->select(selected);
+				object->own(owner);
 				this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
 				
 				if (! object->getName().empty()){
@@ -220,7 +237,7 @@ void Server::receivePacket(ENetEvent event){
 					net::dataAppendShort(data, objId);
 					data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
 
-					std::cout << clients[*id]->nick << " created a new " << object->getName() << std::endl;
+					std::cout << clients[*id]->nick << " created a new " << object->getName() << "." << std::endl;
 					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 3);
 				}else{
 					std::cout << "Error: object " << objectId << " is not recognized by the server!" << std::endl;
@@ -231,37 +248,37 @@ void Server::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_MOVE:{
-			if (event.packet->dataLength == 3 + 8){
+			if (event.packet->dataLength >= 1 + 10){
 				if (this->objects.count(event.packet->data[1]) > 0){
-					unsigned short objId;
-					{
-						unsigned char bytes[2];
-
-						std::copy(event.packet->data + 1, event.packet->data + 3, bytes);
-						objId = net::bytesToShort(bytes);
-					}
-
-					Vector2 location;
-					{
-						unsigned char bytes[4];
-
-						std::copy(event.packet->data + 3, event.packet->data + 7, bytes);
-						location.x = net::bytesToFloat(bytes);
-
-						std::copy(event.packet->data + 7, event.packet->data + 11, bytes);
-						location.y = net::bytesToFloat(bytes);
-					}
-
-					Object *object = this->objects.find(objId)->second;
-					object->setLocation(location);
-
 					std::string data;
 					data += net::PACKET_MOVE;
 					data += *id;
 					data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
 
-					std::cout << clients[*id]->nick << " moved " << object->getName() << std::endl;
-					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 2);
+					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
+
+					unsigned int numberObjects = 0;
+					Object *lastObject;
+
+					size_t i = 1;
+					while (i < event.packet->dataLength){
+						++numberObjects;
+	
+						unsigned short objId = net::bytesToShort(event.packet->data + i);
+						Vector2 location = net::bytesToVector2(event.packet->data + i + 2);
+
+						Object *object = this->objects.find(objId)->second;
+						object->setLocation(location);
+						lastObject = object;
+
+						i += 10;
+					}
+
+					if (numberObjects == 1){
+						std::cout << clients[*id]->nick << " moved " << lastObject->getName() << "." << std::endl;
+					}else if (numberObjects >= 2){
+						std::cout << clients[*id]->nick << " moved " << numberObjects << " objects." << std::endl;
+					}
 				}
 			}
 			break;
@@ -283,18 +300,11 @@ void Server::receivePacket(ENetEvent event){
 
 				size_t i = 1;
 				while (i < event.packet->dataLength){
-					unsigned short objId;
-					{
-						unsigned char bytes[2];
-
-						std::copy(event.packet->data + i, event.packet->data + i + 2, bytes);
-						objId = net::bytesToShort(bytes);
-					}
+					unsigned short objId = net::bytesToShort(event.packet->data + i);
 
 					Object* object = this->objects.find(objId)->second;
 					object->select(clients[*id]);
 
-					std::cout << clients[*id]->nick << " selected " << object->getName() << std::endl;
 					i += 2;
 				}
 
