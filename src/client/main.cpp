@@ -249,7 +249,7 @@ void Game::localEvents(){
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
 					for (auto& object : this->selectedObjects){
 						object->setLocation(nextLocation);
-						nextLocation += Vector2(5.0f, 5.0f);
+						nextLocation += object->getStackDelta();
 					}
 				}
 			}
@@ -604,20 +604,30 @@ void Game::chatCommand(std::string commandstr){
 	if (parameters.at(0) == "create"){
 		if (parameters.size() == 2){
 			this->createObject(parameters.at(1));
+		}else if (parameters.size() == 4){
+			Vector2 location;
+			{
+				std::istringstream stream(parameters.at(2));
+				stream >> location.x;
+			}
+			{
+				std::istringstream stream(parameters.at(3));
+				stream >> location.y;
+			}
+
+			this->createObject(parameters.at(1), location);
 		}else{
-			this->addMessage("Usage: /" + parameters.at(0) + " object");
+			this->addMessage("Usage: /" + parameters.at(0) + " object [x y]");
 		}
 	}else{
 		this->addMessage(parameters.at(0) + ": command not found!");
 	}
 }
 
-void Game::createObject(std::string objectId){
+void Game::createObject(std::string objectId, Vector2 location){
 	std::string data;
 	data.push_back(net::PACKET_CREATE);
 
-	Vector2 location = Vector2(0.0f, 0.0f);
-	
 	unsigned char bytes[4];
 	net::floatToBytes(bytes, location.x);
 	data.append((char*) bytes, 4);

@@ -26,6 +26,7 @@ public:
 	bool testCollision(Object *object, bool second = false);
 
 	bool isUnder(void) const;
+	Vector2 getStackDelta(void) const;
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
 	bool checkIfUnder(std::vector<Object*> objectOrder);
 	bool isSelectedBy(net::Client *client);
@@ -45,6 +46,7 @@ private:
 	bool flipped;
 	std::string image;
 	std::string backside;
+	Vector2 stackDelta;
 
 	net::Client *selected;
 	std::list<Object*> objectsAbove;

@@ -29,6 +29,7 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 
 	this->image = this->objectId + ".png";
 	this->backside = "card_backside.png";
+	this->stackDelta = Vector2(4.0f, 0.0f);
 }
 
 std::string Object::getObjectId() const{
@@ -69,6 +70,10 @@ bool Object::testCollision(Object *object, bool second){
 
 bool Object::isUnder() const{
 	return ! this->objectsAbove.empty();
+}
+
+Vector2 Object::getStackDelta() const{
+	return this->stackDelta;
 }
 
 #include <iostream>
@@ -151,8 +156,6 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 	}
 
 	if (this->selected != nullptr){
-		renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
-
 		float r, g, b;
 		if (this->selected == localClient){
 			r = 0.0f;
@@ -171,7 +174,9 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 		renderer->transformLocation(CAMERA, pointB);
 
 		renderer->drawRectangle(pointA, pointB, r, g, b, 1.0f, 2.0f);
-	}else if (!this->isUnder()){
+	}
+	
+	if (!this->isUnder()){
 		renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
 	}else{
 		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.75f, 0.75f, 0.75f, 1.0f);
