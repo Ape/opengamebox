@@ -274,6 +274,7 @@ void Game::localEvents(){
 
 					if (this->selectedObjects.size() == 1 && this->selectedObjects.front() == nullptr){
 						this->selectedObjects.clear();
+					}
 
 					for (auto& objectA : this->selectedObjects){
 						data += objectA->getId();
