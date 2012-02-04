@@ -278,7 +278,6 @@ void Game::localEvents(){
 
 					for (auto& objectA : this->selectedObjects){
 						net::dataAppendShort(data, objectA->getId());
-						std::cout << objectA->getId() << std::endl;
 
 						net::removeObject(this->objectOrder, objectA);
 						this->objectOrder.push_back(objectA);

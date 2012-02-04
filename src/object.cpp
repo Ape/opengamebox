@@ -82,7 +82,6 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
 		allAbove.push_back(this);
 
 		for (auto& object : this->objectsAbove){
-	std::cout << "getOA:" << std::endl;
 			if (visited.count(object) == 0){
 				std::list<Object*> objects = object->getObjectsAbove(visited);
 

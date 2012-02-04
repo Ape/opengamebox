@@ -268,6 +268,7 @@ void Server::receivePacket(ENetEvent event){
 		case net::PACKET_SELECT:{
 			if (event.packet->dataLength >= 1){
 				std::string data;
+
 				data += net::PACKET_SELECT;
 				data += *id;
 				data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
@@ -284,7 +285,7 @@ void Server::receivePacket(ENetEvent event){
 					{
 						unsigned char bytes[2];
 
-						std::copy(event.packet->data + i, event.packet->data + 2*i + 2, bytes);
+						std::copy(event.packet->data + i, event.packet->data + i + 2, bytes);
 						objId = net::bytesToShort(bytes);
 					}
 
