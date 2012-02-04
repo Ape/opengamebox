@@ -72,17 +72,32 @@ bool Object::isUnder() const{
 }
 
 std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited){
+	std::list<Object*> allAbove;
 	visited.insert(this);
 
-	std::list<Object*> allAbove;
-	allAbove.push_back(this);
+	bool fail = false;
 
-	for (auto& object : this->objectsAbove){
-		if (visited.count(object) == 0){
-			std::list<Object*> objects = object->getObjectsAbove(visited);
+	if (this->selected == nullptr){
+		allAbove.push_back(this);
 
-			allAbove.splice(allAbove.end(), objects);
+		for (auto& object : this->objectsAbove){
+			if (visited.count(object) == 0){
+				std::list<Object*> objects = object->getObjectsAbove(visited);
+
+				if (objects.size() == 1 && objects.front() == nullptr){
+					fail = true;
+				}else{
+					allAbove.splice(allAbove.end(), objects);
+				}
+			}
 		}
+	}else{
+		fail = true;
+	}
+
+	if (fail){
+		allAbove.clear();
+		allAbove.push_back(nullptr);
 	}
 
 	return allAbove;

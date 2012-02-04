@@ -272,6 +272,9 @@ void Game::localEvents(){
 					std::set<Object*> visited;
 					this->selectedObjects = (*object)->getObjectsAbove(visited);
 
+					if (this->selectedObjects.size() == 1 && this->selectedObjects.front() == nullptr){
+						this->selectedObjects.clear();
+
 					for (auto& objectA : this->selectedObjects){
 						data += objectA->getId();
 
