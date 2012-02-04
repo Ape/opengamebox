@@ -76,6 +76,9 @@ int Game::run(std::string address, int port){
 		al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);
 	}
 
+	// Initialize the renderer
+	this->renderer = new Renderer();
+
 	// Create the window
 	this->display = al_create_display(SCREEN_W, SCREEN_H);
 	if (! this->display){
@@ -103,9 +106,6 @@ int Game::run(std::string address, int port){
 		std::cerr << "Failed to initialize primitives_addon!" << std::endl;
 		return EXIT_FAILURE;
 	}
-
-	// Initialize the renderer
-	this->renderer = new Renderer();
 
 	// Create a timer for the main loop
 	this->timer = al_create_timer(1.0f / FPS_LIMIT);
@@ -214,11 +214,11 @@ void Game::localEvents(){
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
 		if (event.mouse.button == 1){
 			Vector2 location(event.mouse.x, event.mouse.y);
-			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
+			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
 			if (this->selectedObjects.size() == 0){
 				for (auto object = this->objects.rbegin(); object != this->objects.rend(); ++object){
-					if (object->second->testLocation(location) && ! object->second->isUnder(this->objectOrder)){
+					if (object->second->testLocation(location) && ! object->second->isUnder()){
 						std::cout << object->second->getName() << " selected." << std::endl;
 						this->selectedObjects.push_back(object->second);
 						//this->selectionOffset = location - this->selectedObject->getLocation();
@@ -248,6 +248,10 @@ void Game::localEvents(){
 
 				std::cout << this->selectedObjects.back()->getName() << " dropped at " << location.x << "," << location.y << std::endl; // TODO
 
+				for (auto& object : this->objectOrder){
+					object->checkIfUnder(this->objectOrder);
+				}
+
 				this->selectedObjects.pop_back();
 			}
 		}
@@ -257,7 +261,7 @@ void Game::localEvents(){
 			this->resize();
 		}else if (! this->selectedObjects.empty() && (event.mouse.dx != 0 || event.mouse.dy != 0)){
 			Vector2 location(event.mouse.x, event.mouse.y);
-			al_transform_coordinates(&this->camera_inverse, &location.x, &location.y);
+			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
 			this->selectedObjects.back()->setLocation(location); // - this->selectionOffset); // TODO
 		}
@@ -526,15 +530,19 @@ void Game::render(){
 }
 
 void Game::renderGame(){
-	al_use_transform(&this->camera);
+	this->renderer->useTransform(CAMERA);
 
 	for (auto& object : this->objectOrder){
-		object->draw(renderer);
+		object->draw(this->renderer);
+	}
+
+	for (auto& object : this->selectedObjects){
+		object->drawSelection(this->renderer);
 	}
 }
 
 void Game::renderUI(){
-	al_use_transform(&this->UIcamera);
+	this->renderer->useTransform(UI);
 
 	double deltaTime = al_get_time() - this->previousTime;
 	this->previousTime = al_get_time();
@@ -574,17 +582,5 @@ void Game::renderUI(){
 void Game::resize(){
 	al_acknowledge_resize(this->display);
 
-	al_identity_transform(&this->camera);
-	al_translate_transform(&this->camera, al_get_display_width(this->display) / this->screenZoom, al_get_display_height(display) / this->screenZoom);
-	al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
-
-	al_identity_transform(&this->camera_inverse);
-	al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
-	al_translate_transform(&this->camera_inverse, -al_get_display_width(this->display) / this->screenZoom, -al_get_display_height(this->display) / this->screenZoom);
-
-	// TODO: Use al_invert_transform
-	/*al_copy_transform(&this->camera, &this->camera_inverse);
-	al_invert_transform(&this->camera_inverse);*/
-
-	al_identity_transform(&this->UIcamera);
+	this->renderer->resize(Vector2(al_get_display_width(this->display), al_get_display_height(display)), this->screenZoom);
 }

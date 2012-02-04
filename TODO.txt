@@ -6,6 +6,10 @@ General:
 	- loading settings from a file
 
 Mechanics:
+	- multiobject selection
+		- suffle selection
+		- stack / formate selection
+		- remove selected objects
 	- private areas
 	- ability to flip objects so that a flipside is shown instead of the usual
 	  picture
@@ -14,7 +18,7 @@ Mechanics:
 	- uploading objects to the server
 
 Graphics:
-	- ability to move and rotate the camera
+	- ability to move the camera
 
 Resources:
 	- create a full set of 52 playing cards

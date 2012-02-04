@@ -51,7 +51,12 @@ bool Object::testCollision(Object *object) const{
 	}
 }
 
-bool Object::isUnder(std::vector<Object*> objectOrder) const{
+bool Object::isUnder() const{
+	return ! this->objectsAbove.empty();
+}
+
+bool Object::checkIfUnder(std::vector<Object*> objectOrder){
+	this->objectsAbove.clear();
 	bool thisFound = false;
 	for (auto& object : objectOrder){
 		if (! thisFound){
@@ -59,11 +64,15 @@ bool Object::isUnder(std::vector<Object*> objectOrder) const{
 				thisFound = true;
 			}
 		}else if (this->testCollision(object)){
-			return true;
+			this->objectsAbove.push_back(object);
 		}
 	}
 
-	return false;
+	if (this->objectsAbove.empty()){
+		return false;
+	}else{
+		return true;
+	}
 }
 
 void Object::setLocation(Vector2 location){
@@ -71,5 +80,19 @@ void Object::setLocation(Vector2 location){
 }
 
 void Object::draw(IRenderer *renderer) const{
-	renderer->drawBitmap(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
+	if (!this->isUnder()){
+		renderer->drawBitmap(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
+	}else{
+		renderer->drawBitmapTinted(this->image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, 0.5f, 0.5f, 0.5f, 1.0f);
+	}
+}
+
+void Object::drawSelection(IRenderer *renderer) const{
+	Vector2 pointA = this->location - this->size/2.0f;
+	Vector2 pointB = this->location + this->size/2.0f;
+
+	renderer->transformLocation(CAMERA, pointA);
+	renderer->transformLocation(CAMERA, pointB);
+
+	renderer->drawRectangle(pointA, pointB, 0.0f, 1.0f, 0.0f, 1.0f, 6.0f);
 }

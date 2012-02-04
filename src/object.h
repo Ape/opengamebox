@@ -18,11 +18,13 @@ public:
 	Vector2 getLocation(void) const;
 	bool testLocation(Vector2 location) const;
 	bool testCollision(Object *object) const;
-	bool isUnder(std::vector<Object*> objectOrder) const;
+	bool isUnder(void) const;
+	bool checkIfUnder(std::vector<Object*> objectOrder);
 
 	void setLocation(Vector2 location);
 
 	void draw(IRenderer *renderer) const;
+	void drawSelection(IRenderer *renderer) const;
 
 private:
 	std::string objectId;
@@ -31,6 +33,7 @@ private:
 	std::string image;
 	Vector2 size;
 	Vector2 location;
+	std::vector<Object*> objectsAbove;
 };
 
 #endif

@@ -12,6 +12,22 @@ Renderer::~Renderer(){
 	}
 }
 
+void Renderer::resize(Vector2 displaySize, float screenZoom){
+	al_identity_transform(&this->camera);
+    al_translate_transform(&this->camera, displaySize.x / screenZoom, displaySize.y / screenZoom);
+    al_scale_transform(&this->camera, screenZoom / 2.0f, screenZoom / 2.0f);
+
+    al_identity_transform(&this->camera_inverse);
+    al_scale_transform(&this->camera_inverse, 2.0f / screenZoom, 2.0f / screenZoom);
+    al_translate_transform(&this->camera_inverse, -displaySize.x / screenZoom, -displaySize.y / screenZoom);
+
+    // TODO: Use al_invert_transform
+    /*al_copy_transform(&this->camera, &this->camera_inverse);
+    al_invert_transform(&this->camera_inverse);*/
+
+    al_identity_transform(&this->cameraUI);
+}
+
 void Renderer::loadTexture(std::string texture){
 	if (this->textures[texture] == nullptr){
 		std::string path = "gfx/" + texture;
@@ -31,10 +47,57 @@ void Renderer::drawBitmap(std::string texture, Vector2 source_location, Vector2 
 	                      dest_location.x, dest_location.y, dest_size.x, dest_size.y, 0);
 }
 
+void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Vector2 source_size,
+                          Vector2 dest_location, Vector2 dest_size, float r, float g, float b, float alpha){
+	if (this->textures[texture] == nullptr){
+		this->loadTexture(texture);
+	}
+
+	al_draw_tinted_scaled_bitmap(this->textures[texture], al_map_rgba_f(r, g, b, alpha), source_location.x, source_location.y,
+	                      source_size.x * this->getTextureSize(texture).x, source_size.y * this->getTextureSize(texture).y,
+	                      dest_location.x, dest_location.y, dest_size.x, dest_size.y, 0);
+}
+
+void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, float r, float g, float b, float alpha, float thickness){
+	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(r, g, b, alpha), thickness);
+}
+
 Coordinates Renderer::getTextureSize(std::string texture){
 	if (this->textures[texture] == nullptr){
 		this->loadTexture(texture);
 	}
 
 	return Coordinates(al_get_bitmap_width(this->textures[texture]), al_get_bitmap_height(this->textures[texture]));
+}
+
+ALLEGRO_TRANSFORM* Renderer::getTransformation(Transformation transformation){
+	switch (transformation){
+		case CAMERA:{
+			return &this->camera;
+			break;
+		}
+
+		case CAMERA_INVERSE:{
+			return &this->camera_inverse;
+			break;
+		}
+
+		case UI:{
+			return &this->cameraUI;
+			break;
+		}
+		
+		default:{
+			return nullptr;
+			break;
+		}
+	}
+}
+
+void Renderer::transformLocation(Transformation transformation, Vector2 &location){
+	al_transform_coordinates(this->getTransformation(transformation), &location.x, &location.y);
+}
+
+void Renderer::useTransform(Transformation transformation){
+	al_use_transform(this->getTransformation(transformation));
 }

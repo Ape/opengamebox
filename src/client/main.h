@@ -43,9 +43,6 @@ private:
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *event_queue;
 	ALLEGRO_TIMER *timer;
-	ALLEGRO_TRANSFORM camera;
-	ALLEGRO_TRANSFORM camera_inverse;
-	ALLEGRO_TRANSFORM UIcamera;
 
 	ENetAddress hostAddress;
 	ENetHost *connection;
