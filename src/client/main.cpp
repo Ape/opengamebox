@@ -310,9 +310,14 @@ void Game::localEvents(){
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 2){
 		if (this->dragging){
+			std::string data;
+			data.push_back(net::PACKET_FLIP);
+
 			for (auto& object : this->selectedObjects){
-				object->flip();
+				net::dataAppendShort(data, object->getId());
 			}
+
+			net::sendCommand(connection, data.c_str(), data.length());
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1){
 		if (this->dragging){
@@ -462,7 +467,7 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CREATE:{
-			if (event.packet->dataLength >= 1 + 5 + 8 + 1 && event.packet->dataLength <= 1 + 5 + 8 + 255){
+			if (event.packet->dataLength >= 1 + 6 + 8 + 1 && event.packet->dataLength <= 1 + 6 + 8 + 255){
 				net::Client *client;
 				if (event.packet->data[1] != 255){
 					client = this->clients.find(event.packet->data[1])->second;
@@ -471,12 +476,15 @@ void Game::receivePacket(ENetEvent event){
 				unsigned short objId = net::bytesToShort(event.packet->data + 2);
 				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[4]);
                 net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
-				Vector2 location = net::bytesToVector2(event.packet->data + 6);
-				std::string objectId = std::string((char*) event.packet->data + 14, event.packet->dataLength - 14);
+				bool flipped = event.packet->data[6];
+				Vector2 location = net::bytesToVector2(event.packet->data + 7);
+				std::string objectId = std::string((char*) event.packet->data + 15, event.packet->dataLength - 15);
 
 				Object *object = new Object(objectId, objId, location);
 				object->select(selected);
 				object->own(owner);
+				object->setFlipped(flipped);
+
 				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
 				this->objectOrder.push_back(object);
 
@@ -492,6 +500,8 @@ void Game::receivePacket(ENetEvent event){
 
 		case net::PACKET_MOVE:{
 			if (event.packet->dataLength >= 2 + 10){
+				net::Client *client = this->clients.find(event.packet->data[1])->second;
+
 				unsigned int numberObjects = 0;
 				Object *lastObject;
 
@@ -509,17 +519,16 @@ void Game::receivePacket(ENetEvent event){
 					this->objectOrder.push_back(object);
 
 					lastObject = object;
-
 					i += 10;
 				}
 
 				if (numberObjects == 1){
-					this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + lastObject->getName() + ".");
+					this->addMessage(client->nick + " moved " + lastObject->getName() + ".");
 				}else if (numberObjects >= 2){
 					std::ostringstream stream;
 					stream << numberObjects;
 
-					this->addMessage(this->clients[event.packet->data[1]]->nick + " moved " + stream.str() + " objects.");
+					this->addMessage(client->nick + " moved " + stream.str() + " objects.");
 				}
 
 				this->checkObjectOrder();
@@ -547,6 +556,40 @@ void Game::receivePacket(ENetEvent event){
 					i += 2;
 				}
 			}
+
+			break;
+		}
+
+		case net::PACKET_FLIP:{
+			if (event.packet->dataLength >= 2){
+				net::Client *client = this->clients.find(event.packet->data[1])->second;
+
+				unsigned int numberObjects = 0;
+                Object *lastObject;
+
+				size_t i = 2;
+				while (i < event.packet->dataLength){
+					++numberObjects;
+
+					unsigned short objId = net::bytesToShort(event.packet->data + i);
+
+					Object *object = this->objects.find(objId)->second;
+					object->flip();
+
+					lastObject = object;
+					i += 2;
+				}
+
+				if (numberObjects == 1){
+                    this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
+                }else if (numberObjects >= 2){
+                    std::ostringstream stream;
+                    stream << numberObjects;
+
+                    this->addMessage(client->nick + " flipped " + stream.str() + " objects.");
+                }
+			}
+
 
 			break;
 		}
@@ -626,8 +669,10 @@ void Game::chatCommand(std::string commandstr){
 void Game::createObject(std::string objectId, Vector2 location){
 	std::string data;
 	data.push_back(net::PACKET_CREATE);
-	data += 255; // No selection
-	data += 255; // No owner
+	data += 255; // Not selected
+	data += 255; // Not owned
+	bool flipped = false;
+	data += flipped; // Not flipped
 	net::dataAppendVector2(data, location);
 	data.append(objectId);
 

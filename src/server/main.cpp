@@ -178,6 +178,7 @@ void Server::receivePacket(ENetEvent event){
 						net::dataAppendShort(data, object.second->getId());
 						data += net::clientToClientId(object.second->getSelected());
 						data += net::clientToClientId(object.second->getOwner());
+						data += object.second->isFlipped();
 						net::dataAppendVector2(data, object.second->getLocation());
 						data.append(object.second->getObjectId());
 
@@ -218,16 +219,18 @@ void Server::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_CREATE:{
-			if (event.packet->dataLength >= 1 + 8 + 1 && event.packet->dataLength <= 1 + 8 + 255){
+			if (event.packet->dataLength >= 1 + 9 + 1 && event.packet->dataLength <= 1 + 9 + 255){
 				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[1]);
 				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[2]);
-				Vector2 location = net::bytesToVector2(event.packet->data + 3);
-				std::string objectId = std::string((char*) event.packet->data + 11, event.packet->dataLength - 11);
+				bool flipped = event.packet->data[3];
+				Vector2 location = net::bytesToVector2(event.packet->data + 4);
+				std::string objectId = std::string((char*) event.packet->data + 12, event.packet->dataLength - 12);
 
 				unsigned short objId = net::firstUnusedKey(this->objects);
 				Object *object = new Object(objectId, objId, location);
 				object->select(selected);
 				object->own(owner);
+				object->setFlipped(flipped);
 				this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
 				
 				if (! object->getName().empty()){
@@ -306,6 +309,41 @@ void Server::receivePacket(ENetEvent event){
 					object->select(clients[*id]);
 
 					i += 2;
+				}
+
+				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
+			}
+			break;
+		}
+
+		case net::PACKET_FLIP:{
+			if (event.packet->dataLength >= 1){
+				std::string data;
+
+				data += net::PACKET_FLIP;
+				data += *id;
+				data.append((char*) event.packet->data + 1, event.packet->dataLength - 1);
+
+				unsigned int numberObjects = 0;
+				Object *lastObject;
+
+				size_t i = 1;
+				while (i < event.packet->dataLength){
+					++numberObjects;
+
+					unsigned short objId = net::bytesToShort(event.packet->data + i);
+
+					Object* object = this->objects.find(objId)->second;
+					object->flip();
+					lastObject = object;
+
+					i += 2;
+				}
+
+				if (numberObjects == 1){
+					std::cout << clients[*id]->nick << " flipped " << lastObject->getName() << "." << std::endl;
+				}else if (numberObjects >= 2){
+					std::cout << clients[*id]->nick << " flipped " << numberObjects << " objects." << std::endl;
 				}
 
 				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);

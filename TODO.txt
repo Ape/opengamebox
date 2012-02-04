@@ -1,5 +1,4 @@
 Networking:
-	- send flip information
 	- send private area information
 
 General:

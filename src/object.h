@@ -33,11 +33,13 @@ public:
 	net::Client* getSelected(void);
 	bool isOwnedBy(net::Client *client);
 	net::Client* getOwner(void);
+	bool isFlipped(void) const;
 
 	void setLocation(Vector2 location);
 	void select(net::Client *client);
 	void own(net::Client *client);
 	void flip(void);
+	void setFlipped(bool flipped);
 
 	void draw(IRenderer *renderer, net::Client *localClient) const;
 

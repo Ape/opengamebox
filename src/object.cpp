@@ -145,6 +145,10 @@ net::Client* Object::getOwner(){
 	return this->owner;
 }
 
+bool Object::isFlipped() const{
+	return this->flipped;
+}
+
 void Object::setLocation(Vector2 location){
 	this->location = location;
 }
@@ -159,6 +163,10 @@ void Object::own(net::Client* client){
 
 void Object::flip(){
 	this->flipped = ! this->flipped;
+}
+
+void Object::setFlipped(bool flipped){
+	this->flipped = flipped;
 }
 
 void Object::draw(IRenderer *renderer, net::Client *localClient) const{
