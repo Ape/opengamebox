@@ -1,10 +1,11 @@
 Networking:
-	- send private area information
+	- send private object information
 
 General:
 	- loading settings from a file
 
 Mechanics:
+	- players to have individual colors
 	- ability to remove selected objects
 	- loading objects from the filesystem
 	- downloading objects from the server
@@ -12,7 +13,7 @@ Mechanics:
 
 Graphics:
 	- ability to rotate the camera
-	- draw the table edge
+	- new method for drawing private objects
 
 Resources:
 	- create a full set of 52 playing cards
