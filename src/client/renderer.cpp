@@ -12,14 +12,14 @@ Renderer::~Renderer(){
 	}
 }
 
-void Renderer::resize(Vector2 displaySize, float screenZoom){
+void Renderer::resize(Vector2 displaySize, float screenZoom, Vector2 pos){
 	al_identity_transform(&this->camera);
-    al_translate_transform(&this->camera, displaySize.x / screenZoom, displaySize.y / screenZoom);
+    al_translate_transform(&this->camera, (displaySize.x+pos.x) / screenZoom, (displaySize.y+pos.y) / screenZoom);
     al_scale_transform(&this->camera, screenZoom / 2.0f, screenZoom / 2.0f);
 
     al_identity_transform(&this->camera_inverse);
     al_scale_transform(&this->camera_inverse, 2.0f / screenZoom, 2.0f / screenZoom);
-    al_translate_transform(&this->camera_inverse, -displaySize.x / screenZoom, -displaySize.y / screenZoom);
+    al_translate_transform(&this->camera_inverse, -(displaySize.x+pos.x) / screenZoom, -(displaySize.y+pos.y) / screenZoom);
 
     // TODO: Use al_invert_transform
     /*al_copy_transform(&this->camera, &this->camera_inverse);
@@ -86,7 +86,7 @@ ALLEGRO_TRANSFORM* Renderer::getTransformation(Transformation transformation){
 			return &this->cameraUI;
 			break;
 		}
-		
+
 		default:{
 			return nullptr;
 			break;

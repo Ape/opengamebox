@@ -29,6 +29,7 @@ Game::Game(void){
 	this->input = nullptr;
 
 	this->screenZoom = 2.0f;
+	this->screenPos = Vector2(0,0);
 	this->dragging = false;
 
 	this->localClient = net::MAX_CLIENTS;
@@ -260,6 +261,18 @@ void Game::localEvents(){
 						nextLocation += object->getStackDelta();
 					}
 				}
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT){
+				screenPos.x += 10;
+				resize();
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT){
+				screenPos.x -= 10;
+				resize();
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_UP){
+				screenPos.y += 10;
+				resize();
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN){
+				screenPos.y -= 10;
+				resize();
 			}
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1){
@@ -768,5 +781,5 @@ void Game::renderUI(){
 void Game::resize(){
 	al_acknowledge_resize(this->display);
 
-	this->renderer->resize(Vector2(al_get_display_width(this->display), al_get_display_height(display)), this->screenZoom);
+	this->renderer->resize(Vector2(al_get_display_width(this->display), al_get_display_height(display)), this->screenZoom, this->screenPos);
 }

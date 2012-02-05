@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include "../vector2.h"
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -15,7 +16,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	virtual void resize(Vector2 displaySize, float screenZoom);
+	virtual void resize(Vector2 displaySize, float screenZoom, Vector2 pos);
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,

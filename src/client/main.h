@@ -62,6 +62,8 @@ private:
 	bool disconnecting;
 
 	float screenZoom;
+	Vector2 screenPos;
+
 	double previousTime;
 
 	std::map<unsigned short, Object*> objects;
