@@ -61,9 +61,6 @@ private:
 	bool redraw;
 	bool disconnecting;
 
-	float screenZoom;
-	Vector2 screenPos;
-
 	double previousTime;
 
 	std::map<unsigned short, Object*> objects;
@@ -83,6 +80,9 @@ private:
 	std::list<Object*> selectedObjects;
 	bool dragging;
 	Vector2 draggingStart;
+
+	bool movingScreen;
+	Vector2 movingScreenStart;
 
 	void mainLoop(void);
 	void quit(void);

@@ -28,9 +28,8 @@ Game::Game(void){
 	this->disconnecting = false;
 	this->input = nullptr;
 
-	this->screenZoom = 2.0f;
-	this->screenPos = Vector2(0,0);
 	this->dragging = false;
+	this->movingScreen = false;
 
 	this->localClient = net::MAX_CLIENTS;
 }
@@ -262,17 +261,17 @@ void Game::localEvents(){
 					}
 				}
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT){
-				screenPos.x += 10;
-				resize();
+				this->renderer->addScreenLocation(Vector2(10.0f, 0.0f));
+				this->resize();
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT){
-				screenPos.x -= 10;
-				resize();
+				this->renderer->addScreenLocation(Vector2(-10.0f, 0.0f));
+				this->resize();
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_UP){
-				screenPos.y += 10;
-				resize();
+				this->renderer->addScreenLocation(Vector2(0.0f, 10.0f));
+				this->resize();
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN){
-				screenPos.y -= 10;
-				resize();
+				this->renderer->addScreenLocation(Vector2(0.0f, -10.0f));
+				this->resize();
 			}
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1){
@@ -332,6 +331,12 @@ void Game::localEvents(){
 
 			net::sendCommand(connection, data.c_str(), data.length());
 		}
+	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3){
+		Vector2 location(event.mouse.x, event.mouse.y);
+        this->renderer->transformLocation(CAMERA_INVERSE, location);
+
+		this->movingScreen = true;
+		this->movingScreenStart = location;
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1){
 		if (this->dragging){
 			Vector2 location(event.mouse.x, event.mouse.y);
@@ -351,9 +356,11 @@ void Game::localEvents(){
 
 			this->dragging = false;
 		}
+	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3){
+		this->movingScreen = false;
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
 		if (event.mouse.dz != 0){
-			this->screenZoom *= 1 - 0.25f * event.mouse.dz;
+			this->renderer->mulScreenZoom(1 - 0.1f * event.mouse.dz);
 			this->resize();
 		}else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)){
 			Vector2 location(event.mouse.x, event.mouse.y);
@@ -363,6 +370,14 @@ void Game::localEvents(){
 				object->setLocation(object->getLocation() + (location - this->draggingStart)); // - this->selectionOffset); // TODO
 			}
 			this->draggingStart = location;
+		}else if (this->movingScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)){
+			Vector2 location(event.mouse.x, event.mouse.y);
+			this->renderer->transformLocation(CAMERA_INVERSE, location);
+
+			this->renderer->addScreenLocation(Vector2(event.mouse.dx, event.mouse.dy));
+			this->resize();
+
+			this->movingScreenStart = location;
 		}
 	}
 }
@@ -781,5 +796,5 @@ void Game::renderUI(){
 void Game::resize(){
 	al_acknowledge_resize(this->display);
 
-	this->renderer->resize(Vector2(al_get_display_width(this->display), al_get_display_height(display)), this->screenZoom, this->screenPos);
+	this->renderer->resize(Vector2(al_get_display_width(this->display), al_get_display_height(display)));
 }

@@ -16,7 +16,10 @@ public:
 	Renderer();
 	~Renderer();
 
-	virtual void resize(Vector2 displaySize, float screenZoom, Vector2 pos);
+	virtual void resize(Vector2 displaySize);
+
+	virtual void mulScreenZoom(float zoom);
+	virtual void addScreenLocation(Vector2 location);
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,
@@ -35,6 +38,10 @@ private:
     ALLEGRO_TRANSFORM camera;
     ALLEGRO_TRANSFORM camera_inverse;
     ALLEGRO_TRANSFORM cameraUI;
+
+	float screenZoom;
+	Vector2 screenLocation;
+	float screenRotation;
 
 	std::map<std::string, ALLEGRO_BITMAP*> textures;
 

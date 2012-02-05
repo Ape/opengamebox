@@ -11,8 +11,8 @@ Mechanics:
 	- uploading objects to the server
 
 Graphics:
-	- ability to move the camera
 	- ability to rotate the camera
+	- draw the table edge
 
 Resources:
 	- create a full set of 52 playing cards

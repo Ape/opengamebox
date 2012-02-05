@@ -10,7 +10,9 @@ enum Transformation{CAMERA, CAMERA_INVERSE, UI};
 
 class IRenderer{
 public:
-	virtual void resize(Vector2 displaySize, float screenZoom, Vector2 pos) = 0;
+	virtual void resize(Vector2 displaySize) = 0;
+	virtual void mulScreenZoom(float zoom) = 0;
+	virtual void addScreenLocation(Vector2 location) = 0;
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,

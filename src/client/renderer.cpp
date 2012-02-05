@@ -1,6 +1,10 @@
 #include "renderer.h"
 
 Renderer::Renderer(){
+	this->screenZoom = 2.0f;
+	this->screenLocation = Vector2(0.0f, 0.0f);
+	this->screenRotation = 0.0f;
+
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
 	// TODO: Do we want a system for preloading textures?
@@ -12,20 +16,31 @@ Renderer::~Renderer(){
 	}
 }
 
-void Renderer::resize(Vector2 displaySize, float screenZoom, Vector2 pos){
+void Renderer::resize(Vector2 displaySize){
 	al_identity_transform(&this->camera);
-    al_translate_transform(&this->camera, (displaySize.x+pos.x) / screenZoom, (displaySize.y+pos.y) / screenZoom);
-    al_scale_transform(&this->camera, screenZoom / 2.0f, screenZoom / 2.0f);
+    al_translate_transform(&this->camera, displaySize.x / this->screenZoom, displaySize.y / this->screenZoom);
+    al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
+    al_translate_transform(&this->camera, this->screenLocation.x, this->screenLocation.y);
 
     al_identity_transform(&this->camera_inverse);
-    al_scale_transform(&this->camera_inverse, 2.0f / screenZoom, 2.0f / screenZoom);
-    al_translate_transform(&this->camera_inverse, -(displaySize.x+pos.x) / screenZoom, -(displaySize.y+pos.y) / screenZoom);
+    al_translate_transform(&this->camera_inverse, -this->screenLocation.x, -this->screenLocation.y);
+    al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
+    al_translate_transform(&this->camera_inverse, -displaySize.x / this->screenZoom, -displaySize.y / this->screenZoom);
 
     // TODO: Use al_invert_transform
     /*al_copy_transform(&this->camera, &this->camera_inverse);
     al_invert_transform(&this->camera_inverse);*/
 
     al_identity_transform(&this->cameraUI);
+}
+
+void Renderer::mulScreenZoom(float zoom){
+	if (this->screenZoom * zoom > 0.1f && this->screenZoom * zoom < 30.0f)
+	this->screenZoom *= zoom;
+}
+
+void Renderer::addScreenLocation(Vector2 location){
+	this->screenLocation += location;
 }
 
 void Renderer::loadTexture(std::string texture){
