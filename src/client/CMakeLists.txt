@@ -1,7 +1,7 @@
 set(srcSources widget.cpp renderer.cpp)
 
 foreach(srcSource ${srcSources})
-	set(clientSources ${clientSources} ${CMAKE_CURRENT_SOURCE_DIR}/${srcSource})
+	set(clientSources ${clientSources} ${CMAKE_CURRENT_SOURCE_DIR}/${srcSource} CACHE STRING INTERNAL FORCE)
 endforeach(srcSource)
 
 add_subdirectory(widgets)
