@@ -192,8 +192,8 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 		Vector2 pointA = this->location - this->size/2.0f - Vector2(1.0f, 1.0f);
 		Vector2 pointB = this->location + this->size/2.0f + Vector2(1.0f, 1.0f);
 
-		renderer->transformLocation(CAMERA, pointA);
-		renderer->transformLocation(CAMERA, pointB);
+		//renderer->transformLocation(CAMERA, pointA);
+		//renderer->transformLocation(CAMERA, pointB);
 
 		renderer->drawRectangle(pointA, pointB, r, g, b, 1.0f, 2.0f);
 	}

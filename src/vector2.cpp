@@ -7,6 +7,11 @@ Vector2::Vector2(const float x, const float y){
 
 Vector2::~Vector2(){}
 
+std::ostream& operator<<(std::ostream &output, const Vector2 &vector){
+	output << "(" <<  vector.x << ", " << vector.y << ")";
+	return output;
+}
+
 void Vector2::operator+=(const Vector2 &vector){
 	this->x += vector.x;
 	this->y += vector.y;

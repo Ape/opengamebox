@@ -19,12 +19,12 @@ Renderer::~Renderer(){
 void Renderer::resize(Vector2 displaySize){
 	al_identity_transform(&this->camera);
     al_translate_transform(&this->camera, displaySize.x / this->screenZoom, displaySize.y / this->screenZoom);
-    al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
     al_translate_transform(&this->camera, this->screenLocation.x, this->screenLocation.y);
+    al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
 
     al_identity_transform(&this->camera_inverse);
-    al_translate_transform(&this->camera_inverse, -this->screenLocation.x, -this->screenLocation.y);
     al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
+    al_translate_transform(&this->camera_inverse, -this->screenLocation.x, -this->screenLocation.y);
     al_translate_transform(&this->camera_inverse, -displaySize.x / this->screenZoom, -displaySize.y / this->screenZoom);
 
     // TODO: Use al_invert_transform
@@ -40,7 +40,7 @@ void Renderer::mulScreenZoom(float zoom){
 }
 
 void Renderer::addScreenLocation(Vector2 location){
-	this->screenLocation += location;
+	this->screenLocation += location * 2.0f / this->screenZoom;
 }
 
 void Renderer::loadTexture(std::string texture){
@@ -74,6 +74,9 @@ void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Ve
 }
 
 void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, float r, float g, float b, float alpha, float thickness){
+	this->transformLocation(CAMERA, pointA);
+	this->transformLocation(CAMERA, pointB);
+
 	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(r, g, b, alpha), thickness);
 }
 

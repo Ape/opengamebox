@@ -2,8 +2,11 @@
 #define VECTOR2_H
 
 #include <cmath>
+#include <iostream>
 
 class Vector2{
+	friend std::ostream& operator<<(std::ostream &output, const Vector2 &vector);
+
 public:
 	float x;
 	float y;
@@ -26,7 +29,6 @@ public:
 
 	bool operator== (const Vector2 &vector1);
 	bool operator!= (const Vector2 &vector1);
-
 
 	float angle(void) const;
 

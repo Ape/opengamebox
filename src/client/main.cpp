@@ -332,11 +332,8 @@ void Game::localEvents(){
 			net::sendCommand(connection, data.c_str(), data.length());
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3){
-		Vector2 location(event.mouse.x, event.mouse.y);
-        this->renderer->transformLocation(CAMERA_INVERSE, location);
-
 		this->movingScreen = true;
-		this->movingScreenStart = location;
+		this->movingScreenStart = Vector2(event.mouse.x, event.mouse.y);
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1){
 		if (this->dragging){
 			Vector2 location(event.mouse.x, event.mouse.y);
@@ -346,10 +343,8 @@ void Game::localEvents(){
 			data.push_back(net::PACKET_MOVE);
 
 			for (auto& object : this->selectedObjects){
-				Vector2 destination = object->getLocation() + (location - this->draggingStart);
-
 				net::dataAppendShort(data, object->getId());
-				net::dataAppendVector2(data, destination);
+				net::dataAppendVector2(data, object->getLocation());
 			}
 
 			net::sendCommand(connection, data.c_str(), data.length());
@@ -367,17 +362,31 @@ void Game::localEvents(){
 			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
 			for (auto& object : this->selectedObjects){
-				object->setLocation(object->getLocation() + (location - this->draggingStart)); // - this->selectionOffset); // TODO
+				Vector2 destination = object->getLocation() + (location - this->draggingStart);
+
+				if (destination.x > net::MAX_FLOAT){
+					destination.x = net::MAX_FLOAT;
+				}
+				if (destination.x < -net::MAX_FLOAT){
+					destination.x = -net::MAX_FLOAT;
+				}
+				if (destination.y > net::MAX_FLOAT){
+					destination.y = net::MAX_FLOAT;
+				}
+				if (destination.y < -net::MAX_FLOAT){
+					destination.y = -net::MAX_FLOAT;
+				}
+
+				object->setLocation(destination);
 			}
 			this->draggingStart = location;
 		}else if (this->movingScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)){
 			Vector2 location(event.mouse.x, event.mouse.y);
-			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
-			this->renderer->addScreenLocation(Vector2(event.mouse.dx, event.mouse.dy));
-			this->resize();
-
+			this->renderer->addScreenLocation(location - this->movingScreenStart);
 			this->movingScreenStart = location;
+
+			this->resize();
 		}
 	}
 }
@@ -749,6 +758,9 @@ void Game::render(){
 
 void Game::renderGame(){
 	this->renderer->useTransform(CAMERA);
+
+	// Draw the table area
+	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), 1.0f, 1.0f, 1.0f, 1.0f, 5.0f);
 
 	for (auto& object : this->objectOrder){
 		object->draw(this->renderer, this->clients.find(this->localClient)->second);
