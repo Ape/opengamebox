@@ -161,7 +161,7 @@ void Game::mainLoop(){
 		this->localEvents();
 
 		// Render the screen with limited FPS
-		if (this->redraw){
+		if (this->redraw && al_is_event_queue_empty(this->event_queue)){
 			this->redraw = false;
 			this->render();
 		}
