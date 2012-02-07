@@ -22,6 +22,7 @@ public:
 	std::string getName(void) const;
 	unsigned short getId(void) const;
 	Vector2 getLocation(void) const;
+	Vector2 getSize(void) const;
 	bool testLocation(Vector2 location) const;
 	bool testCollision(Object *object, bool second = false);
 

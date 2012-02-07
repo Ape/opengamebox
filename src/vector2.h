@@ -21,6 +21,7 @@ public:
 	Vector2 operator/(const float &scalar) const;
 	Vector2 operator*(const Vector2 &vector) const;
 	Vector2 operator/(const Vector2 &vector) const;
+	Vector2 operator%(const Vector2 &vector) const;
 	void operator+=(const Vector2 &vector);
 	void operator-=(const Vector2 &vector);
 	void operator*=(const float &scalar);
@@ -67,6 +68,10 @@ inline Vector2 Vector2::operator*(const Vector2 &vector) const{
 
 inline Vector2 Vector2::operator/(const Vector2 &vector) const{
 	return Vector2(this->x / vector.x, this->y / vector.y);
+}
+
+inline Vector2 Vector2::operator%(const Vector2 &vector) const{
+	return Vector2(fmod(this->x, vector.x), fmod(this->y, vector.y));
 }
 
 #endif
