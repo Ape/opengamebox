@@ -4,5 +4,5 @@ cmake_install.cmake
 CMakeFiles/
 Makefile
 lib/
-ogb
-ogb-server
+opengamebox
+opengamebox-server

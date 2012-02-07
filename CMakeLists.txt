@@ -1,6 +1,6 @@
 ### Common definitions ###
 project(OpenGameBox)
-set(executableName ogb)
+set(executableName opengamebox)
 
 cmake_minimum_required(VERSION 2.6)
 

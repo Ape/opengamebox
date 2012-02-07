@@ -1,22 +1,30 @@
+General:
+	- use references instead of pointers always when appropriate
+	- use const on methods always when possible
+	- move everything related to rendering to Renderer
+		- display, font
+	- loading settings from a file
+
 Networking:
 	- send private object information
 
-General:
-	- loading settings from a file
-
 Mechanics:
 	- players to have individual colors
+	- ability to snap objects to grid
+	- ability to rotate objects
+		- free angle and 90 degree steps
+	- flipping and owning a stack instead of individual objects
 	- ability to remove selected objects
 	- loading objects from the filesystem
 	- downloading objects from the server
 	- uploading objects to the server
 
 Graphics:
-	- ability to rotate the camera
 	- new method for drawing private objects
+	- ability to rotate the camera
 
 Resources:
-	- create a full set of 52 playing cards
-	- dice
+	- full set of 52 playing cards
 	- classic board game sets
 		- chess
+	- extenal packages for game resources
