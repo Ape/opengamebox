@@ -84,6 +84,8 @@ private:
 	bool movingScreen;
 	Vector2 movingScreenStart;
 
+	bool snappingToGrid;
+
 	void mainLoop(void);
 	void quit(void);
 	void dispose(void);

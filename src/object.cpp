@@ -26,6 +26,9 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 	}else if (this->objectId == "piece_blue"){
 		this->name = "Blue piece";
 		this->size = Vector2(50.0f, 50.0f);
+	}else {
+		this->size = Vector2(300.0f, 300.0f);
+		this->name = this->objectId;
 	}
 
 	this->image = this->objectId + ".png";

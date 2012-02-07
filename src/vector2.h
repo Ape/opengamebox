@@ -6,6 +6,8 @@
 
 class Vector2{
 	friend std::ostream& operator<<(std::ostream &output, const Vector2 &vector);
+	friend Vector2 operator*(float scalar, const Vector2 &vector);
+	friend Vector2 operator/(float scalar, const Vector2 &vector);
 
 public:
 	float x;
@@ -38,8 +40,10 @@ public:
 
 	Vector2 nor(void) const;
 
-	float dst(Vector2 vector) const;
 	float dst2(Vector2 vector) const;
+	float dst(Vector2 vector) const;
+
+	Vector2 abs(void) const;
 };
 
 inline Vector2 Vector2::cpy() const{
@@ -58,8 +62,16 @@ inline Vector2 Vector2::operator*(const float &scalar) const{
 	return Vector2(scalar * this->x, scalar * this->y);
 }
 
+inline Vector2 operator*(float scalar, const Vector2 &vector){
+	return Vector2(scalar * vector.x, scalar * vector.y);
+}
+
 inline Vector2 Vector2::operator/(const float &scalar) const{
 	return Vector2(this->x / scalar, this->y / scalar);
+}
+
+inline Vector2 operator/(float scalar, const Vector2 &vector){
+	return Vector2(vector.x / scalar, vector.y / scalar);
 }
 
 inline Vector2 Vector2::operator*(const Vector2 &vector) const{

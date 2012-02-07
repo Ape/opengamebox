@@ -68,3 +68,7 @@ float Vector2::dst(Vector2 vector) const{
 Vector2 Vector2::nor() const{
 	return this->cpy() / this->len();
 }
+
+Vector2 Vector2::abs() const{
+	return Vector2(fabs(this->x), fabs(this->y));
+}

@@ -30,6 +30,7 @@ Game::Game(void){
 
 	this->dragging = false;
 	this->movingScreen = false;
+	this->snappingToGrid = false;
 
 	this->localClient = net::MAX_CLIENTS;
 }
@@ -272,6 +273,14 @@ void Game::localEvents(){
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN){
 				this->renderer->addScreenLocation(Vector2(0.0f, -10.0f));
 				this->renderer->updateTransformations();
+			}else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL){
+				this->snappingToGrid = true;
+			}
+		}
+	}else if (event.type == ALLEGRO_EVENT_KEY_UP){
+		if(input == nullptr){
+			if(event.keyboard.keycode == ALLEGRO_KEY_LCTRL){
+				this->snappingToGrid = false;
 			}
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1){
@@ -314,7 +323,7 @@ void Game::localEvents(){
 			for (auto& object : this->selectedObjects){
 				if (object->testLocation(location)){
 					this->dragging = true;
-					this->draggingStart = location;
+					this->draggingStart = this->selectedObjects.front()->getLocation() - location;
 
 					break;
 				}
@@ -361,8 +370,24 @@ void Game::localEvents(){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
+			if (this->snappingToGrid){ 
+				Vector2 grid = this->selectedObjects.front()->getSize() + Vector2(0.001f, 0.001f);
+
+				if (location.x < 0.0f){
+					location.x -= grid.x;
+				}
+				if (location.y < 0.0f){
+					location.y -= grid.y;
+				}
+
+				location += -1.0f * (location % grid) + Vector2(150.f, 150.0f);
+			}else{
+				location += this->draggingStart;
+			}
+
+			Vector2 delta = location - this->selectedObjects.front()->getLocation();
 			for (auto& object : this->selectedObjects){
-				Vector2 destination = object->getLocation() + (location - this->draggingStart);
+				Vector2 destination = object->getLocation() + delta;
 
 				if (destination.x > net::MAX_FLOAT){
 					destination.x = net::MAX_FLOAT;
@@ -379,7 +404,6 @@ void Game::localEvents(){
 
 				object->setLocation(destination);
 			}
-			this->draggingStart = location;
 		}else if (this->movingScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)){
 			Vector2 location(event.mouse.x, event.mouse.y);
 
