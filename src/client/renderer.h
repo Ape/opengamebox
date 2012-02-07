@@ -13,13 +13,14 @@
 
 class Renderer : public IRenderer{
 public:
-	Renderer();
+	Renderer(Vector2 screenSize);
 	~Renderer();
 
-	virtual void resize(Vector2 displaySize);
+	virtual void updateTransformations();
 
 	virtual void mulScreenZoom(float zoom);
 	virtual void addScreenLocation(Vector2 location);
+	virtual void setScreenSize(Vector2 screenSize);
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,
@@ -39,6 +40,7 @@ private:
     ALLEGRO_TRANSFORM camera_inverse;
     ALLEGRO_TRANSFORM cameraUI;
 
+	Vector2 screenSize;
 	float screenZoom;
 	Vector2 screenLocation;
 	float screenRotation;

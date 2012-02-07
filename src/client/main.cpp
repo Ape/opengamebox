@@ -77,16 +77,16 @@ int Game::run(std::string address, int port){
 		al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);
 	}
 
-	// Initialize the renderer
-	this->renderer = new Renderer();
-
 	// Create the window
 	this->display = al_create_display(SCREEN_W, SCREEN_H);
 	if (! this->display){
 		std::cerr << "Failed to create a display!" << std::endl;
 		return EXIT_FAILURE;
 	}
-	this->resize();
+	al_acknowledge_resize(this->display);
+
+	// Initialize the renderer
+	this->renderer = new Renderer(Vector2(al_get_display_width(this->display), al_get_display_height(this->display)));
 
 	// Initialize fonts
 	al_init_font_addon();
@@ -262,16 +262,16 @@ void Game::localEvents(){
 				}
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT){
 				this->renderer->addScreenLocation(Vector2(10.0f, 0.0f));
-				this->resize();
+				this->renderer->updateTransformations();
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT){
 				this->renderer->addScreenLocation(Vector2(-10.0f, 0.0f));
-				this->resize();
+				this->renderer->updateTransformations();
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_UP){
 				this->renderer->addScreenLocation(Vector2(0.0f, 10.0f));
-				this->resize();
+				this->renderer->updateTransformations();
 			}else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN){
 				this->renderer->addScreenLocation(Vector2(0.0f, -10.0f));
-				this->resize();
+				this->renderer->updateTransformations();
 			}
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1){
@@ -356,7 +356,7 @@ void Game::localEvents(){
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES){
 		if (event.mouse.dz != 0){
 			this->renderer->mulScreenZoom(1 - 0.1f * event.mouse.dz);
-			this->resize();
+			this->renderer->updateTransformations();
 		}else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(CAMERA_INVERSE, location);
@@ -386,7 +386,7 @@ void Game::localEvents(){
 			this->renderer->addScreenLocation(location - this->movingScreenStart);
 			this->movingScreenStart = location;
 
-			this->resize();
+			this->renderer->updateTransformations();
 		}
 	}
 }
@@ -808,5 +808,6 @@ void Game::renderUI(){
 void Game::resize(){
 	al_acknowledge_resize(this->display);
 
-	this->renderer->resize(Vector2(al_get_display_width(this->display), al_get_display_height(display)));
+	this->renderer->setScreenSize(Vector2(al_get_display_width(this->display), al_get_display_height(this->display)));
+	this->renderer->updateTransformations();
 }

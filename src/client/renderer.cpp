@@ -1,6 +1,7 @@
 #include "renderer.h"
 
-Renderer::Renderer(){
+Renderer::Renderer(Vector2 screenSize){
+	this->screenSize = screenSize;
 	this->screenZoom = 2.0f;
 	this->screenLocation = Vector2(0.0f, 0.0f);
 	this->screenRotation = 0.0f;
@@ -8,6 +9,8 @@ Renderer::Renderer(){
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
 	// TODO: Do we want a system for preloading textures?
+
+	this->updateTransformations();
 }
 
 Renderer::~Renderer(){
@@ -16,16 +19,16 @@ Renderer::~Renderer(){
 	}
 }
 
-void Renderer::resize(Vector2 displaySize){
+void Renderer::updateTransformations(){
 	al_identity_transform(&this->camera);
-    al_translate_transform(&this->camera, displaySize.x / this->screenZoom, displaySize.y / this->screenZoom);
+    al_translate_transform(&this->camera, this->screenSize.x / this->screenZoom, this->screenSize.y / this->screenZoom);
     al_translate_transform(&this->camera, this->screenLocation.x, this->screenLocation.y);
     al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
 
     al_identity_transform(&this->camera_inverse);
     al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
     al_translate_transform(&this->camera_inverse, -this->screenLocation.x, -this->screenLocation.y);
-    al_translate_transform(&this->camera_inverse, -displaySize.x / this->screenZoom, -displaySize.y / this->screenZoom);
+    al_translate_transform(&this->camera_inverse, -this->screenSize.x / this->screenZoom, -this->screenSize.y / this->screenZoom);
 
     // TODO: Use al_invert_transform
     /*al_copy_transform(&this->camera, &this->camera_inverse);
@@ -41,6 +44,10 @@ void Renderer::mulScreenZoom(float zoom){
 
 void Renderer::addScreenLocation(Vector2 location){
 	this->screenLocation += location * 2.0f / this->screenZoom;
+}
+
+void Renderer::setScreenSize(Vector2 screenSize){
+	this->screenSize = screenSize;
 }
 
 void Renderer::loadTexture(std::string texture){
