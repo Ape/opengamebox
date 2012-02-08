@@ -34,6 +34,8 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location){
 	this->image = this->objectId + ".png";
 	this->backside = "card_backside.png";
 	this->stackDelta = Vector2(4.0f, 0.0f);
+
+	this->animationTime = 0.0f;
 }
 
 std::string Object::getObjectId() const{
@@ -176,7 +178,27 @@ void Object::setFlipped(bool flipped){
 	this->flipped = flipped;
 }
 
-void Object::draw(IRenderer *renderer, net::Client *localClient) const{
+void Object::setAnimation(Vector2 target, float time){
+	this->animationTarget = target;
+	this->animationTime = time;
+}
+
+void Object::animate(double deltaTime){
+	if (this->animationTime > 0.0f){
+		const float distance = this->location.dst(this->animationTarget);
+		const float speed = distance / this->animationTime;
+
+		if (distance < speed * deltaTime || distance <= 0.002f){
+			this->location = this->animationTarget;
+			this->animationTime = 0.0f;
+		}else{
+			this->location += speed * deltaTime * (this->animationTarget - this->location).nor();
+			this->animationTime -= deltaTime;
+		}
+	}
+}
+
+void Object::draw(IRenderer *renderer, net::Client *localClient){
 	std::string image;
 	if (! this->flipped){
 		image = this->image;

@@ -7,11 +7,14 @@ General:
 
 Networking:
 	- send private object information
+	- multiobject create packet
 
 Mechanics:
 	- ability to rotate objects
 		- free angle and 90 degree steps
 	- flipping and owning a stack instead of individual objects
+	- server-side dice command
+	- shuffle to happen on server-side
 	- ability to remove selected objects
 	- loading objects from the filesystem
 	- downloading objects from the server
@@ -26,5 +29,4 @@ Graphics:
 Resources:
 	- full set of 52 playing cards
 	- classic board game sets
-		- chess
 	- extenal packages for game resources

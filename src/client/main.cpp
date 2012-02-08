@@ -32,6 +32,9 @@ Game::Game(void){
 	this->movingScreen = false;
 	this->snappingToGrid = false;
 
+	this->previousTime = al_get_time();
+	this->deltaTime = 0.0f;
+
 	this->localClient = net::MAX_CLIENTS;
 }
 
@@ -354,6 +357,8 @@ void Game::localEvents(){
 			for (auto& object : this->selectedObjects){
 				net::dataAppendShort(data, object->getId());
 				net::dataAppendVector2(data, object->getLocation());
+
+				object->setAnimation(object->getLocation(), 0.0f);
 			}
 
 			net::sendCommand(connection, data.c_str(), data.length());
@@ -577,7 +582,12 @@ void Game::receivePacket(ENetEvent event){
 					Vector2 location = net::bytesToVector2(event.packet->data + i + 2);
 
 					Object *object = this->objects.find(objId)->second;
-					object->setLocation(location);
+
+					if (ANIMATION_TIME == 0){
+						object->setLocation(location);
+					}else{
+						object->setAnimation(location, ANIMATION_TIME);
+					}
 
 					net::removeObject(this->objectOrder, object);
 					this->objectOrder.push_back(object);
@@ -766,6 +776,13 @@ void Game::identifyToServer(std::string nick){
 }
 
 void Game::render(){
+	// Calculate deltaTime
+	this->deltaTime = al_get_time() - this->previousTime;
+	this->previousTime = al_get_time();
+
+	// Animate objects
+	this->animate();
+
 	// Clear the screen
 	al_clear_to_color(al_map_rgb_f(0.1f, 0.1f, 0.1f));
 
@@ -782,6 +799,12 @@ void Game::render(){
 	al_flip_display();
 }
 
+void Game::animate(){
+	for (auto& object : this->objectOrder){
+		object->animate(this->deltaTime);
+	}
+}
+
 void Game::renderGame(){
 	this->renderer->useTransform(CAMERA);
 
@@ -795,9 +818,6 @@ void Game::renderGame(){
 
 void Game::renderUI(){
 	this->renderer->useTransform(UI);
-
-	double deltaTime = al_get_time() - this->previousTime;
-	this->previousTime = al_get_time();
 
 	std::ostringstream tmpText;
 
@@ -826,7 +846,7 @@ void Game::renderUI(){
 	}
 
 	tmpText.str(std::string());
-	tmpText << "FPS: " << (int) (1.0 / deltaTime + 0.25);
+	tmpText << "FPS: " << (int) (1.0 / this->deltaTime + 0.25);
 	al_draw_text(font, al_map_rgb_f(1.0f, 1.0f, 1.0f), 0.0f, al_get_display_height(display) - 20.0f, 0, tmpText.str().c_str());
 
 	for (auto& widget : this->widgets){

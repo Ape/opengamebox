@@ -41,8 +41,10 @@ public:
 	void own(net::Client *client);
 	void flip(void);
 	void setFlipped(bool flipped);
+	void setAnimation(Vector2 target, float time);
 
-	void draw(IRenderer *renderer, net::Client *localClient) const;
+	void animate(double deltaTime);
+	void draw(IRenderer *renderer, net::Client *localClient);
 
 private:
 	std::string objectId;
@@ -58,6 +60,9 @@ private:
 	net::Client *selected;
 	net::Client *owner;
 	std::list<Object*> objectsAbove;
+
+	Vector2 animationTarget;
+	float animationTime;
 };
 
 #endif

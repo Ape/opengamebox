@@ -34,6 +34,7 @@ const int SCREEN_W = 1024;
 const int SCREEN_H = 768;
 const float FPS_LIMIT = 60.0f;
 const bool FULLSCREEN = false;
+const float ANIMATION_TIME = 0.5f;
 
 class Game{
 public:
@@ -62,6 +63,7 @@ private:
 	bool disconnecting;
 
 	double previousTime;
+	double deltaTime;
 
 	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;
@@ -105,6 +107,7 @@ private:
 	void askNick(void);
 
 	void render(void);
+	void animate(void);
 	void renderGame(void);
 	void renderUI(void);
 	void resize(void);
