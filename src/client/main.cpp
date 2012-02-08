@@ -380,7 +380,7 @@ void Game::localEvents(){
 					location.y -= grid.y;
 				}
 
-				location += -1.0f * (location % grid) + Vector2(150.f, 150.0f);
+				location += -1.0f * (location % grid) + this->selectedObjects.front()->getSize() / 2.0f;
 			}else{
 				location += this->draggingStart;
 			}
