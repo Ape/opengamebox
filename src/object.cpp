@@ -186,21 +186,10 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 
 	if (this->selected != nullptr){
 		float r, g, b;
-		if (this->selected == localClient){
-			r = 0.0f;
-			g = 1.0f;
-			b = 0.0f;
-		}else{
-			r = 1.0f;
-			g = 0.0f;
-			b = 0.0f;
-		}
+		renderer->idToColor(this->selected->id, r, g, b);
 
 		Vector2 pointA = this->location - this->size/2.0f - Vector2(1.0f, 1.0f);
 		Vector2 pointB = this->location + this->size/2.0f + Vector2(1.0f, 1.0f);
-
-		//renderer->transformLocation(CAMERA, pointA);
-		//renderer->transformLocation(CAMERA, pointB);
 
 		renderer->drawRectangle(pointA, pointB, r, g, b, 1.0f, 2.0f);
 	}
@@ -208,9 +197,6 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 	if (this->owner == localClient){
 		Vector2 pointA = this->location - this->size/2.0f - Vector2(3.0f, 3.0f);
 		Vector2 pointB = this->location + this->size/2.0f + Vector2(3.0f, 3.0f);
-
-		renderer->transformLocation(CAMERA, pointA);
-		renderer->transformLocation(CAMERA, pointB);
 
 		renderer->drawRectangle(pointA, pointB, 0.0f, 0.0f, 1.0f, 1.0f, 2.0f);
 	}

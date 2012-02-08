@@ -488,6 +488,7 @@ void Game::receivePacket(ENetEvent event){
 			if (event.packet->dataLength >= 3 && event.packet->dataLength <= 35){
 				// Store the client information
 				net::Client *client = new net::Client(std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+				client->id = event.packet->data[1];
 				this->clients[event.packet->data[1]] = client;
 
 				this->addMessage(client->nick + " has joined the server!");
@@ -804,7 +805,9 @@ void Game::renderUI(){
 		if (client.second->joined){
 			tmpText.str(std::string());
 			tmpText << client.second->nick << " (" << client.second->ping << " ms)";
-			al_draw_text(font, al_map_rgb_f(1.0f, 1.0f, 1.0f), 0.0f, i * 20.0f, 0, tmpText.str().c_str());
+			float r, g, b;
+			this->renderer->idToColor(client.second->id, r, g, b);
+			al_draw_text(font, al_map_rgb_f(r, g, b), 0.0f, i * 20.0f, 0, tmpText.str().c_str());
 		}
 
 		++i;

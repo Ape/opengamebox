@@ -126,3 +126,12 @@ void Renderer::transformLocation(Transformation transformation, Vector2 &locatio
 void Renderer::useTransform(Transformation transformation){
 	al_use_transform(this->getTransformation(transformation));
 }
+
+void Renderer::hsvToRgb(float hue, float saturation, float value, float &red, float &green, float &blue){
+	al_color_hsv_to_rgb(hue, saturation, value, &red, &green, &blue);
+}
+
+void Renderer::idToColor(unsigned int id, float &red, float &green, float &blue){
+	// The magical float values below are based on the golden angle on the hue circle
+	this->hsvToRgb(217.75608f + 137.50776f * id, 1.0f, 1.0f, red, green, blue);
+}

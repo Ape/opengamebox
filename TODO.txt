@@ -9,8 +9,6 @@ Networking:
 	- send private object information
 
 Mechanics:
-	- players to have individual colors
-	- ability to snap objects to grid
 	- ability to rotate objects
 		- free angle and 90 degree steps
 	- flipping and owning a stack instead of individual objects

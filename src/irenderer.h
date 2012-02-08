@@ -30,6 +30,10 @@ public:
 
 	virtual void transformLocation(Transformation transformation, Vector2 &location) = 0;
 	virtual void useTransform(Transformation transformation) = 0;
+
+	virtual void hsvToRgb(float hue, float saturation, float value, float &red, float &green, float &blue) = 0;
+
+	virtual void idToColor(unsigned int id, float &red, float &green, float &blue) = 0;
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_color.h>
 
 #include "../irenderer.h"
 
@@ -34,6 +35,10 @@ public:
 
 	virtual void transformLocation(Transformation transformation, Vector2 &location);
 	virtual void useTransform(Transformation transformation);
+
+	virtual void hsvToRgb(float hue, float saturation, float value, float &red, float &green, float &blue);
+
+	virtual void idToColor(unsigned int id, float &red, float &green, float &blue);
 
 private:
     ALLEGRO_TRANSFORM camera;
