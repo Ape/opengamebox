@@ -465,6 +465,7 @@ void Game::receivePacket(ENetEvent event){
 				while (i < event.packet->dataLength){
 					net::Client *client = new net::Client(std::string((char*) event.packet->data + i + 2, event.packet->data[i + 1]));
 					client->id = event.packet->data[i];
+					client->ping = 65535;
 					this->clients[event.packet->data[i]] = client;
 
 					i += 2 + event.packet->data[i + 1];
@@ -489,6 +490,7 @@ void Game::receivePacket(ENetEvent event){
 				// Store the client information
 				net::Client *client = new net::Client(std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
 				client->id = event.packet->data[1];
+				client->ping = 65535;
 				this->clients[event.packet->data[1]] = client;
 
 				this->addMessage(client->nick + " has joined the server!");
@@ -657,17 +659,16 @@ void Game::receivePacket(ENetEvent event){
 		}
 
 		case net::PACKET_PINGS:{
-			// TODO: Do we want this?
-			/*if (event.packet->dataLength >= 4 && event.packet->dataLength <= 1 + 3 * net::MAX_CLIENTS){
+			if (event.packet->dataLength >= 4){
 				size_t i = 1;
 				while (i < event.packet->dataLength){
 					if (this->clients.count(event.packet->data[i]) > 0){
-						this->clients[event.packet->data[i]]->ping = (event.packet->data[i + 1] + (event.packet->data[i + 2] << 8));
+						this->clients[event.packet->data[i]]->ping = net::bytesToShort(event.packet->data + i + 1);
 					}
 
 					i += 3;
 				}
-			}*/
+			}
 
 			break;
 		}
@@ -804,7 +805,11 @@ void Game::renderUI(){
 	for (auto& client : this->clients){
 		if (client.second->joined){
 			tmpText.str(std::string());
-			tmpText << client.second->nick << " (" << client.second->ping << " ms)";
+			if (client.second->ping != 65535){
+				tmpText << client.second->nick << " (" << client.second->ping << " ms)";
+			}else{
+				tmpText << client.second->nick;
+			}
 			float r, g, b;
 			this->renderer->idToColor(client.second->id, r, g, b);
 			al_draw_text(font, al_map_rgb_f(r, g, b), 0.0f, i * 20.0f, 0, tmpText.str().c_str());

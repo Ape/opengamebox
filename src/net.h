@@ -18,6 +18,7 @@ namespace net{
 	const unsigned int CHANNELS       = 2;
 	const unsigned char MAX_CLIENTS   = 32;
 	const float MAX_FLOAT             = 10000.0f;
+	const double STREAM_INTERVAL       = 5000.0f;
 
 	// Client control packets
 	const unsigned char PACKET_HANDSHAKE  = 0x01;

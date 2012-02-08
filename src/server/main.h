@@ -26,8 +26,7 @@ private:
 
 	bool exiting;
 
-	unsigned int frame;
-	unsigned int lastFrameTime;
+	double lastStreamTime;
 
 	void mainLoop(void);
 	void dispose(void);

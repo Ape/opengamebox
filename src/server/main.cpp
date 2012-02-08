@@ -20,8 +20,7 @@ Server::Server(unsigned int port){
 	this->address.port = port;
 
 	this->exiting = false;
-	this->frame = 0;
-	this->lastFrameTime = 0;
+	this->lastStreamTime = 0.0;
 }
 
 int Server::run(){
@@ -56,9 +55,9 @@ int Server::run(){
 
 void Server::mainLoop(){
 	while (! this->exiting){
-		// TODO: Simulation
-
 		this->networkEvents();
+
+		this->sendStream();
 	}
 }
 
@@ -194,6 +193,9 @@ void Server::receivePacket(ENetEvent event){
 
 						net::sendCommand(connection, data.c_str(), data.length());
 					}
+
+					// Rush stream information
+					this->lastStreamTime = 0.0;
 				}else{
 					// Reply that the nick is taken
 					char data[1];
@@ -354,25 +356,25 @@ void Server::receivePacket(ENetEvent event){
 }
 
 void Server::sendStream(){
-	// TODO: Do we want this?
-	/*if (enet_time_get() > this->lastStreamTime + net::STREAM_INTERVAL){
+	if (enet_time_get() > this->lastStreamTime + net::STREAM_INTERVAL){
 		this->lastStreamTime = enet_time_get();
 
-		// Stream ping information{
+		// Stream ping information
+		{
 			std::string data;
 			data += net::PACKET_PINGS;
 
 			for (unsigned char id = 0; id < net::MAX_CLIENTS; ++id){
-				if (this->clients.count(id) > 0  && this->clients[id]->joined){
+				if (this->clients.count(id) > 0 && this->clients[id]->joined){
 					data += id;
-					data += this->clients[id]->peer->lastRoundTripTime & 0xFF;
-					data += (this->clients[id]->peer->lastRoundTripTime >> 8) & 0xFF;
+					net::dataAppendShort(data, this->clients[id]->peer->roundTripTime);
 				}
 			}
 
-			if (data.length() > 1) // Only send stream data if there is at least one client{
+			// Only send stream data if there is at least one client
+			if (data.length() > 1){
 				net::sendCommand(this->connection, data.c_str(), data.length(), false);
 			}
 		}
-	}*/
+	}
 }

@@ -20,6 +20,8 @@ Mechanics:
 Graphics:
 	- new method for drawing private objects
 	- ability to rotate the camera
+	- use player colors in chat messages
+	- fix chat input location
 
 Resources:
 	- full set of 52 playing cards
