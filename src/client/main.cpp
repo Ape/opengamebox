@@ -83,36 +83,8 @@ int Game::run(std::string address, int port) {
 		al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);
 	}
 
-	// Create the window
-	this->display = al_create_display(SCREEN_W, SCREEN_H);
-	if (! this->display) {
-		std::cerr << "Failed to create a display!" << std::endl;
-		return EXIT_FAILURE;
-	}
-	al_acknowledge_resize(this->display);
-
 	// Initialize the renderer
-	this->renderer = new Renderer(Vector2(al_get_display_width(this->display), al_get_display_height(this->display)));
-
-	// Initialize fonts
-	al_init_font_addon();
-	if (! al_init_ttf_addon()) {
-		std::cerr << "Failed to initialize fonts!" << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	this->font = al_load_ttf_font("res/LiberationSans-Regular.ttf", 16, 0);
-
-	// Initialize image libraries
-	if (! al_init_image_addon()) {
-		std::cerr << "Failed to initialize image libraries!" << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	if (!al_init_primitives_addon()) {
-		std::cerr << "Failed to initialize primitives_addon!" << std::endl;
-		return EXIT_FAILURE;
-	}
+	this->renderer = new Renderer(Coordinates(SCREEN_W, SCREEN_H));
 
 	// Create a timer for the main loop
 	this->timer = al_create_timer(1.0f / FPS_LIMIT);
@@ -129,7 +101,7 @@ int Game::run(std::string address, int port) {
 	}
 
 	// Register event sources
-	al_register_event_source(this->event_queue, al_get_display_event_source(this->display));
+	al_register_event_source(this->event_queue, al_get_display_event_source(this->renderer->getDisplay()));
 	al_register_event_source(this->event_queue, al_get_timer_event_source(this->timer));
 	al_register_event_source(this->event_queue, al_get_keyboard_event_source());
 	al_register_event_source(this->event_queue, al_get_mouse_event_source());
@@ -191,7 +163,6 @@ void Game::dispose() {
 	delete this->renderer;
 
 	al_destroy_timer(this->timer);
-	al_destroy_display(this->display);
 	al_destroy_event_queue(this->event_queue);
 }
 
@@ -204,13 +175,13 @@ void Game::localEvents() {
 	}else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 		this->quit();
 	}else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-		this->resize();
+		this->renderer->resize();
 	}else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 		if (input != nullptr) {
 			this->input->onKey(event.keyboard);
 		}else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 			// Create a new chat input widget
-			this->input = new InputBox(this, &Game::sendChat, Vector2(SCREEN_H - 40, 0), Vector2(24, 150), this->font, 255);
+			this->input = new InputBox(this, &Game::sendChat, Vector2(SCREEN_H - 40, 0), Vector2(24, 150), this->renderer->getFont(), 255);
 		}
 	}else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
 		if (input == nullptr) {
@@ -760,7 +731,7 @@ void Game::checkObjectOrder() {
 }
 
 void Game::askNick() {
-	this->input = new InputBox(this, &Game::identifyToServer, Vector2(SCREEN_H - 40, 0), Vector2(20, 100), this->font, 16);
+	this->input = new InputBox(this, &Game::identifyToServer, Vector2(SCREEN_H - 40, 0), Vector2(20, 100), this->renderer->getFont(), 16);
 }
 
 void Game::removeInput() {
@@ -832,8 +803,7 @@ void Game::renderUI() {
 				tmpText << client.second->nick;
 			}
 
-			Color color(this->renderer, client.second->id);
-			al_draw_text(font, al_map_rgb_f(color.red, color.green, color.blue), 0.0f, i * 20.0f, 0, tmpText.str().c_str());
+			this->renderer->drawText(tmpText.str(), Color(this->renderer, client.second->id), Vector2(0.0f, i * 20.0f));
 		}
 
 		++i;
@@ -841,14 +811,14 @@ void Game::renderUI() {
 
 	for (std::vector<Message>::size_type i = this->messages.size(); i > 0; --i) {
 		if (al_get_time() < this->messages[i-1].time + 10.0) {
-			al_draw_text(font, al_map_rgb_f(1.0f, 1.0f, 1.0f), 0.0f, al_get_display_height(display) / 2.0f + i * 20.0f - this->messages.size() * 20.0f,
-			             0, this->messages[i-1].message.c_str());
+			this->renderer->drawText(this->messages[i-1].message, Color(1.0f, 1.0f, 1.0f),
+			                         Vector2(0.0f, al_get_display_height(this->renderer->getDisplay()) / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
 		}
 	}
 
 	tmpText.str(std::string());
 	tmpText << "FPS: " << (int) (1.0 / this->deltaTime + 0.25);
-	al_draw_text(font, al_map_rgb_f(1.0f, 1.0f, 1.0f), 0.0f, al_get_display_height(display) - 20.0f, 0, tmpText.str().c_str());
+	this->renderer->drawText(tmpText.str(), Color(1.0f, 1.0f, 1.0f), Vector2(0.0f, al_get_display_height(this->renderer->getDisplay()) - 20.0f));
 
 	for (auto& widget : this->widgets) {
 		widget->draw();
@@ -856,11 +826,4 @@ void Game::renderUI() {
 	if (this->input != nullptr) {
 		input->draw();
 	}
-}
-
-void Game::resize() {
-	al_acknowledge_resize(this->display);
-
-	this->renderer->setScreenSize(Vector2(al_get_display_width(this->display), al_get_display_height(this->display)));
-	this->renderer->updateTransformations();
 }

@@ -17,7 +17,7 @@ public:
 
 	virtual void mulScreenZoom(float zoom) = 0;
 	virtual void addScreenLocation(Vector2 location) = 0;
-	virtual void setScreenSize(Vector2 screenSize) = 0;
+	virtual void setScreenSize(Coordinates screenSize) = 0;
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,
@@ -28,6 +28,8 @@ public:
 	                        Vector2 dest_size, Color color) = 0;
 
 	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness) = 0;
+
+	virtual void drawText(std::string text, Color color, Vector2 location) = 0;
 
 	virtual Coordinates getTextureSize(std::string texture) = 0;
 

@@ -1,6 +1,4 @@
 General:
-	- move everything related to rendering to Renderer
-		- display, font
 	- loading settings from a file
 
 Networking:

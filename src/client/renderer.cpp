@@ -1,7 +1,32 @@
 #include "renderer.h"
 
-Renderer::Renderer(Vector2 screenSize) {
+Renderer::Renderer(Coordinates screenSize) {
 	this->screenSize = screenSize;
+
+	// Initialize display
+	this->display = al_create_display(this->screenSize.x, this->screenSize.y);
+    if (! this->display) {
+        std::cerr << "Failed to create a display!" << std::endl;
+    }
+    al_acknowledge_resize(this->display);
+
+	// Initialize fonts
+    al_init_font_addon();
+    if (! al_init_ttf_addon()) {
+        std::cerr << "Failed to initialize fonts!" << std::endl;
+    }
+
+    this->font = al_load_ttf_font("res/LiberationSans-Regular.ttf", 16, 0);
+
+    // Initialize additional rendering libraries
+    if (! al_init_image_addon()) {
+        std::cerr << "Failed to initialize image libraries!" << std::endl;
+    }
+
+    if (!al_init_primitives_addon()) {
+        std::cerr << "Failed to initialize primitives addon!" << std::endl;
+    }
+
 	this->screenZoom = 2.0f;
 	this->screenLocation = Vector2(0.0f, 0.0f);
 	this->screenRotation = 0.0f;
@@ -17,6 +42,24 @@ Renderer::~Renderer() {
 	for (auto& texture : this->textures) {
 		al_destroy_bitmap(texture.second);
 	}
+
+	al_destroy_display(this->display);
+	al_destroy_font(this->font);
+}
+
+ALLEGRO_DISPLAY* Renderer::getDisplay(void) const {
+	return this->display;
+}
+
+ALLEGRO_FONT* Renderer::getFont(void) const {
+	return this->font;
+}
+
+void Renderer::resize() {
+	al_acknowledge_resize(this->display);
+
+	this->setScreenSize(Coordinates(al_get_display_width(this->display), al_get_display_height(this->display)));
+    this->updateTransformations();
 }
 
 void Renderer::updateTransformations() {
@@ -46,7 +89,7 @@ void Renderer::addScreenLocation(Vector2 location) {
 	this->screenLocation += location * 2.0f / this->screenZoom;
 }
 
-void Renderer::setScreenSize(Vector2 screenSize) {
+void Renderer::setScreenSize(Coordinates screenSize) {
 	this->screenSize = screenSize;
 }
 
@@ -87,9 +130,9 @@ void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float 
 	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
 }
 
-/*void Renderer::drawText(std::string text, Color color, Vector2 location) {
-	al_draw_text(this->font, al_map_rgb_f(r, g, b), 0.0f, i * 20.0f, 0, tmpText.str().c_str());
-}*/
+void Renderer::drawText(std::string text, Color color, Vector2 location) {
+	al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x, location.y, 0, text.c_str());
+}
 
 Coordinates Renderer::getTextureSize(std::string texture) {
 	if (this->textures[texture] == nullptr) {

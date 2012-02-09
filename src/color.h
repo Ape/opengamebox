@@ -16,7 +16,7 @@ public:
 	float blue;
 	float alpha;
 
-	Color(const float red = 0.0f, const float green = 0.0f, const float blue = 0.0f, const float alpha = 0.0f);
+	Color(const float red = 1.0f, const float green = 1.0f, const float blue = 1.0f, const float alpha = 1.0f);
 	Color(IRenderer *renderer, unsigned int id);
 
 	Color cpy(void) const;
