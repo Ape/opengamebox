@@ -70,22 +70,26 @@ void Renderer::drawBitmap(std::string texture, Vector2 source_location, Vector2 
 }
 
 void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Vector2 source_size,
-                                Vector2 dest_location, Vector2 dest_size, float r, float g, float b, float alpha) {
+                                Vector2 dest_location, Vector2 dest_size, Color color) {
 	if (this->textures[texture] == nullptr) {
 		this->loadTexture(texture);
 	}
 
-	al_draw_tinted_scaled_bitmap(this->textures[texture], al_map_rgba_f(r, g, b, alpha), source_location.x, source_location.y,
+	al_draw_tinted_scaled_bitmap(this->textures[texture], al_map_rgba_f(color.red, color.green, color.blue, color.alpha), source_location.x, source_location.y,
 	                      source_size.x * this->getTextureSize(texture).x, source_size.y * this->getTextureSize(texture).y,
 	                      dest_location.x, dest_location.y, dest_size.x, dest_size.y, 0);
 }
 
-void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, float r, float g, float b, float alpha, float thickness) {
+void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness) {
 	this->transformLocation(CAMERA, pointA);
 	this->transformLocation(CAMERA, pointB);
 
-	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(r, g, b, alpha), thickness);
+	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
 }
+
+/*void Renderer::drawText(std::string text, Color color, Vector2 location) {
+	al_draw_text(this->font, al_map_rgb_f(r, g, b), 0.0f, i * 20.0f, 0, tmpText.str().c_str());
+}*/
 
 Coordinates Renderer::getTextureSize(std::string texture) {
 	if (this->textures[texture] == nullptr) {
@@ -127,11 +131,6 @@ void Renderer::useTransform(Transformation transformation) {
 	al_use_transform(this->getTransformation(transformation));
 }
 
-void Renderer::hsvToRgb(float hue, float saturation, float value, float &red, float &green, float &blue) {
-	al_color_hsv_to_rgb(hue, saturation, value, &red, &green, &blue);
-}
-
-void Renderer::idToColor(unsigned int id, float &red, float &green, float &blue) {
-	// The magical float values below are based on the golden angle on the hue circle
-	this->hsvToRgb(217.75608f + 137.50776f * id, 1.0f, 1.0f, red, green, blue);
+void Renderer::hsvToRgb(float hue, float saturation, float value, Color *color) {
+	al_color_hsv_to_rgb(hue, saturation, value, &color->red, &color->green, &color->blue);
 }

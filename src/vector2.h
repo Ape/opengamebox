@@ -14,7 +14,6 @@ public:
 	float y;
 
 	Vector2(const float x = 0, const float y = 0);
-	~Vector2(void);
 
 	Vector2 cpy(void) const;
 	Vector2 operator+(const Vector2 &vector) const;
@@ -30,8 +29,8 @@ public:
 	void operator/=(const float &scalar);
 	void operator=(const Vector2 &vector);
 
-	bool operator== (const Vector2 &vector1) const;
-	bool operator!= (const Vector2 &vector1) const;
+	bool operator==(const Vector2 &vector1) const;
+	bool operator!=(const Vector2 &vector1) const;
 
 	float angle(void) const;
 

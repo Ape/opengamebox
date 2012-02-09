@@ -5,8 +5,6 @@ Vector2::Vector2(const float x, const float y) {
 	this->y = y;
 }
 
-Vector2::~Vector2() {}
-
 std::ostream& operator<<(std::ostream &output, const Vector2 &vector) {
 	output << "(" <<  vector.x << ", " << vector.y << ")";
 	return output;
@@ -37,12 +35,12 @@ void Vector2::operator=(const Vector2 &vector) {
 	this->y = vector.y;
 }
 
-bool Vector2::operator== (const Vector2 &vector) const {
+bool Vector2::operator==(const Vector2 &vector) const {
 	return vector.x == this->x && vector.y == this->y;
 }
 
-bool Vector2::operator!= (const Vector2 &vector) const {
-	return !(this->cpy()==vector);
+bool Vector2::operator!=(const Vector2 &vector) const {
+	return !(this->cpy() == vector);
 }
 
 float Vector2::angle() const {

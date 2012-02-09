@@ -3,7 +3,6 @@
 
 #include <map>
 #include <string>
-#include "../vector2.h"
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -11,6 +10,8 @@
 #include <allegro5/allegro_color.h>
 
 #include "../irenderer.h"
+#include "../vector2.h"
+#include "../color.h"
 
 class Renderer : public IRenderer{
 public:
@@ -28,17 +29,15 @@ public:
 	                        Vector2 dest_size);
 	virtual void drawBitmapTinted(std::string texture, Vector2 source_location,
                             Vector2 source_size, Vector2 dest_location,
-                            Vector2 dest_size, float r, float g, float b, float alpha);
-	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, float r, float g, float b, float alpha, float thickness);
+                            Vector2 dest_size, Color color);
+	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness);
 
 	virtual Coordinates getTextureSize(std::string texture);
 
 	virtual void transformLocation(Transformation transformation, Vector2 &location);
 	virtual void useTransform(Transformation transformation);
 
-	virtual void hsvToRgb(float hue, float saturation, float value, float &red, float &green, float &blue);
-
-	virtual void idToColor(unsigned int id, float &red, float &green, float &blue);
+	virtual void hsvToRgb(float hue, float saturation, float value, Color *color);
 
 private:
 	ALLEGRO_TRANSFORM camera;

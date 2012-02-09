@@ -810,7 +810,7 @@ void Game::renderGame() {
 	this->renderer->useTransform(CAMERA);
 
 	// Draw the table area
-	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), 1.0f, 1.0f, 1.0f, 1.0f, 5.0f);
+	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), Color(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
 
 	for (auto& object : this->objectOrder) {
 		object->draw(this->renderer, this->clients.find(this->localClient)->second);
@@ -831,9 +831,9 @@ void Game::renderUI() {
 			} else {
 				tmpText << client.second->nick;
 			}
-			float r, g, b;
-			this->renderer->idToColor(client.second->id, r, g, b);
-			al_draw_text(font, al_map_rgb_f(r, g, b), 0.0f, i * 20.0f, 0, tmpText.str().c_str());
+
+			Color color(this->renderer, client.second->id);
+			al_draw_text(font, al_map_rgb_f(color.red, color.green, color.blue), 0.0f, i * 20.0f, 0, tmpText.str().c_str());
 		}
 
 		++i;
