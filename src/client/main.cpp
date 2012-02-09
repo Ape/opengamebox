@@ -32,7 +32,7 @@ Game::Game(void){
 	this->movingScreen = false;
 	this->snappingToGrid = false;
 
-	this->previousTime = al_get_time();
+
 	this->deltaTime = 0.0f;
 
 	this->localClient = net::MAX_CLIENTS;
@@ -67,7 +67,7 @@ int Game::run(std::string address, int port){
 		std::cerr << "Failed to initialize Allegro!" << std::endl;
 		return EXIT_FAILURE;
 	}
-
+	this->previousTime = al_get_time();
 	// Initialize input
 	if (! al_install_keyboard() || ! al_install_mouse()){
 		std::cerr << "Failed to initialize the input components!" << std::endl;
@@ -375,7 +375,7 @@ void Game::localEvents(){
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(CAMERA_INVERSE, location);
 
-			if (this->snappingToGrid){ 
+			if (this->snappingToGrid){
 				Vector2 grid = this->selectedObjects.front()->getSize() + Vector2(0.001f, 0.001f);
 
 				if (location.x < 0.0f){
