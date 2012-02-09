@@ -87,9 +87,9 @@ namespace net{
 }
 
 template <class T>
-unsigned char net::firstUnusedKey(std::map<unsigned char, T*> map){
-	for (unsigned char i = 0; i < 255; ++i){
-		if (map.count(i) == 0){
+unsigned char net::firstUnusedKey(std::map<unsigned char, T*> map) {
+	for (unsigned char i = 0; i < 255; ++i) {
+		if (map.count(i) == 0) {
 			return i;
 		}
 	}
@@ -98,9 +98,9 @@ unsigned char net::firstUnusedKey(std::map<unsigned char, T*> map){
 }
 
 template <class T>
-unsigned short net::firstUnusedKey(std::map<unsigned short, T*> map){
-	for (unsigned short i = 0; i < 65535; ++i){
-		if (map.count(i) == 0){
+unsigned short net::firstUnusedKey(std::map<unsigned short, T*> map) {
+	for (unsigned short i = 0; i < 65535; ++i) {
+		if (map.count(i) == 0) {
 			return i;
 		}
 	}

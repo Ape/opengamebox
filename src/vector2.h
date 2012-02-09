@@ -46,43 +46,43 @@ public:
 	Vector2 abs(void) const;
 };
 
-inline Vector2 Vector2::cpy() const{
+inline Vector2 Vector2::cpy() const {
 	return Vector2(this->x, this->y);
 }
 
-inline Vector2 Vector2::operator+(const Vector2 &vector) const{
+inline Vector2 Vector2::operator+(const Vector2 &vector) const {
 	return Vector2(this->x + vector.x, this->y + vector.y);
 }
 
-inline Vector2 Vector2::operator-(const Vector2 &vector) const{
+inline Vector2 Vector2::operator-(const Vector2 &vector) const {
 	return Vector2(this->x - vector.x, this->y - vector.y);
 }
 
-inline Vector2 Vector2::operator*(const float &scalar) const{
+inline Vector2 Vector2::operator*(const float &scalar) const {
 	return Vector2(scalar * this->x, scalar * this->y);
 }
 
-inline Vector2 operator*(float scalar, const Vector2 &vector){
+inline Vector2 operator*(float scalar, const Vector2 &vector) {
 	return Vector2(scalar * vector.x, scalar * vector.y);
 }
 
-inline Vector2 Vector2::operator/(const float &scalar) const{
+inline Vector2 Vector2::operator/(const float &scalar) const {
 	return Vector2(this->x / scalar, this->y / scalar);
 }
 
-inline Vector2 operator/(float scalar, const Vector2 &vector){
+inline Vector2 operator/(float scalar, const Vector2 &vector) {
 	return Vector2(vector.x / scalar, vector.y / scalar);
 }
 
-inline Vector2 Vector2::operator*(const Vector2 &vector) const{
+inline Vector2 Vector2::operator*(const Vector2 &vector) const {
 	return Vector2(this->x * vector.x, this->y * vector.y);
 }
 
-inline Vector2 Vector2::operator/(const Vector2 &vector) const{
+inline Vector2 Vector2::operator/(const Vector2 &vector) const {
 	return Vector2(this->x / vector.x, this->y / vector.y);
 }
 
-inline Vector2 Vector2::operator%(const Vector2 &vector) const{
+inline Vector2 Vector2::operator%(const Vector2 &vector) const {
 	return Vector2(fmod(this->x, vector.x), fmod(this->y, vector.y));
 }
 
