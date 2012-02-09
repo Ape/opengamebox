@@ -20,10 +20,10 @@ void Coordinates::operator=(const Coordinates &coordinates){
     this->y = coordinates.y;
 }
 
-bool Coordinates::operator== (const Coordinates &coordinates){
+bool Coordinates::operator== (const Coordinates &coordinates) const{
     return coordinates.x == this->x && coordinates.y == this->y;
 }
 
-bool Coordinates::operator!= (const Coordinates &coordinates){
+bool Coordinates::operator!= (const Coordinates &coordinates) const{
     return !(this->cpy() == coordinates);
 }

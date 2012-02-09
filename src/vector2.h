@@ -30,8 +30,8 @@ public:
 	void operator/=(const float &scalar);
 	void operator=(const Vector2 &vector);
 
-	bool operator== (const Vector2 &vector1);
-	bool operator!= (const Vector2 &vector1);
+	bool operator== (const Vector2 &vector1) const;
+	bool operator!= (const Vector2 &vector1) const;
 
 	float angle(void) const;
 

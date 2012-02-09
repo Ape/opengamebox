@@ -18,8 +18,8 @@ public:
     void operator-=(const Coordinates &coordinates);
 	void operator=(const Coordinates &coordinates);
 
-    bool operator== (const Coordinates &coordinates);
-    bool operator!= (const Coordinates &coordinates);
+    bool operator== (const Coordinates &coordinates) const;
+    bool operator!= (const Coordinates &coordinates) const;
 };
 
 inline Coordinates Coordinates::cpy() const{

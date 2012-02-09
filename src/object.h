@@ -24,15 +24,15 @@ public:
 	Vector2 getLocation(void) const;
 	Vector2 getSize(void) const;
 	bool testLocation(Vector2 location) const;
-	bool testCollision(Object *object, bool second = false);
+	bool testCollision(const Object *object, bool second = false) const;
 
 	bool isUnder(void) const;
 	Vector2 getStackDelta(void) const;
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
 	bool checkIfUnder(std::vector<Object*> objectOrder);
-	bool isSelectedBy(net::Client *client);
+	bool isSelectedBy(net::Client *client) const;
 	net::Client* getSelected(void);
-	bool isOwnedBy(net::Client *client);
+	bool isOwnedBy(net::Client *client) const;
 	net::Client* getOwner(void);
 	bool isFlipped(void) const;
 
@@ -44,7 +44,7 @@ public:
 	void setAnimation(Vector2 target, float time);
 
 	void animate(double deltaTime);
-	void draw(IRenderer *renderer, net::Client *localClient);
+	void draw(IRenderer *renderer, net::Client *localClient) const;
 
 private:
 	std::string objectId;

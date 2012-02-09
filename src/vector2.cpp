@@ -37,11 +37,11 @@ void Vector2::operator=(const Vector2 &vector){
 	this->y = vector.y;
 }
 
-bool Vector2::operator== (const Vector2 &vector){
+bool Vector2::operator== (const Vector2 &vector) const{
 	return vector.x == this->x && vector.y == this->y;
 }
 
-bool Vector2::operator!= (const Vector2 &vector){
+bool Vector2::operator!= (const Vector2 &vector) const{
 	return !(this->cpy()==vector);
 }
 

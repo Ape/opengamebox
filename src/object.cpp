@@ -67,7 +67,7 @@ bool Object::testLocation(Vector2 location) const{
 	}
 }
 
-bool Object::testCollision(Object *object, bool second){
+bool Object::testCollision(const Object *object, bool second) const{
 	if (object->testLocation(this->location - this->size/2.0f) || object->testLocation(this->location + this->size/2.0f)
 	        || object->testLocation(Vector2(this->location.x - this->size.x/2.0f, this->location.y + this->size.y/2.0f))
 	        || object->testLocation(Vector2(this->location.x + this->size.x/2.0f, this->location.y - this->size.y/2.0f))
@@ -138,7 +138,7 @@ bool Object::checkIfUnder(std::vector<Object*> objectOrder){
 	}
 }
 
-bool Object::isSelectedBy(net::Client *client){
+bool Object::isSelectedBy(net::Client *client) const{
 	return this->selected == client;
 }
 
@@ -146,7 +146,7 @@ net::Client* Object::getSelected(){
 	return this->selected;
 }
 
-bool Object::isOwnedBy(net::Client *client){
+bool Object::isOwnedBy(net::Client *client) const{
 	return this->owner == client;
 }
 
@@ -198,7 +198,7 @@ void Object::animate(double deltaTime){
 	}
 }
 
-void Object::draw(IRenderer *renderer, net::Client *localClient){
+void Object::draw(IRenderer *renderer, net::Client *localClient) const{
 	std::string image;
 	if (! this->flipped){
 		image = this->image;

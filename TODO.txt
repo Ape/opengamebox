@@ -1,6 +1,4 @@
 General:
-	- use references instead of pointers always when appropriate
-	- use const on methods always when possible
 	- move everything related to rendering to Renderer
 		- display, font
 	- loading settings from a file
