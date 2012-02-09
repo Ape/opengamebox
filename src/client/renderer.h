@@ -41,9 +41,9 @@ public:
 	virtual void idToColor(unsigned int id, float &red, float &green, float &blue);
 
 private:
-    ALLEGRO_TRANSFORM camera;
-    ALLEGRO_TRANSFORM camera_inverse;
-    ALLEGRO_TRANSFORM cameraUI;
+	ALLEGRO_TRANSFORM camera;
+	ALLEGRO_TRANSFORM camera_inverse;
+	ALLEGRO_TRANSFORM cameraUI;
 
 	Vector2 screenSize;
 	float screenZoom;

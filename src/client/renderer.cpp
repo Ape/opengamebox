@@ -21,20 +21,20 @@ Renderer::~Renderer() {
 
 void Renderer::updateTransformations() {
 	al_identity_transform(&this->camera);
-    al_translate_transform(&this->camera, this->screenSize.x / this->screenZoom, this->screenSize.y / this->screenZoom);
-    al_translate_transform(&this->camera, this->screenLocation.x, this->screenLocation.y);
-    al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
+	al_translate_transform(&this->camera, this->screenSize.x / this->screenZoom, this->screenSize.y / this->screenZoom);
+	al_translate_transform(&this->camera, this->screenLocation.x, this->screenLocation.y);
+	al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
 
-    al_identity_transform(&this->camera_inverse);
-    al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
-    al_translate_transform(&this->camera_inverse, -this->screenLocation.x, -this->screenLocation.y);
-    al_translate_transform(&this->camera_inverse, -this->screenSize.x / this->screenZoom, -this->screenSize.y / this->screenZoom);
+	al_identity_transform(&this->camera_inverse);
+	al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
+	al_translate_transform(&this->camera_inverse, -this->screenLocation.x, -this->screenLocation.y);
+	al_translate_transform(&this->camera_inverse, -this->screenSize.x / this->screenZoom, -this->screenSize.y / this->screenZoom);
 
-    // TODO: Use al_invert_transform
-    /*al_copy_transform(&this->camera, &this->camera_inverse);
-    al_invert_transform(&this->camera_inverse);*/
+	// TODO: Use al_invert_transform
+	/*al_copy_transform(&this->camera, &this->camera_inverse);
+	al_invert_transform(&this->camera_inverse);*/
 
-    al_identity_transform(&this->cameraUI);
+	al_identity_transform(&this->cameraUI);
 }
 
 void Renderer::mulScreenZoom(float zoom) {
@@ -70,7 +70,7 @@ void Renderer::drawBitmap(std::string texture, Vector2 source_location, Vector2 
 }
 
 void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Vector2 source_size,
-                          Vector2 dest_location, Vector2 dest_size, float r, float g, float b, float alpha) {
+                                Vector2 dest_location, Vector2 dest_size, float r, float g, float b, float alpha) {
 	if (this->textures[texture] == nullptr) {
 		this->loadTexture(texture);
 	}

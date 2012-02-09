@@ -62,8 +62,8 @@ void Server::mainLoop() {
 }
 
 void Server::dispose() {
-    enet_host_destroy(this->connection);
-    enet_deinitialize();
+	enet_host_destroy(this->connection);
+	enet_deinitialize();
 }
 
 void Server::networkEvents() {

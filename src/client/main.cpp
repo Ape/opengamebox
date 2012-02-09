@@ -546,7 +546,7 @@ void Game::receivePacket(ENetEvent event) {
 
 				unsigned short objId = net::bytesToShort(event.packet->data + 2);
 				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[4]);
-                net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
+				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
 				bool flipped = event.packet->data[6];
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
 				std::string objectId = std::string((char*) event.packet->data + 15, event.packet->dataLength - 15);
@@ -641,7 +641,7 @@ void Game::receivePacket(ENetEvent event) {
 				net::Client *client = this->clients.find(event.packet->data[1])->second;
 
 				unsigned int numberObjects = 0;
-                Object *lastObject;
+				Object *lastObject;
 
 				size_t i = 2;
 				while (i < event.packet->dataLength) {
@@ -657,13 +657,13 @@ void Game::receivePacket(ENetEvent event) {
 				}
 
 				if (numberObjects == 1) {
-                    this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
-                }else if (numberObjects >= 2) {
-                    std::ostringstream stream;
-                    stream << numberObjects;
+					this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
+				}else if (numberObjects >= 2) {
+					std::ostringstream stream;
+					stream << numberObjects;
 
-                    this->addMessage(client->nick + " flipped " + stream.str() + " objects.");
-                }
+					this->addMessage(client->nick + " flipped " + stream.str() + " objects.");
+				}
 			}
 
 			break;
@@ -765,7 +765,7 @@ void Game::askNick() {
 
 void Game::removeInput() {
 	delete input;
-    this->input = nullptr;
+	this->input = nullptr;
 }
 
 void Game::identifyToServer(std::string nick) {
