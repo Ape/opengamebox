@@ -14,10 +14,13 @@ ENDIF(WIN32 AND MINGW)
 ### User selectable options ###
 option(DEBUG "Show all warnings, include debug symbols, and disable optimizations" ON)
 
+set(CMAKE_CXX_FLAGS_DEBUG -Wall)
+set(CMAKE_CXX_FLAGS_RELEASE -s)
+
 if(DEBUG)
-	add_definitions(-Wall -g)
+	set(CMAKE_BUILD_TYPE debug)
 else(DEBUG)
-	add_definitions(-s -O3)
+	set(CMAKE_BUILD_TYPE release)
 endif(DEBUG)
 
 ### External libraries ###
