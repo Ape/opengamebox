@@ -31,5 +31,5 @@ void Color::setHsv(IRenderer *renderer, float hue, float saturation, float value
 
 void Color::setFromId(IRenderer *renderer, unsigned int id) {
 	// The magical float values below are based on the golden angle on the hue circle
-	this->setHsv(renderer, 217.75608f + 137.50776f * id, 1.0f, 1.0f);
+	this->setHsv(renderer, 217.75608f + 137.50776f * id, 1.0f, 1 - ((id - id % 7) / 7) % 2 * 0.4f);
 }
