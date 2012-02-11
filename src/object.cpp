@@ -13,20 +13,20 @@ Object::Object(std::string objectId, unsigned int id, Vector2 location) {
 
 	if (this->objectId == "card_7c") {
 		this->name = "Seven of Clubs";
-	}else if (this->objectId == "card_Kh") {
+	} else if (this->objectId == "card_Kh") {
 		this->name = "King of Hearts";
-	}else if (this->objectId == "card_As") {
+	} else if (this->objectId == "card_As") {
 		this->name = "Ace of Spades";
-	}else if (this->objectId == "chessboard") {
+	} else if (this->objectId == "chessboard") {
 		this->name = "Chessboard";
 		this->size = Vector2(512.0f, 512.0f);
-	}else if (this->objectId == "piece_red") {
+	} else if (this->objectId == "piece_red") {
 		this->name = "Red piece";
 		this->size = Vector2(50.0f, 50.0f);
-	}else if (this->objectId == "piece_blue") {
+	} else if (this->objectId == "piece_blue") {
 		this->name = "Blue piece";
 		this->size = Vector2(50.0f, 50.0f);
-	}else {
+	} else {
 		this->size = Vector2(300.0f, 300.0f);
 		this->name = this->objectId;
 	}
@@ -134,7 +134,7 @@ bool Object::checkIfUnder(std::vector<Object*> objectOrder) {
 			if (object->getId() == this->getId()) {
 				thisFound = true;
 			}
-		}else if (this->testCollision(object)) {
+		} else if (this->testCollision(object)) {
 			this->objectsAbove.push_back(object);
 		}
 	}
@@ -234,7 +234,7 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 		tint.blue = 0.75f;
 	}
 	
-	if (this->owner != nullptr || this->owner != localClient) {
+	if (this->owner == nullptr || this->owner == localClient) {
 		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, tint);
 	}
 }

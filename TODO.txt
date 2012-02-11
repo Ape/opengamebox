@@ -2,13 +2,11 @@ General:
 	- loading settings from a file
 
 Networking:
-	- send private object information
 	- multiobject create packet
 
 Mechanics:
 	- ability to rotate objects
 		- free angle and 90 degree steps
-	- flipping and owning a stack instead of individual objects
 	- server-side dice command
 	- shuffle to happen on server-side
 	- ability to remove selected objects
@@ -17,7 +15,6 @@ Mechanics:
 	- uploading objects to the server
 
 Graphics:
-	- new method for drawing private objects
 	- ability to rotate the camera
 	- use player colors in chat messages
 	- fix chat input location

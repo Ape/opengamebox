@@ -172,40 +172,62 @@ void Game::localEvents() {
 
 	if (event.type == ALLEGRO_EVENT_TIMER) {
 		this->redraw = true;
-	}else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+	} else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 		this->quit();
-	}else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+	} else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 		this->renderer->resize();
-	}else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
+	} else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 		if (input != nullptr) {
 			this->input->onKey(event.keyboard);
-		}else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+		} else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 			// Create a new chat input widget
 			this->input = new InputBox(this, &Game::sendChat, Vector2(SCREEN_H - 40, 0), Vector2(24, 150), this->renderer->getFont(), 255);
 		}
-	}else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
 		if (input == nullptr) {
 			if (event.keyboard.keycode == ALLEGRO_KEY_F10) {
 				this->quit();
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE) {
-				for (auto& object : this->selectedObjects) {
-					if (object->isOwnedBy(this->clients.find(localClient)->second)) {
-						object->own(nullptr);
-					}else if (object->isOwnedBy(nullptr)) {
-						object->own(this->clients.find(localClient)->second);
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE) {
+				if (this->selectedObjects.size() > 0) {
+					std::string data;
+					data.push_back(net::PACKET_OWN);
+
+					// If even one of the selected objects isn't owned by the player every selected object will be owned. If all of the
+					// objects are owned then all of the objects will be disowned.
+					bool owned = true;
+ 					for (auto& object : this->selectedObjects) {
+						if (! object->isOwnedBy(this->clients.find(localClient)->second)) {
+							owned = false;
+
+							break;
+						}
 					}
+
+					data += ! owned;
+
+					for (auto& object : this->selectedObjects) {
+						if (owned) {
+							object->own(nullptr);
+						} else if (object->isOwnedBy(nullptr)) {
+							object->own(this->clients.find(localClient)->second);
+						}
+
+						net::dataAppendShort(data, object->getId());
+					}
+
+					net::sendCommand(connection, data.c_str(), data.length());
 				}
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_C) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_C) {
 				this->chatCommand("create card_7c");
 				this->chatCommand("create card_Kh");
 				this->chatCommand("create card_As");
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_V) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_V) {
 				this->chatCommand("create chessboard");
 				for (int i = 0; i < 12; ++i) {
 					this->chatCommand("create piece_red");
 					this->chatCommand("create piece_blue");
 				}
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
 				if (this->dragging) {
 					std::vector<Object*> objects;
 					std::vector<Vector2> locations;
@@ -229,7 +251,7 @@ void Game::localEvents() {
 
 					this->checkObjectOrder();
 				}
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_F) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_F) {
 				if (this->dragging) {
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
 					for (auto& object : this->selectedObjects) {
@@ -237,29 +259,29 @@ void Game::localEvents() {
 						nextLocation += object->getStackDelta();
 					}
 				}
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
 				this->renderer->addScreenLocation(Vector2(10.0f, 0.0f));
 				this->renderer->updateTransformations();
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
 				this->renderer->addScreenLocation(Vector2(-10.0f, 0.0f));
 				this->renderer->updateTransformations();
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_UP) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_UP) {
 				this->renderer->addScreenLocation(Vector2(0.0f, 10.0f));
 				this->renderer->updateTransformations();
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) {
 				this->renderer->addScreenLocation(Vector2(0.0f, -10.0f));
 				this->renderer->updateTransformations();
-			}else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
 				this->snappingToGrid = true;
 			}
 		}
-	}else if (event.type == ALLEGRO_EVENT_KEY_UP) {
+	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {
 		if (input == nullptr) {
 			if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
 				this->snappingToGrid = false;
 			}
 		}
-	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
+	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
 		Vector2 location(event.mouse.x, event.mouse.y);
 		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
@@ -305,21 +327,36 @@ void Game::localEvents() {
 				}
 			}
 		}
-	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 2) {
+	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 2) {
 		if (this->dragging) {
 			std::string data;
 			data.push_back(net::PACKET_FLIP);
+	
+			// If even one of the selected objects isn't flipped every selected object will be flipped. If all of the
+			// objects are flipped then all of the objects will be unflipped.
+			bool flipped = true;
+			for (auto& object : this->selectedObjects) {
+				if (! object->isFlipped()) {
+					flipped = false;
+
+					break;
+				}
+			}
+
+			data += ! flipped;
 
 			for (auto& object : this->selectedObjects) {
+				object->setFlipped(! flipped);
+
 				net::dataAppendShort(data, object->getId());
 			}
 
 			net::sendCommand(connection, data.c_str(), data.length());
 		}
-	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3) {
+	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3) {
 		this->movingScreen = true;
 		this->movingScreenStart = Vector2(event.mouse.x, event.mouse.y);
-	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1) {
+	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1) {
 		if (this->dragging) {
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
@@ -338,13 +375,13 @@ void Game::localEvents() {
 
 			this->dragging = false;
 		}
-	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
+	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
 		this->movingScreen = false;
-	}else if (event.type == ALLEGRO_EVENT_MOUSE_AXES) {
+	} else if (event.type == ALLEGRO_EVENT_MOUSE_AXES) {
 		if (event.mouse.dz != 0) {
 			this->renderer->mulScreenZoom(1 - 0.1f * event.mouse.dz);
 			this->renderer->updateTransformations();
-		}else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
+		} else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
@@ -382,7 +419,7 @@ void Game::localEvents() {
 
 				object->setLocation(destination);
 			}
-		}else if (this->movingScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
+		} else if (this->movingScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
 			Vector2 location(event.mouse.x, event.mouse.y);
 
 			this->renderer->addScreenLocation(location - this->movingScreenStart);
@@ -571,7 +608,7 @@ void Game::receivePacket(ENetEvent event) {
 
 				if (numberObjects == 1) {
 					this->addMessage(client->nick + " moved " + lastObject->getName() + ".");
-				}else if (numberObjects >= 2) {
+				} else if (numberObjects >= 2) {
 					std::ostringstream stream;
 					stream << numberObjects;
 
@@ -614,14 +651,16 @@ void Game::receivePacket(ENetEvent event) {
 				unsigned int numberObjects = 0;
 				Object *lastObject;
 
-				size_t i = 2;
+				bool flipped = event.packet->data[2];
+
+				size_t i = 3;
 				while (i < event.packet->dataLength) {
 					++numberObjects;
 
 					unsigned short objId = net::bytesToShort(event.packet->data + i);
 
 					Object *object = this->objects.find(objId)->second;
-					object->flip();
+					object->setFlipped(flipped);
 
 					lastObject = object;
 					i += 2;
@@ -629,11 +668,57 @@ void Game::receivePacket(ENetEvent event) {
 
 				if (numberObjects == 1) {
 					this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
-				}else if (numberObjects >= 2) {
+				} else if (numberObjects >= 2) {
 					std::ostringstream stream;
 					stream << numberObjects;
 
 					this->addMessage(client->nick + " flipped " + stream.str() + " objects.");
+				}
+			}
+
+			break;
+		}
+
+		case net::PACKET_OWN: {
+			if (event.packet->dataLength >= 2) {
+				net::Client *client = this->clients.find(event.packet->data[1])->second;
+
+				unsigned int numberObjects = 0;
+				Object *lastObject;
+
+				bool owned = event.packet->data[2];
+
+				size_t i = 3;
+				while (i < event.packet->dataLength) {
+					++numberObjects;
+
+					unsigned short objId = net::bytesToShort(event.packet->data + i);
+
+					Object *object = this->objects.find(objId)->second;
+					if (owned) {
+						object->own(client);
+					} else {
+						object->own(nullptr);
+					}
+
+					lastObject = object;
+					i += 2;
+				}
+
+				std::string verb;
+				if (owned) {
+					verb = "owned";
+				} else {
+					verb = "disowned";
+				}
+
+				if (numberObjects == 1) {
+					this->addMessage(client->nick + " " + verb + " " + lastObject->getName() + ".");
+				} else if (numberObjects >= 2) {
+					std::ostringstream stream;
+					stream << numberObjects;
+
+					this->addMessage(client->nick + " " + verb + " " + stream.str() + " objects.");
 				}
 			}
 
@@ -671,7 +756,7 @@ void Game::addMessage(std::string text) {
 void Game::sendChat(std::string text) {
 	if (text.at(0) == '/') {
 		this->chatCommand(text.substr(1));
-	}else if (al_ustr_length(input->getTextUstr()) > 0) {
+	} else if (al_ustr_length(input->getTextUstr()) > 0) {
 		std::string data;
 		data.push_back(net::PACKET_CHAT);
 		data.append(this->input->getText());
@@ -691,7 +776,7 @@ void Game::chatCommand(std::string commandstr) {
 	if (parameters.at(0) == "create") {
 		if (parameters.size() == 2) {
 			this->createObject(parameters.at(1));
-		}else if (parameters.size() == 4) {
+		} else if (parameters.size() == 4) {
 			Vector2 location;
 			{
 				std::istringstream stream(parameters.at(2));

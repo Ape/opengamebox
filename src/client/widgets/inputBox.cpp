@@ -38,26 +38,26 @@ bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 			(this->game->*send)(std::string(al_cstr(this->text)));
 		}
 		this->game->removeInput();
-	}else if (keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+	} else if (keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
 		this->game->removeInput();
-	}else if (keyboard.keycode == ALLEGRO_KEY_DELETE) {
+	} else if (keyboard.keycode == ALLEGRO_KEY_DELETE) {
 		if (this->inputLocation != al_ustr_length(this->text)) {
 			al_ustr_remove_chr(this->text, al_ustr_offset(this->text, this->inputLocation));
 		}
-	}else if (keyboard.keycode == ALLEGRO_KEY_BACKSPACE) {
+	} else if (keyboard.keycode == ALLEGRO_KEY_BACKSPACE) {
 		if (this->inputLocation > 0) {
 			al_ustr_remove_chr(this->text, al_ustr_offset(this->text, this->inputLocation - 1));
 			--this->inputLocation;
 		}
-	}else if (keyboard.keycode == ALLEGRO_KEY_LEFT) {
+	} else if (keyboard.keycode == ALLEGRO_KEY_LEFT) {
 		if (this->inputLocation > 0) {
 			--this->inputLocation;
 		}
-	}else if (keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+	} else if (keyboard.keycode == ALLEGRO_KEY_RIGHT) {
 		if (this->inputLocation < al_ustr_length(this->text)) {
 			++this->inputLocation;
 		}
-	}else if (keyboard.unichar > 0 && this->inputLocation < this->maxLength) {
+	} else if (keyboard.unichar > 0 && this->inputLocation < this->maxLength) {
 		al_ustr_insert_chr(this->text, al_ustr_offset(this->text, this->inputLocation), keyboard.unichar);
 		++this->inputLocation;
 	}
