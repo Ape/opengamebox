@@ -104,7 +104,7 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited) {
 		allAbove.push_back(this);
 
 		for (auto& object : this->objectsAbove) {
-			if (visited.count(object) == 0) {
+			if (visited.count(object) == 0 && object->owner == this->owner) {
 				std::list<Object*> objects = object->getObjectsAbove(visited);
 
 				if (objects.size() == 1 && objects.front() == nullptr) {
@@ -134,7 +134,7 @@ bool Object::checkIfUnder(std::vector<Object*> objectOrder) {
 			if (object->getId() == this->getId()) {
 				thisFound = true;
 			}
-		} else if (this->testCollision(object)) {
+		} else if (object->owner == this->owner && this->testCollision(object)) {
 			this->objectsAbove.push_back(object);
 		}
 	}
@@ -214,13 +214,6 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 		image = this->backside;
 	}
 
-	if (this->selected != nullptr) {
-		Vector2 pointA = this->location - this->size/2.0f - Vector2(1.0f, 1.0f);
-		Vector2 pointB = this->location + this->size/2.0f + Vector2(1.0f, 1.0f);
-
-		renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f);
-	}
-
 	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
 	if (this->owner == localClient) {
 		renderer->drawText(localClient->nick, Color(renderer, localClient->id), this->location + Vector2(0.0f, -this->size.y / 2.0f - 18.0f),
@@ -235,6 +228,13 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 	}
 	
 	if (this->owner == nullptr || this->owner == localClient) {
+		if (this->selected != nullptr) {
+			Vector2 pointA = this->location - this->size/2.0f - Vector2(1.0f, 1.0f);
+			Vector2 pointB = this->location + this->size/2.0f + Vector2(1.0f, 1.0f);
+
+			renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f);
+		}
+
 		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, tint);
 	}
 }

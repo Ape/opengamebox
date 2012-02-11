@@ -295,7 +295,8 @@ void Game::localEvents() {
 			data.push_back(net::PACKET_SELECT);
 
 			for (auto object = this->objectOrder.rbegin(); object != this->objectOrder.rend(); ++object) {
-				if ((*object)->isSelectedBy(nullptr) && (*object)->testLocation(location)) {
+				if ((*object)->isSelectedBy(nullptr) && ((*object)->isOwnedBy(nullptr) || (*object)->isOwnedBy(this->clients.find(localClient)->second))
+				    && (*object)->testLocation(location)) {
 					std::set<Object*> visited;
 					this->selectedObjects = (*object)->getObjectsAbove(visited);
 
