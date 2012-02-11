@@ -1,5 +1,5 @@
 ### Common definitions ###
-project(OpenGameBox)
+project(OpenGameBox CXX)
 set(executableName opengamebox)
 
 cmake_minimum_required(VERSION 2.6)
@@ -14,8 +14,8 @@ ENDIF(WIN32 AND MINGW)
 ### User selectable options ###
 option(DEBUG "Show all warnings, include debug symbols, and disable optimizations" ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG -Wall)
-set(CMAKE_CXX_FLAGS_RELEASE -s)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -s")
 
 if(DEBUG)
 	set(CMAKE_BUILD_TYPE debug)
