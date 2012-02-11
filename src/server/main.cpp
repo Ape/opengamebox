@@ -225,6 +225,31 @@ void Server::receivePacket(ENetEvent event) {
 			break;
 		}
 
+		case net::PACKET_DICE: {
+			if (event.packet->dataLength == 1 + 2) {
+				unsigned short maxValue = net::bytesToShort(event.packet->data + 1);
+
+				if (maxValue == 0) {
+					maxValue = 1;
+				}
+
+				srand(enet_time_get());
+
+				std::ostringstream reply;
+				reply << this->clients[*id]->nick << " threw " << "d" << maxValue << " and got " << 1 + (rand() % maxValue) << ".";
+
+				std::string data;
+				data += net::PACKET_CHAT;
+				data += 255;
+				data.append(reply.str());
+
+				std::cout << reply.str() << std::endl;
+				net::sendCommand(this->connection, data.c_str(), 2 + reply.str().length());
+			}
+
+			break;
+		}
+
 		case net::PACKET_CREATE: {
 			if (event.packet->dataLength >= 1 + 9 + 1 && event.packet->dataLength <= 1 + 9 + 255) {
 				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[1]);

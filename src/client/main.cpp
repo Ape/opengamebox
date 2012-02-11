@@ -550,7 +550,12 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_CHAT: {
 			if (event.packet->dataLength >= 1 + 1 + 1 && event.packet->dataLength <= 1 + 1 + 1 + 255) {
-				this->addMessage(this->clients[event.packet->data[1]]->nick + ": " + std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+				if (event.packet->data[1] == 255) {
+					this->addMessage(std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+				} else {
+					this->addMessage(this->clients[event.packet->data[1]]->nick + ": " + std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+				}
+		
 			}
 
 			break;
@@ -803,6 +808,22 @@ void Game::chatCommand(std::string commandstr) {
 			this->createObject(parameters.at(1), location);
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " object [x y]");
+		}
+	} else if (parameters.at(0) == "dice") {
+		if (parameters.size() <= 3) {
+			unsigned short maxValue = 6;
+	
+			if (parameters.size() >= 2) {
+				std::istringstream stream(parameters.at(1));
+				stream >> maxValue;
+			}
+
+			std::string data;
+			data.push_back(net::PACKET_DICE);
+			net::dataAppendShort(data, maxValue);
+			net::sendCommand(connection, data.c_str(), data.length());
+		} else {
+			this->addMessage("Usage: /" + parameters.at(0) + " [max value]");
 		}
 	} else {
 		this->addMessage(parameters.at(0) + ": command not found!");
