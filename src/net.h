@@ -12,31 +12,35 @@
 
 class Object;
 
-namespace net{
+namespace net {
 	// Define basic connection parameters
-	const unsigned int DEFAULT_PORT   = 13355;
-	const unsigned int CHANNELS       = 2;
-	const unsigned char MAX_CLIENTS   = 32;
-	const float MAX_FLOAT             = 10000.0f;
-	const double STREAM_INTERVAL      = 5000.0f;
+	const unsigned int DEFAULT_PORT = 13355;
+	const unsigned int CHANNELS     = 2;
+	const unsigned char MAX_CLIENTS = 32;
+	const float MAX_FLOAT           = 10000.0f;
+	const double STREAM_INTERVAL    = 5000.0f;
 
 	// Client control packets
-	const unsigned char PACKET_HANDSHAKE  = 0x01;
-	const unsigned char PACKET_NICK_TAKEN = 0x02;
-	const unsigned char PACKET_JOIN       = 0x03;
-	const unsigned char PACKET_LEAVE      = 0x04;
+	const unsigned char PACKET_HANDSHAKE  = 0x01; // Initialize connection
+	const unsigned char PACKET_NICK_TAKEN = 0x02; // Inform about a reserved nick name
+	const unsigned char PACKET_JOIN       = 0x03; // Inform about a joining client
+	const unsigned char PACKET_LEAVE      = 0x04; // Inform about a leaving client
 
-	// Command packets
-	const unsigned char PACKET_CHAT     = 0x20; // Send a chat message
-	const unsigned char PACKET_CREATE   = 0x21; // Create new objects
-	const unsigned char PACKET_SELECT   = 0x22; // Select objects and prevent others from moving them
-	const unsigned char PACKET_REMOVE   = 0x24; // Remove objects
-	const unsigned char PACKET_MOVE     = 0x25; // Move objects
-	const unsigned char PACKET_FLIP     = 0x26; // Flip objects
-	const unsigned char PACKET_OWN      = 0x27; // Make objects private
+	// Object command packets
+	const unsigned char PACKET_CREATE  = 0x20; // Create new objects
+	const unsigned char PACKET_SELECT  = 0x21; // Select objects and prevent others from moving them
+	const unsigned char PACKET_REMOVE  = 0x22; // Remove objects
+	const unsigned char PACKET_MOVE    = 0x23; // Move objects
+	const unsigned char PACKET_FLIP    = 0x24; // Flip objects
+	const unsigned char PACKET_OWN     = 0x25; // Make objects private
+	const unsigned char PACKET_SHUFFLE = 0x26; // Shuffle objects
+
+	// Other command packets
+	const unsigned char PACKET_CHAT = 0x40; // Send a chat message
+	const unsigned char PACKET_DICE = 0x41; // Throw dice on the server
 
 	// Stream packets
-	const unsigned char PACKET_PINGS = 0xE0;
+	const unsigned char PACKET_PINGS = 0xE0; // Broadcast ping information
 
 	// Structure for storing client information
 	struct Client{

@@ -47,12 +47,16 @@ Renderer::~Renderer() {
 	al_destroy_font(this->font);
 }
 
-ALLEGRO_DISPLAY* Renderer::getDisplay(void) const {
+ALLEGRO_DISPLAY* Renderer::getDisplay() const {
 	return this->display;
 }
 
-ALLEGRO_FONT* Renderer::getFont(void) const {
+ALLEGRO_FONT* Renderer::getFont() const {
 	return this->font;
+}
+
+Coordinates Renderer::getDisplaySize() const {
+	return this->screenSize;
 }
 
 void Renderer::resize() {
@@ -123,14 +127,25 @@ void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Ve
 	                      dest_location.x, dest_location.y, dest_size.x, dest_size.y, 0);
 }
 
-void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness) {
-	this->transformLocation(CAMERA, pointA);
-	this->transformLocation(CAMERA, pointB);
+void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation) {
+	if (transformation != Transformation::UI) {
+		this->transformLocation(transformation, pointA);
+		this->transformLocation(transformation, pointB);
+	}
 
 	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
 }
 
-void Renderer::drawText(std::string text, Color color, Vector2 location, Alignment alignment) {
+void Renderer::drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, Transformation transformation) {
+	if (transformation != Transformation::UI) {
+		this->transformLocation(transformation, pointA);
+		this->transformLocation(transformation, pointB);
+	}
+
+	al_draw_filled_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha));
+}
+
+void Renderer::drawText(std::string text, Vector2 location, Color color, Alignment alignment) {
 	al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x, location.y, this->getAlignment(alignment), text.c_str());
 }
 

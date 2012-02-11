@@ -181,7 +181,8 @@ void Game::localEvents() {
 			this->input->onKey(event.keyboard);
 		} else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 			// Create a new chat input widget
-			this->input = new InputBox(this, &Game::sendChat, Vector2(SCREEN_H - 40, 0), Vector2(24, 150), this->renderer->getFont(), 255);
+			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f), 300.0f,
+			                           this->renderer->getFont(), 255);
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
 		if (input == nullptr) {
@@ -228,6 +229,7 @@ void Game::localEvents() {
 					this->chatCommand("create piece_blue");
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
+				// TODO: Shuffle the objects on the server
 				if (this->dragging) {
 					std::vector<Object*> objects;
 					std::vector<Vector2> locations;
@@ -252,12 +254,20 @@ void Game::localEvents() {
 					this->checkObjectOrder();
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_F) {
-				if (this->dragging) {
+				if (this->selectedObjects.size() > 0) {
+					std::string data;
+					data.push_back(net::PACKET_MOVE);
+
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
 					for (auto& object : this->selectedObjects) {
-						object->setLocation(nextLocation);
+						net::dataAppendShort(data, object->getId());
+						net::dataAppendVector2(data, nextLocation);
+
+						object->setAnimation(nextLocation, ANIMATION_TIME);
 						nextLocation += object->getStackDelta();
 					}
+
+					net::sendCommand(connection, data.c_str(), data.length());
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
 				this->renderer->addScreenLocation(Vector2(10.0f, 0.0f));
@@ -755,18 +765,20 @@ void Game::addMessage(std::string text) {
 
 // Send a chat packet
 void Game::sendChat(std::string text) {
-	if (text.at(0) == '/') {
-		this->chatCommand(text.substr(1));
-	} else if (al_ustr_length(input->getTextUstr()) > 0) {
-		std::string data;
-		data.push_back(net::PACKET_CHAT);
-		data.append(this->input->getText());
-
-		net::sendCommand(connection, data.c_str(), data.length());
-	}
-
 	delete input;
 	this->input = nullptr;
+
+	if (text.length() > 0) {
+		if (text.at(0) == '/') {
+			this->chatCommand(text.substr(1));
+		} else {
+			std::string data;
+			data.push_back(net::PACKET_CHAT);
+			data.append(text);
+
+			net::sendCommand(connection, data.c_str(), data.length());
+		}
+	}
 }
 
 void Game::chatCommand(std::string commandstr) {
@@ -817,20 +829,23 @@ void Game::checkObjectOrder() {
 }
 
 void Game::askNick() {
-	this->input = new InputBox(this, &Game::identifyToServer, Vector2(SCREEN_H - 40, 0), Vector2(20, 100), this->renderer->getFont(), 16);
-}
-
-void Game::removeInput() {
-	delete input;
-	this->input = nullptr;
+	this->input = new InputBox(this, &Game::identifyToServer, "Nick", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f), 225.0f,
+	                           this->renderer->getFont(), 16);
 }
 
 void Game::identifyToServer(std::string nick) {
-	std::string data;
-	data.push_back(net::PACKET_HANDSHAKE);
-	data.append(nick, 0, 16); // Limit nick to 16 characters
+	delete input;
+	this->input = nullptr;
 
-	net::sendCommand(connection, data.c_str(), data.length());
+	if (nick.length() > 0) {
+		std::string data;
+		data.push_back(net::PACKET_HANDSHAKE);
+		data.append(nick, 0, 16); // Limit nick to 16 characters
+
+		net::sendCommand(connection, data.c_str(), data.length());
+	} else {
+		this->askNick();
+	}
 }
 
 void Game::render() {
@@ -889,7 +904,7 @@ void Game::renderUI() {
 				tmpText << client.second->nick;
 			}
 
-			this->renderer->drawText(tmpText.str(), Color(this->renderer, client.second->id), Vector2(0.0f, i * 20.0f));
+			this->renderer->drawText(tmpText.str(), Vector2(0.0f, i * 20.0f), Color(this->renderer, client.second->id));
 		}
 
 		++i;
@@ -897,19 +912,20 @@ void Game::renderUI() {
 
 	for (std::vector<Message>::size_type i = this->messages.size(); i > 0; --i) {
 		if (al_get_time() < this->messages[i-1].time + 10.0) {
-			this->renderer->drawText(this->messages[i-1].message, Color(1.0f, 1.0f, 1.0f),
-			                         Vector2(0.0f, al_get_display_height(this->renderer->getDisplay()) / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
+			this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f),
+			                         Color(1.0f, 1.0f, 1.0f));
 		}
 	}
 
 	tmpText.str(std::string());
 	tmpText << "FPS: " << (int) (1.0 / this->deltaTime + 0.25);
-	this->renderer->drawText(tmpText.str(), Color(1.0f, 1.0f, 1.0f), Vector2(0.0f, al_get_display_height(this->renderer->getDisplay()) - 20.0f));
+	this->renderer->drawText(tmpText.str(), Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f), Color(1.0f, 1.0f, 1.0f));
 
 	for (auto& widget : this->widgets) {
-		widget->draw();
+		widget->draw(this->renderer);
 	}
+
 	if (this->input != nullptr) {
-		input->draw();
+		input->draw(this->renderer);
 	}
 }

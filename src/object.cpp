@@ -216,7 +216,7 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 
 	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
 	if (this->owner == localClient) {
-		renderer->drawText(localClient->nick, Color(renderer, localClient->id), this->location + Vector2(0.0f, -this->size.y / 2.0f - 18.0f),
+		renderer->drawText(localClient->nick, this->location + Vector2(0.0f, -this->size.y / 2.0f - 18.0f), Color(renderer, localClient->id),
 		                   IRenderer::Alignment::CENTER);
 		tint.alpha = 0.75f;
 	}
@@ -232,7 +232,7 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 			Vector2 pointA = this->location - this->size/2.0f - Vector2(1.0f, 1.0f);
 			Vector2 pointB = this->location + this->size/2.0f + Vector2(1.0f, 1.0f);
 
-			renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f);
+			renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f, IRenderer::Transformation::CAMERA);
 		}
 
 		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, tint);

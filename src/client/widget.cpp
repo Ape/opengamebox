@@ -5,7 +5,7 @@ Widget::Widget(Vector2 location, Vector2 size) {
 	this->size = size;
 }
 
-void Widget::draw() {
+void Widget::draw(IRenderer *renderer) {
 
 }
 

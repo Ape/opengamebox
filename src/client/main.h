@@ -42,7 +42,6 @@ public:
 
 	int run(std::string address, int port);
 
-	void removeInput(void);
 	void sendChat(std::string text);
 	void identifyToServer(std::string nick);
 

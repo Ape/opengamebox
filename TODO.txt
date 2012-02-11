@@ -10,6 +10,8 @@ Mechanics:
 	- server-side dice command
 	- shuffle to happen on server-side
 	- ability to remove selected objects
+	- fix object ordering bug
+	- server to know object ordering
 	- loading objects from the filesystem
 	- downloading objects from the server
 	- uploading objects to the server
@@ -17,7 +19,8 @@ Mechanics:
 Graphics:
 	- ability to rotate the camera
 	- use player colors in chat messages
-	- fix chat input location
+	- better screen scrolling with arrow keys by holding the buttons down instead of tapping them
+	- screen zooming with + and - keys
 
 Resources:
 	- full set of 52 playing cards

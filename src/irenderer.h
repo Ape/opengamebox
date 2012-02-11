@@ -14,6 +14,7 @@ public:
 	enum Transformation {CAMERA, CAMERA_INVERSE, UI};
 	enum Alignment {LEFT, CENTER, RIGHT};
 
+	virtual Coordinates getDisplaySize(void) const = 0;
 	virtual void updateTransformations(void) = 0;
 
 	virtual void mulScreenZoom(float zoom) = 0;
@@ -28,9 +29,10 @@ public:
 	                        Vector2 source_size, Vector2 dest_location,
 	                        Vector2 dest_size, Color color) = 0;
 
-	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness) = 0;
+	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation = Transformation::UI) = 0;
+	virtual void drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, Transformation transformation = Transformation::UI) = 0;
 
-	virtual void drawText(std::string text, Color color, Vector2 location, Alignment alignment) = 0;
+	virtual void drawText(std::string text, Vector2 location, Color color, Alignment alignment = Alignment::LEFT) = 0;
 
 	virtual Coordinates getTextureSize(std::string texture) = 0;
 

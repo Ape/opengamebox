@@ -10,10 +10,10 @@ class Game;
 
 class InputBox : public Widget{
 public:
-	InputBox(Game *game, void (Game::*send)(std::string), Vector2 location, Vector2 size, ALLEGRO_FONT *font, unsigned char maxLen);
+	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen);
 	~InputBox();
 
-	virtual void draw(void);
+	virtual void draw(IRenderer *renderer);
 	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
 	std::string getText();
 
@@ -23,6 +23,7 @@ private:
 	Game *game;
 	void (Game::*send)(std::string);
 
+	std::string caption;
 	ALLEGRO_FONT *font;
 	ALLEGRO_USTR *text;
 	size_t inputLocation;
