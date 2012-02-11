@@ -54,13 +54,21 @@ Vector2 Object::getLocation() const {
 	return this->location;
 }
 
+Vector2 Object::getTargetLocation() const {
+	if (this->animationTime > 0.0f) {
+		return this->animationTarget;
+	} else {
+		return this->location;
+	}
+}
+
 Vector2 Object::getSize() const {
 	return this->size;
 }
 
 bool Object::testLocation(Vector2 location) const {
-	if (location.x >= this->location.x - this->size.x/2.0f && location.x <= this->location.x + this->size.x/2.0f
-	    && location.y >= this->location.y - this->size.y/2.0f && location.y <= this->location.y + this->size.y/2.0f) {
+	if (location.x >= this->getTargetLocation().x - this->size.x/2.0f && location.x <= this->getTargetLocation().x + this->size.x/2.0f
+	    && location.y >= this->getTargetLocation().y - this->size.y/2.0f && location.y <= this->getTargetLocation().y + this->size.y/2.0f) {
 		return true;
 	} else {
 		return false;
@@ -68,9 +76,9 @@ bool Object::testLocation(Vector2 location) const {
 }
 
 bool Object::testCollision(const Object *object, bool second) const {
-	if (object->testLocation(this->location - this->size/2.0f) || object->testLocation(this->location + this->size/2.0f)
-	        || object->testLocation(Vector2(this->location.x - this->size.x/2.0f, this->location.y + this->size.y/2.0f))
-	        || object->testLocation(Vector2(this->location.x + this->size.x/2.0f, this->location.y - this->size.y/2.0f))
+	if (object->testLocation(this->getTargetLocation() - this->size/2.0f) || object->testLocation(this->getTargetLocation() + this->size/2.0f)
+	        || object->testLocation(Vector2(this->getTargetLocation().x - this->size.x/2.0f, this->getTargetLocation().y + this->size.y/2.0f))
+	        || object->testLocation(Vector2(this->getTargetLocation().x + this->size.x/2.0f, this->getTargetLocation().y - this->size.y/2.0f))
 	        || (! second && object->testCollision(this, true))) {
 		return true;
 	} else {
