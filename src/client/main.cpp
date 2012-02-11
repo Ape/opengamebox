@@ -261,7 +261,7 @@ void Game::localEvents() {
 		}
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
 		Vector2 location(event.mouse.x, event.mouse.y);
-		this->renderer->transformLocation(CAMERA_INVERSE, location);
+		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 		if (! this->dragging) {
 			for (auto& object : this->selectedObjects) {
@@ -322,7 +322,7 @@ void Game::localEvents() {
 	}else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1) {
 		if (this->dragging) {
 			Vector2 location(event.mouse.x, event.mouse.y);
-			this->renderer->transformLocation(CAMERA_INVERSE, location);
+			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 			std::string data;
 			data.push_back(net::PACKET_MOVE);
@@ -346,7 +346,7 @@ void Game::localEvents() {
 			this->renderer->updateTransformations();
 		}else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
 			Vector2 location(event.mouse.x, event.mouse.y);
-			this->renderer->transformLocation(CAMERA_INVERSE, location);
+			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 			if (this->snappingToGrid) {
 				Vector2 grid = this->selectedObjects.front()->getSize() + Vector2(0.001f, 0.001f);
@@ -778,7 +778,7 @@ void Game::animate() {
 }
 
 void Game::renderGame() {
-	this->renderer->useTransform(CAMERA);
+	this->renderer->useTransform(IRenderer::CAMERA);
 
 	// Draw the table area
 	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), Color(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
@@ -789,7 +789,7 @@ void Game::renderGame() {
 }
 
 void Game::renderUI() {
-	this->renderer->useTransform(UI);
+	this->renderer->useTransform(IRenderer::UI);
 
 	std::ostringstream tmpText;
 

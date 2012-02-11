@@ -130,8 +130,8 @@ void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float 
 	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
 }
 
-void Renderer::drawText(std::string text, Color color, Vector2 location) {
-	al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x, location.y, 0, text.c_str());
+void Renderer::drawText(std::string text, Color color, Vector2 location, Alignment alignment) {
+	al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x, location.y, this->getAlignment(alignment), text.c_str());
 }
 
 Coordinates Renderer::getTextureSize(std::string texture) {
@@ -161,6 +161,30 @@ ALLEGRO_TRANSFORM* Renderer::getTransformation(Transformation transformation) {
 
 		default: {
 			return nullptr;
+			break;
+		}
+	}
+}
+
+int Renderer::getAlignment(Alignment alignment) {
+	switch (alignment) {
+		case Alignment::LEFT: {
+			return ALLEGRO_ALIGN_LEFT;
+			break;
+		}
+
+		case Alignment::CENTER: {
+			return ALLEGRO_ALIGN_CENTRE;
+			break;
+		}
+
+		case Alignment::RIGHT: {
+			return ALLEGRO_ALIGN_RIGHT;
+			break;
+		}
+
+		default: {
+			return ALLEGRO_ALIGN_LEFT;
 			break;
 		}
 	}

@@ -221,18 +221,20 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 		renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f);
 	}
 
+	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
 	if (this->owner == localClient) {
-		Vector2 pointA = this->location - this->size/2.0f - Vector2(3.0f, 3.0f);
-		Vector2 pointB = this->location + this->size/2.0f + Vector2(3.0f, 3.0f);
-
-		renderer->drawRectangle(pointA, pointB, Color(0.0f, 0.0f, 1.0f, 1.0f), 2.0f);
+		renderer->drawText(localClient->nick, Color(renderer, localClient->id), this->location + Vector2(0.0f, -this->size.y / 2.0f - 18.0f),
+		                   IRenderer::Alignment::CENTER);
+		tint.alpha = 0.75f;
+	}
+	
+	if (this->isUnder()) {
+		tint.red = 0.75f;
+		tint.green = 0.75f;
+		tint.blue = 0.75f;
 	}
 	
 	if (this->owner != nullptr || this->owner != localClient) {
-		if (!this->isUnder()) {
-			renderer->drawBitmap(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size);
-		} else {
-			renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, Color(0.75f, 0.75f, 0.75f, 1.0f));
-		}
+		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, tint);
 	}
 }

@@ -38,7 +38,7 @@ public:
                             Vector2 dest_size, Color color);
 	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness);
 
-	virtual void drawText(std::string text, Color color, Vector2 location);
+	virtual void drawText(std::string text, Color color, Vector2 location, Alignment alignment = Alignment::LEFT);
 
 	virtual Coordinates getTextureSize(std::string texture);
 
@@ -65,6 +65,7 @@ private:
 	void loadTexture(std::string);
 
 	ALLEGRO_TRANSFORM* getTransformation(Transformation transformation);
+	int getAlignment(IRenderer::Alignment alignment);
 };
 
 #endif

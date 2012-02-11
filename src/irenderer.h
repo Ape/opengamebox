@@ -9,10 +9,11 @@
 
 class Color;
 
-enum Transformation{CAMERA, CAMERA_INVERSE, UI};
-
 class IRenderer{
 public:
+	enum Transformation {CAMERA, CAMERA_INVERSE, UI};
+	enum Alignment {LEFT, CENTER, RIGHT};
+
 	virtual void updateTransformations(void) = 0;
 
 	virtual void mulScreenZoom(float zoom) = 0;
@@ -29,7 +30,7 @@ public:
 
 	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness) = 0;
 
-	virtual void drawText(std::string text, Color color, Vector2 location) = 0;
+	virtual void drawText(std::string text, Color color, Vector2 location, Alignment alignment) = 0;
 
 	virtual Coordinates getTextureSize(std::string texture) = 0;
 
