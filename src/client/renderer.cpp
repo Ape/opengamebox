@@ -1,7 +1,12 @@
 #include "renderer.h"
 
-Renderer::Renderer(Coordinates screenSize) {
+Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 	this->screenSize = screenSize;
+
+	if (multisamplingSamples > 1) {
+		al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 1, ALLEGRO_SUGGEST);
+		al_set_new_display_option(ALLEGRO_SAMPLES, multisamplingSamples, ALLEGRO_SUGGEST);
+	}
 
 	// Initialize display
 	this->display = al_create_display(this->screenSize.x, this->screenSize.y);

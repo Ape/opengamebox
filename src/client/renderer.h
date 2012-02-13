@@ -17,7 +17,7 @@
 
 class Renderer : public IRenderer{
 public:
-	Renderer(Coordinates screenSize);
+	Renderer(Coordinates screenSize, const int multisamplingSamples);
 	~Renderer(void);
 
 	ALLEGRO_DISPLAY* getDisplay(void) const;
