@@ -43,7 +43,7 @@ namespace net {
 	const unsigned char PACKET_PINGS = 0xE0; // Broadcast ping information
 
 	// Structure for storing client information
-	struct Client{
+	struct Client {
 		unsigned char id;
 
 		Client(ENetPeer *peer); // Constructor for server

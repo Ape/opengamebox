@@ -736,6 +736,8 @@ void Game::receivePacket(ENetEvent event) {
 
 					this->addMessage(client->nick + " " + verb + " " + stream.str() + " objects.");
 				}
+
+				this->checkObjectOrder();
 			}
 
 			break;
