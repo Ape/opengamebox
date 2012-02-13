@@ -84,7 +84,7 @@ int Game::run(std::string address, int port) {
 	}
 
 	// Initialize the renderer
-	this->renderer = new Renderer(Coordinates(SCREEN_W, SCREEN_H));
+	this->renderer = new Renderer(Coordinates(SCREEN_W, SCREEN_H), MULTISAMPLING_SAMPLES);
 
 	// Create a timer for the main loop
 	this->timer = al_create_timer(1.0f / FPS_LIMIT);

@@ -35,6 +35,7 @@ const int SCREEN_H = 768;
 const float FPS_LIMIT = 60.0f;
 const bool FULLSCREEN = false;
 const float ANIMATION_TIME = 0.5f;
+const int MULTISAMPLING_SAMPLES = 2;
 
 class Game{
 public:
