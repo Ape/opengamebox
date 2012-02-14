@@ -72,7 +72,7 @@ void net::floatToBytes(unsigned char* bytes, float value) {
 		normalized = 0.99999f;
 	}
 
-	unsigned int out = normalized * 4294967295;
+	unsigned int out = normalized * 4294967295u;
 
 	net::intToBytes(bytes, out);
 }
@@ -156,7 +156,7 @@ void net::removeObject(std::vector<Object*> &objectOrder, Object* object) {
 		if (objectOrder.at(i)->getId() == object->getId()) {
 			objectOrder.erase(objectOrder.begin() + i);
 
-			break; 
+			break;
 		}
 	}
 }
