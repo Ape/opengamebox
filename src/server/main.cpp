@@ -11,8 +11,15 @@ int main(int argc, char **argv) {
 	}
 
 	Server server = Server(port);
+	serverPtr = &server;
 
 	return server.run();
+}
+
+void catchSignal(int signal) {
+	std::cout << std::endl << "Exiting.." << std::endl;
+
+	serverPtr->exit();
 }
 
 Server::Server(unsigned int port) {
@@ -29,6 +36,9 @@ int Server::run() {
 		std::cerr << "Illegal port number!" << std::endl;
 		return EXIT_FAILURE;
 	}
+
+	// Catch SIGINT
+	signal(SIGINT, catchSignal);
 
 	// Initialize ENnet
 	if (enet_initialize() != 0) {
@@ -48,6 +58,18 @@ int Server::run() {
 	// Enter the main loop
 	this->mainLoop();
 
+	// Disconnect all remaining clients
+	for (auto& client : this->clients) {
+		enet_peer_disconnect_now(client.second->peer, 0);
+		delete static_cast<unsigned char*>(client.second->peer->data);
+		delete client.second;
+	}
+
+	// Dispose all objects
+	for (auto& object : this->objects) {
+		delete object.second;
+	}
+
 	// Exit the server
 	this->dispose();
 	return EXIT_SUCCESS;
@@ -59,6 +81,10 @@ void Server::mainLoop() {
 
 		this->sendStream();
 	}
+}
+
+void Server::exit() {
+	this->exiting = true;
 }
 
 void Server::dispose() {
@@ -127,6 +153,8 @@ void Server::networkEvents() {
 					// Reset the peer's client information.
 					delete this->clients.find(*id)->second;
 					this->clients.erase(*id);
+
+					delete static_cast<unsigned char*>(event.peer->data);
 					event.peer->data = nullptr;
 				}
 
