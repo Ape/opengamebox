@@ -30,6 +30,8 @@ void InputBox::draw(IRenderer *renderer) {
 	}
 
 	tmpText << al_cstr(tmpUstr) << "|";
+	al_ustr_free(tmpUstr);
+
 	tmpUstr = al_ustr_dup_substr(this->text, al_ustr_offset(this->text, this->inputLocation), al_ustr_size(this->text));
 	tmpText << al_cstr(tmpUstr);
 	al_ustr_free(tmpUstr);

@@ -48,8 +48,8 @@ Renderer::~Renderer() {
 		al_destroy_bitmap(texture.second);
 	}
 
-	al_destroy_display(this->display);
 	al_destroy_font(this->font);
+	al_destroy_display(this->display);
 }
 
 ALLEGRO_DISPLAY* Renderer::getDisplay() const {

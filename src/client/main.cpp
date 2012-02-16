@@ -125,6 +125,16 @@ int Game::run(std::string address, int port) {
 	// Enter the main loop
 	this->mainLoop();
 
+	// Dispose client information
+	for (auto& client : this->clients) {
+		delete client.second;
+	}
+
+	// Dispose all objects
+	for (auto& object : this->objects) {
+		delete object.second;
+	}
+
 	// Exit the application
 	this->dispose();
 	return EXIT_SUCCESS;
@@ -164,6 +174,11 @@ void Game::dispose() {
 
 	al_destroy_timer(this->timer);
 	al_destroy_event_queue(this->event_queue);
+
+	al_uninstall_mouse();
+	al_uninstall_keyboard();	
+
+	al_uninstall_system();
 }
 
 void Game::localEvents() {
