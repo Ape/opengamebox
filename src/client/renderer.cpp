@@ -1,6 +1,6 @@
 #include "renderer.h"
 
-const float Renderer::pi = 3.141592653589;
+const float Renderer::PI = 3.141592653589f;
 
 Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 	this->screenSize = screenSize;
@@ -39,8 +39,6 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 	this->screenRotation = 0.0f;
 
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
-
-	// TODO: Do we want a system for preloading textures?
 
 	this->updateTransformations();
 }
@@ -106,6 +104,11 @@ void Renderer::setScreenSize(Coordinates screenSize) {
 	this->screenSize = screenSize;
 }
 
+void Renderer::rotateScreen(float angle) {
+	this->screenRotation += angle;
+	this->updateTransformations();
+}
+
 void Renderer::loadTexture(std::string texture) {
 	if (this->textures[texture] == nullptr) {
 		std::string path = "gfx/" + texture;
@@ -137,12 +140,20 @@ void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Ve
 }
 
 void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation) {
+	Vector2 pointAB = Vector2(pointA.x, pointB.y);
+	Vector2 pointBA = Vector2(pointB.x, pointA.y);
+
 	if (transformation != Transformation::UI) {
 		this->transformLocation(transformation, pointA);
 		this->transformLocation(transformation, pointB);
+		this->transformLocation(transformation, pointAB);
+		this->transformLocation(transformation, pointBA);
 	}
 
-	al_draw_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
+	al_draw_line(pointA.x, pointA.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
+	al_draw_line(pointA.x, pointA.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
+	al_draw_line(pointB.x, pointB.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
+	al_draw_line(pointB.x, pointB.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
 }
 
 void Renderer::drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, Transformation transformation) {
@@ -218,15 +229,10 @@ void Renderer::transformLocation(Transformation transformation, Vector2 &locatio
 	al_transform_coordinates(this->getTransformation(transformation), &location.x, &location.y);
 }
 
-void Renderer::useTransform(Transformation transformation) {
+void Renderer::useTransformation(Transformation transformation) {
 	al_use_transform(this->getTransformation(transformation));
 }
 
 void Renderer::hsvToRgb(float hue, float saturation, float value, Color *color) {
 	al_color_hsv_to_rgb(hue, saturation, value, &color->red, &color->green, &color->blue);
-}
-
-void Renderer::rotate(float angle)
-{
-	screenRotation += angle;
 }

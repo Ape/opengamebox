@@ -299,11 +299,9 @@ void Game::localEvents() {
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
 				this->snappingToGrid = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_Q) {
-				this->renderer->rotate(Renderer::pi/10);
-				this->renderer->updateTransformations();
+				this->renderer->rotateScreen(-Renderer::PI / 10.0f);
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
-				this->renderer->rotate(-Renderer::pi/10);
-				this->renderer->updateTransformations();
+				this->renderer->rotateScreen(Renderer::PI / 10.0f);
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {
@@ -923,7 +921,7 @@ void Game::animate() {
 }
 
 void Game::renderGame() {
-	this->renderer->useTransform(IRenderer::CAMERA);
+	this->renderer->useTransformation(IRenderer::CAMERA);
 
 	// Draw the table area
 	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), Color(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
@@ -934,7 +932,7 @@ void Game::renderGame() {
 }
 
 void Game::renderUI() {
-	this->renderer->useTransform(IRenderer::UI);
+	this->renderer->useTransformation(IRenderer::UI);
 
 	std::ostringstream tmpText;
 

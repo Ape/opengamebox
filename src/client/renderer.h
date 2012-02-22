@@ -17,6 +17,8 @@
 
 class Renderer : public IRenderer{
 public:
+	static const float PI;
+
 	Renderer(Coordinates screenSize, const int multisamplingSamples);
 	~Renderer(void);
 
@@ -30,6 +32,7 @@ public:
 	virtual void mulScreenZoom(float zoom);
 	virtual void addScreenLocation(Vector2 location);
 	virtual void setScreenSize(Coordinates screenSize);
+	virtual void rotateScreen(float angle);
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,
@@ -46,13 +49,9 @@ public:
 	virtual Coordinates getTextureSize(std::string texture);
 
 	virtual void transformLocation(Transformation transformation, Vector2 &location);
-	virtual void useTransform(Transformation transformation);
+	virtual void useTransformation(Transformation transformation);
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color);
-
-	virtual void rotate(float angle);
-
-	static const float pi;
 
 private:
 	ALLEGRO_DISPLAY *display;

@@ -9,7 +9,7 @@
 
 class Color;
 
-class IRenderer{
+class IRenderer {
 public:
 	enum Transformation {CAMERA, CAMERA_INVERSE, UI};
 	enum Alignment {LEFT, CENTER, RIGHT};
@@ -20,6 +20,7 @@ public:
 	virtual void mulScreenZoom(float zoom) = 0;
 	virtual void addScreenLocation(Vector2 location) = 0;
 	virtual void setScreenSize(Coordinates screenSize) = 0;
+	virtual void rotateScreen(float angle) = 0;
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,
@@ -37,11 +38,9 @@ public:
 	virtual Coordinates getTextureSize(std::string texture) = 0;
 
 	virtual void transformLocation(Transformation transformation, Vector2 &location) = 0;
-	virtual void useTransform(Transformation transformation) = 0;
+	virtual void useTransformation(Transformation transformation) = 0;
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color) = 0;
-
-	virtual void rotate(float angle) = 0;
 };
 
 #endif
