@@ -176,7 +176,7 @@ void Game::dispose() {
 	al_destroy_event_queue(this->event_queue);
 
 	al_uninstall_mouse();
-	al_uninstall_keyboard();	
+	al_uninstall_keyboard();
 
 	al_uninstall_system();
 }
@@ -298,6 +298,12 @@ void Game::localEvents() {
 				this->renderer->updateTransformations();
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
 				this->snappingToGrid = true;
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_Q) {
+				this->renderer->rotate(Renderer::pi/10);
+				this->renderer->updateTransformations();
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
+				this->renderer->rotate(-Renderer::pi/10);
+				this->renderer->updateTransformations();
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {
@@ -357,7 +363,7 @@ void Game::localEvents() {
 		if (this->dragging) {
 			std::string data;
 			data.push_back(net::PACKET_FLIP);
-	
+
 			// If even one of the selected objects isn't flipped every selected object will be flipped. If all of the
 			// objects are flipped then all of the objects will be unflipped.
 			bool flipped = true;
@@ -570,7 +576,7 @@ void Game::receivePacket(ENetEvent event) {
 				} else {
 					this->addMessage(this->clients[event.packet->data[1]]->nick + ": " + std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
 				}
-		
+
 			}
 
 			break;
@@ -829,7 +835,7 @@ void Game::chatCommand(std::string commandstr) {
 	} else if (parameters.at(0) == "dice") {
 		if (parameters.size() <= 3) {
 			unsigned short maxValue = 6;
-	
+
 			if (parameters.size() >= 2) {
 				std::istringstream stream(parameters.at(1));
 				stream >> maxValue;

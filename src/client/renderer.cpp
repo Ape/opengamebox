@@ -1,5 +1,7 @@
 #include "renderer.h"
 
+const float Renderer::pi = 3.141592653589;
+
 Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 	this->screenSize = screenSize;
 
@@ -73,6 +75,7 @@ void Renderer::resize() {
 
 void Renderer::updateTransformations() {
 	al_identity_transform(&this->camera);
+	al_rotate_transform(&this->camera, this->screenRotation);
 	al_translate_transform(&this->camera, this->screenSize.x / this->screenZoom, this->screenSize.y / this->screenZoom);
 	al_translate_transform(&this->camera, this->screenLocation.x, this->screenLocation.y);
 	al_scale_transform(&this->camera, this->screenZoom / 2.0f, this->screenZoom / 2.0f);
@@ -81,6 +84,7 @@ void Renderer::updateTransformations() {
 	al_scale_transform(&this->camera_inverse, 2.0f / this->screenZoom, 2.0f / this->screenZoom);
 	al_translate_transform(&this->camera_inverse, -this->screenLocation.x, -this->screenLocation.y);
 	al_translate_transform(&this->camera_inverse, -this->screenSize.x / this->screenZoom, -this->screenSize.y / this->screenZoom);
+	al_rotate_transform(&this->camera_inverse, -this->screenRotation);
 
 	// TODO: Use al_invert_transform
 	/*al_copy_transform(&this->camera, &this->camera_inverse);
@@ -220,4 +224,9 @@ void Renderer::useTransform(Transformation transformation) {
 
 void Renderer::hsvToRgb(float hue, float saturation, float value, Color *color) {
 	al_color_hsv_to_rgb(hue, saturation, value, &color->red, &color->green, &color->blue);
+}
+
+void Renderer::rotate(float angle)
+{
+	screenRotation += angle;
 }

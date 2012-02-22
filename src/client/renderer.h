@@ -50,6 +50,10 @@ public:
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color);
 
+	virtual void rotate(float angle);
+
+	static const float pi;
+
 private:
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_FONT *font;

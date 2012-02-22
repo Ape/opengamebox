@@ -40,6 +40,8 @@ public:
 	virtual void useTransform(Transformation transformation) = 0;
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color) = 0;
+
+	virtual void rotate(float angle) = 0;
 };
 
 #endif
