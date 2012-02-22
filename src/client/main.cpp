@@ -508,7 +508,7 @@ void Game::receivePacket(ENetEvent event) {
 				// Update the local client list
 				size_t i = 2;
 				while (i < event.packet->dataLength) {
-					net::Client *client = new net::Client(std::string((char*) event.packet->data + i + 2, event.packet->data[i + 1]));
+					net::Client *client = new net::Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]));
 					client->id = event.packet->data[i];
 					client->ping = 65535;
 					this->clients[event.packet->data[i]] = client;
@@ -533,7 +533,7 @@ void Game::receivePacket(ENetEvent event) {
 		case net::PACKET_JOIN: {
 			if (event.packet->dataLength >= 3 && event.packet->dataLength <= 35) {
 				// Store the client information
-				net::Client *client = new net::Client(std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+				net::Client *client = new net::Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				client->id = event.packet->data[1];
 				client->ping = 65535;
 				this->clients[event.packet->data[1]] = client;
@@ -570,9 +570,10 @@ void Game::receivePacket(ENetEvent event) {
 		case net::PACKET_CHAT: {
 			if (event.packet->dataLength >= 1 + 1 + 1 && event.packet->dataLength <= 1 + 1 + 1 + 255) {
 				if (event.packet->data[1] == 255) {
-					this->addMessage(std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+					this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				} else {
-					this->addMessage(this->clients[event.packet->data[1]]->nick + ": " + std::string((char*) event.packet->data + 2, event.packet->dataLength - 2));
+					this->addMessage(this->clients[event.packet->data[1]]->nick + ": "
+					                 + std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				}
 
 			}
@@ -592,7 +593,7 @@ void Game::receivePacket(ENetEvent event) {
 				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
 				bool flipped = event.packet->data[6];
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
-				std::string objectId = std::string((char*) event.packet->data + 15, event.packet->dataLength - 15);
+				std::string objectId = std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15);
 
 				Object *object = new Object(objectId, objId, location);
 				object->select(selected);
@@ -960,7 +961,7 @@ void Game::renderUI() {
 	}
 
 	tmpText.str(std::string());
-	tmpText << "FPS: " << (int) (1.0 / this->deltaTime + 0.25);
+	tmpText << "FPS: " << static_cast<int>(1.0 / this->deltaTime + 0.25);
 	this->renderer->drawText(tmpText.str(), Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f), Color(1.0f, 1.0f, 1.0f));
 
 	for (auto& widget : this->widgets) {

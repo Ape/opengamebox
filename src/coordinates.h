@@ -16,7 +16,7 @@ public:
 
 	void operator+=(const Coordinates &coordinates);
 	void operator-=(const Coordinates &coordinates);
-	void operator=(const Coordinates &coordinates);
+	Coordinates& operator=(const Coordinates &coordinates);
 
 	bool operator== (const Coordinates &coordinates) const;
 	bool operator!= (const Coordinates &coordinates) const;

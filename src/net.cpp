@@ -91,7 +91,7 @@ void net::dataAppendInt(std::string &data, unsigned int value) {
 	unsigned char bytes[4];
 
 	net::intToBytes(bytes, value);
-	data.append((char*) bytes, 4);
+	data.append(reinterpret_cast<char*>(bytes), 4);
 }
 
 // Appends the data with an unsigned short coded with shortToBytes
@@ -99,7 +99,7 @@ void net::dataAppendShort(std::string &data, unsigned short value) {
 	unsigned char bytes[2];
 
 	net::shortToBytes(bytes, value);
-	data.append((char*) bytes, 2);
+	data.append(reinterpret_cast<char*>(bytes), 2);
 }
 
 // Appends the data with a Vector2 coded with floatToBytes
@@ -107,10 +107,10 @@ void net::dataAppendVector2(std::string &data, Vector2 value) {
 	unsigned char bytes[4];
 
 	net::floatToBytes(bytes, value.x);
-	data.append((char*) bytes, 4);
+	data.append(reinterpret_cast<char*>(bytes), 4);
 
 	net::floatToBytes(bytes, value.y);
-	data.append((char*) bytes, 4);
+	data.append(reinterpret_cast<char*>(bytes), 4);
 }
 
 net::Client* net::clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId) {
@@ -138,7 +138,7 @@ std::string net::IPIntegerToString(unsigned int ip) {
 	bytes[3] = (ip >> 24) & 0xFF;
 
 	std::ostringstream string;
-	string << (int) bytes[0] << "." << (int) bytes[1] << "." << (int) bytes[2] << "."<< (int) bytes[3];
+	string << static_cast<int>(bytes[0]) << "." << static_cast<int>(bytes[1]) << "." << static_cast<int>(bytes[2]) << "."<< static_cast<int>(bytes[3]);
 
 	return string.str();
 }

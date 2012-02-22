@@ -1,6 +1,6 @@
 #include "coordinates.h"
 
-Coordinates::Coordinates(int x, int y) {
+Coordinates::Coordinates(const int x, const int y) {
 	this->x = x;
 	this->y = y;
 }
@@ -15,9 +15,11 @@ void Coordinates::operator-=(const Coordinates &coordinates) {
 	this->y -= coordinates.y;
 }
 
-void Coordinates::operator=(const Coordinates &coordinates) {
+Coordinates& Coordinates::operator=(const Coordinates &coordinates) {
 	this->x = coordinates.x;
 	this->y = coordinates.y;
+
+	return *this;
 }
 
 bool Coordinates::operator== (const Coordinates &coordinates) const {
