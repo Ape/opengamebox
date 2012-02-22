@@ -14,7 +14,7 @@ ENDIF(WIN32 AND MINGW)
 ### User selectable options ###
 option(DEBUG "Show all warnings, include debug symbols, and disable optimizations" ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wold-style-cast")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -s")
 
 if(DEBUG)

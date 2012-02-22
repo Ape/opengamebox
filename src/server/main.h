@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <random>
+#include <functional>
 
 #include <enet/enet.h>
 
@@ -37,6 +39,8 @@ private:
 	bool exiting;
 
 	double lastStreamTime;
+
+	std::mt19937 randomGenerator;
 
 	void mainLoop(void);
 	void dispose(void);

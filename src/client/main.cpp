@@ -830,7 +830,7 @@ void Game::chatCommand(std::string commandstr) {
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " object [x y]");
 		}
-	} else if (parameters.at(0) == "dice") {
+	} else if (parameters.at(0) == "roll") {
 		if (parameters.size() <= 3) {
 			unsigned short maxValue = 6;
 
@@ -840,7 +840,7 @@ void Game::chatCommand(std::string commandstr) {
 			}
 
 			std::string data;
-			data.push_back(net::PACKET_DICE);
+			data.push_back(net::PACKET_ROLL);
 			net::dataAppendShort(data, maxValue);
 			net::sendCommand(connection, data.c_str(), data.length());
 		} else {

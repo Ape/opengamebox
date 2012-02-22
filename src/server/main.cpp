@@ -28,6 +28,8 @@ Server::Server(unsigned int port) {
 
 	this->exiting = false;
 	this->lastStreamTime = 0.0;
+
+	this->randomGenerator.seed(enet_time_get());
 }
 
 int Server::run() {
@@ -253,7 +255,7 @@ void Server::receivePacket(ENetEvent event) {
 			break;
 		}
 
-		case net::PACKET_DICE: {
+		case net::PACKET_ROLL: {
 			if (event.packet->dataLength == 1 + 2) {
 				unsigned short maxValue = net::bytesToShort(event.packet->data + 1);
 
@@ -261,10 +263,10 @@ void Server::receivePacket(ENetEvent event) {
 					maxValue = 1;
 				}
 
-				srand(enet_time_get());
+				std::uniform_int_distribution<unsigned short> distribution(1, maxValue);
 
 				std::ostringstream reply;
-				reply << this->clients[*id]->nick << " threw " << "d" << maxValue << " and got " << 1 + (rand() % maxValue) << ".";
+				reply << this->clients[*id]->nick << " rolled a " << "d" << maxValue << " and got " << distribution(this->randomGenerator) << ".";
 
 				std::string data;
 				data += net::PACKET_CHAT;

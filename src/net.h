@@ -37,7 +37,7 @@ namespace net {
 
 	// Other command packets
 	const unsigned char PACKET_CHAT = 0x40; // Send a chat message
-	const unsigned char PACKET_DICE = 0x41; // Throw dice on the server
+	const unsigned char PACKET_ROLL = 0x41; // Roll a die on the server
 
 	// Stream packets
 	const unsigned char PACKET_PINGS = 0xE0; // Broadcast ping information

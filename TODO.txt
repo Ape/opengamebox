@@ -1,9 +1,9 @@
 General:
 	- history for sent chat messages
+		- up and down arrows on inputBox to scroll messages
+	- history for received chat messages
+		- hold a key to show more received chat messages
 	- loading settings from a file
-
-Networking:
-	- multiobject create packet
 
 Mechanics:
 	- ability to rotate objects
@@ -15,12 +15,17 @@ Mechanics:
 	- loading objects from the filesystem
 	- downloading objects from the server
 	- uploading objects to the server
+	- multiobject create
 
 Graphics:
 	- use player colors in chat messages
 	- better screen scrolling with arrow keys by holding the buttons down instead of tapping them
-	- better screen rotating by holding the buttons down instead of tapping them
+	- better screen rotating
+		- holding the buttons down instead of tapping them
+		- rotate around screen center or mouse location
+		- rotate temporary mouse coordinates when dragging an object
 	- screen zooming with + and - keys
+	- background image
 
 Resources:
 	- full set of 52 playing cards
