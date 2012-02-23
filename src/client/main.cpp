@@ -285,29 +285,37 @@ void Game::localEvents() {
 					net::sendCommand(connection, data.c_str(), data.length());
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-				this->renderer->addScreenLocation(Vector2(10.0f, 0.0f));
-				this->renderer->updateTransformations();
+				this->renderer->addScreenLocation(Vector2(2.0f, 0.0f));
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-				this->renderer->addScreenLocation(Vector2(-10.0f, 0.0f));
-				this->renderer->updateTransformations();
+				this->renderer->addScreenLocation(Vector2(-2.0f, 0.0f));
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_UP) {
-				this->renderer->addScreenLocation(Vector2(0.0f, 10.0f));
-				this->renderer->updateTransformations();
+				this->renderer->addScreenLocation(Vector2(0.0f, 2.0f));
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-				this->renderer->addScreenLocation(Vector2(0.0f, -10.0f));
-				this->renderer->updateTransformations();
+				this->renderer->addScreenLocation(Vector2(0.0f, -2.0f));
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
 				this->snappingToGrid = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_Q) {
-				this->renderer->rotateScreen(-Renderer::PI / 10.0f);
+				this->renderer->rotateScreen(-Renderer::PI / 100.0f);
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
-				this->renderer->rotateScreen(Renderer::PI / 10.0f);
+				this->renderer->rotateScreen(Renderer::PI / 100.0f);
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {
 		if (input == nullptr) {
 			if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
 				this->snappingToGrid = false;
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+				this->renderer->addScreenLocation(Vector2(-2.0f, 0.0f));
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+				this->renderer->addScreenLocation(Vector2(2.0f, 0.0f));
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_UP) {
+				this->renderer->addScreenLocation(Vector2(0.0f, -2.0f));
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+				this->renderer->addScreenLocation(Vector2(0.0f, 2.0f));
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_Q) {
+				this->renderer->rotateScreen(Renderer::PI / 100.0f);
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
+				this->renderer->rotateScreen(-Renderer::PI / 100.0f);
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
@@ -901,6 +909,9 @@ void Game::render() {
 
 	// Clear the screen
 	al_clear_to_color(al_map_rgb_f(0.1f, 0.1f, 0.1f));
+
+	//movescreen and update transformations
+	this->renderer->moveScreen();
 
 	// Begin render
 	al_hold_bitmap_drawing(true);

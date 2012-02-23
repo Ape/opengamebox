@@ -53,6 +53,8 @@ public:
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color);
 
+	virtual void moveScreen(void);
+
 private:
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_FONT *font;
@@ -64,7 +66,9 @@ private:
 	Coordinates screenSize;
 	float screenZoom;
 	Vector2 screenLocation;
+	Vector2 screenMoving;
 	float screenRotation;
+	float screenRotating;
 
 	std::map<std::string, ALLEGRO_BITMAP*> textures;
 

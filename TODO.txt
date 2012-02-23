@@ -19,9 +19,7 @@ Mechanics:
 
 Graphics:
 	- use player colors in chat messages
-	- better screen scrolling with arrow keys by holding the buttons down instead of tapping them
 	- better screen rotating
-		- holding the buttons down instead of tapping them
 		- rotate around screen center or mouse location
 		- rotate temporary mouse coordinates when dragging an object
 	- screen zooming with + and - keys
