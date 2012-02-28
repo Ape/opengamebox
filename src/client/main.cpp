@@ -35,6 +35,9 @@ Game::Game(void) {
 	this->deltaTime = 0.0f;
 
 	this->localClient = net::MAX_CLIENTS;
+
+	// TODO: Remove this and use objectClasses dynamically
+	this->objectClass = new ObjectClass("core", "card");
 }
 
 int Game::run(std::string address, int port) {
@@ -234,14 +237,14 @@ void Game::localEvents() {
 					net::sendCommand(connection, data.c_str(), data.length());
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_C) {
-				this->chatCommand("create card_7c");
-				this->chatCommand("create card_Kh");
-				this->chatCommand("create card_As");
+				this->chatCommand("create core.card.7c");
+				this->chatCommand("create core.card.Kh");
+				this->chatCommand("create core.card.As");
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_V) {
-				this->chatCommand("create chessboard");
+				this->chatCommand("create core.chessboard");
 				for (int i = 0; i < 12; ++i) {
-					this->chatCommand("create piece_red");
-					this->chatCommand("create piece_blue");
+					this->chatCommand("create core.piece.red");
+					this->chatCommand("create core.piece.blue");
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
 				// TODO: Shuffle the objects on the server
@@ -603,7 +606,8 @@ void Game::receivePacket(ENetEvent event) {
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
 				std::string objectId = std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15);
 
-				Object *object = new Object(objectId, objId, location);
+				// TODO: Get the real object class
+				Object *object = new Object(this->objectClass, objectId, objId, location);
 				object->select(selected);
 				object->own(owner);
 				object->setFlipped(flipped);

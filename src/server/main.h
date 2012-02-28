@@ -42,6 +42,9 @@ private:
 
 	std::mt19937 randomGenerator;
 
+	// TODO: Remove this and use objectClasses dynamically
+    ObjectClass *objectClass;
+
 	void mainLoop(void);
 	void dispose(void);
 

@@ -1,0 +1,19 @@
+Objects
+--------
+*.txt:
+	Creative Commons Attribution-Share Alike 3.0 Unported
+	Lauri Niskanen <ape@ape3000.com>
+
+Images
+-------
+card_flipside.png:
+	Creative Commons CC0 1.0 Universal Public Domain Dedication
+	http://commons.wikimedia.org/wiki/File:Bicyclebackside.jpg
+
+card/*.png:
+	Creative Commons Attribution-Share Alike 3.0 Unported
+	http://commons.wikimedia.org/wiki/Poker_(cards_deck)
+
+board/chess.png, piece/*.png:
+	Creative Commons Attribution-Share Alike 3.0 Unported
+	Lauri Niskanen <ape@ape3000.com>

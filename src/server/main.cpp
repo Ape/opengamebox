@@ -30,6 +30,9 @@ Server::Server(unsigned int port) {
 	this->lastStreamTime = 0.0;
 
 	this->randomGenerator.seed(enet_time_get());
+
+	// TODO: Remove this and use objectClasses dynamically
+    this->objectClass = new ObjectClass("core", "card");
 }
 
 int Server::run() {
@@ -289,7 +292,7 @@ void Server::receivePacket(ENetEvent event) {
 				std::string objectId = std::string(reinterpret_cast<char*>(event.packet->data + 12), event.packet->dataLength - 12);
 
 				unsigned short objId = net::firstUnusedKey(this->objects);
-				Object *object = new Object(objectId, objId, location);
+				Object *object = new Object(this->objectClass, objectId, objId, location);
 				object->select(selected);
 				object->own(owner);
 				object->setFlipped(flipped);

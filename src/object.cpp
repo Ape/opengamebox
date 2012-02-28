@@ -1,49 +1,26 @@
 #include "object.h"
 
-Object::Object(std::string objectId, unsigned int id, Vector2 location) {
+Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, Vector2 location) {
+	this->objectClass = objectClass;
 	this->objectId = objectId;
-	this->id       = id;
-	this->location = location;
-	this->flipped  = false;
-	this->selected = nullptr;
-	this->owner    = nullptr;
+	this->id          = id;
+	this->location    = location;
+	this->flipped     = false;
+	this->selected    = nullptr;
+	this->owner       = nullptr;
 
-	// TODO: Load this object data from the filesystem
-	this->size = Vector2(135.0f, 189.0f);
-
-	if (this->objectId == "card_7c") {
-		this->name = "Seven of Clubs";
-	} else if (this->objectId == "card_Kh") {
-		this->name = "King of Hearts";
-	} else if (this->objectId == "card_As") {
-		this->name = "Ace of Spades";
-	} else if (this->objectId == "chessboard") {
-		this->name = "Chessboard";
-		this->size = Vector2(512.0f, 512.0f);
-	} else if (this->objectId == "piece_red") {
-		this->name = "Red piece";
-		this->size = Vector2(50.0f, 50.0f);
-	} else if (this->objectId == "piece_blue") {
-		this->name = "Blue piece";
-		this->size = Vector2(50.0f, 50.0f);
-	} else {
-		this->size = Vector2(300.0f, 300.0f);
-		this->name = this->objectId;
-	}
-
-	this->image = this->objectId + ".png";
-	this->backside = "card_backside.png";
+	this->image = this->objectClass->getPackage() + "/objects/" + this->objectClass->getObjectClass() + "/" + this->objectId + ".png";
 	this->stackDelta = Vector2(4.0f, 0.0f);
 
 	this->animationTime = 0.0f;
 }
 
-std::string Object::getObjectId() const {
-	return this->objectId;
+ObjectClass* Object::getObjectClass() const {
+	return this->objectClass;
 }
 
-std::string Object::getName() const {
-	return this->name;
+std::string Object::getObjectId() const {
+	return this->objectId;
 }
 
 unsigned short Object::getId() const {
@@ -62,13 +39,17 @@ Vector2 Object::getTargetLocation() const {
 	}
 }
 
+std::string Object::getName() const {
+	return this->objectClass->getName();
+}
+
 Vector2 Object::getSize() const {
-	return this->size;
+	return this->objectClass->getSize();
 }
 
 bool Object::testLocation(Vector2 location) const {
-	if (location.x >= this->getTargetLocation().x - this->size.x/2.0f && location.x <= this->getTargetLocation().x + this->size.x/2.0f
-	    && location.y >= this->getTargetLocation().y - this->size.y/2.0f && location.y <= this->getTargetLocation().y + this->size.y/2.0f) {
+	if (location.x >= this->getTargetLocation().x - this->getSize().x/2.0f && location.x <= this->getTargetLocation().x + this->getSize().x/2.0f
+	    && location.y >= this->getTargetLocation().y - this->getSize().y/2.0f && location.y <= this->getTargetLocation().y + this->getSize().y/2.0f) {
 		return true;
 	} else {
 		return false;
@@ -76,9 +57,9 @@ bool Object::testLocation(Vector2 location) const {
 }
 
 bool Object::testCollision(const Object *object, bool second) const {
-	if (object->testLocation(this->getTargetLocation() - this->size/2.0f) || object->testLocation(this->getTargetLocation() + this->size/2.0f)
-	        || object->testLocation(Vector2(this->getTargetLocation().x - this->size.x/2.0f, this->getTargetLocation().y + this->size.y/2.0f))
-	        || object->testLocation(Vector2(this->getTargetLocation().x + this->size.x/2.0f, this->getTargetLocation().y - this->size.y/2.0f))
+	if (object->testLocation(this->getTargetLocation() - this->getSize()/2.0f) || object->testLocation(this->getTargetLocation() + this->getSize()/2.0f)
+	        || object->testLocation(Vector2(this->getTargetLocation().x - this->getSize().x/2.0f, this->getTargetLocation().y + this->getSize().y/2.0f))
+	        || object->testLocation(Vector2(this->getTargetLocation().x + this->getSize().x/2.0f, this->getTargetLocation().y - this->getSize().y/2.0f))
 	        || (! second && object->testCollision(this, true))) {
 		return true;
 	} else {
@@ -208,15 +189,15 @@ void Object::animate(double deltaTime) {
 
 void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 	std::string image;
-	if (! this->flipped) {
+	if (! this->flipped || this->objectClass->getFlipsideImage().empty()) {
 		image = this->image;
 	} else {
-		image = this->backside;
+		image = this->objectClass->getFlipsideImage();
 	}
 
 	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
 	if (this->owner == localClient) {
-		renderer->drawText(localClient->nick, this->location + Vector2(0.0f, -this->size.y / 2.0f - 18.0f), Color(renderer, localClient->id),
+		renderer->drawText(localClient->nick, this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), Color(renderer, localClient->id),
 		                   IRenderer::Alignment::CENTER);
 		tint.alpha = 0.75f;
 	}
@@ -229,12 +210,12 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 	
 	if (this->owner == nullptr || this->owner == localClient) {
 		if (this->selected != nullptr) {
-			Vector2 pointA = this->location - this->size/2.0f - Vector2(1.0f, 1.0f);
-			Vector2 pointB = this->location + this->size/2.0f + Vector2(1.0f, 1.0f);
+			Vector2 pointA = this->location - this->getSize()/2.0f - Vector2(1.0f, 1.0f);
+			Vector2 pointB = this->location + this->getSize()/2.0f + Vector2(1.0f, 1.0f);
 
 			renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f, IRenderer::Transformation::CAMERA);
 		}
 
-		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->size/2.0f, this->size, tint);
+		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->getSize()/2.0f, this->getSize(), tint);
 	}
 }

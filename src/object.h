@@ -9,15 +9,17 @@
 #include "net.h"
 #include "irenderer.h"
 #include "vector2.h"
+#include "objectClass.h"
 
-namespace net{
+namespace net {
 	struct Client;
 }
 
-class Object{
+class Object {
 public:
-	Object(std::string objectId, unsigned int id, Vector2 location);
+	Object(ObjectClass *objectClass, std::string objectId, unsigned int id, Vector2 location);
 
+	ObjectClass* getObjectClass(void) const;
 	std::string getObjectId(void) const;
 	std::string getName(void) const;
 	unsigned short getId(void) const;
@@ -48,10 +50,9 @@ public:
 	void draw(IRenderer *renderer, net::Client *localClient) const;
 
 private:
+	ObjectClass *objectClass;
 	std::string objectId;
-	std::string name;
 	unsigned short id;
-	Vector2 size;
 	Vector2 location;
 	bool flipped;
 	std::string image;

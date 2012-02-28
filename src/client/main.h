@@ -19,13 +19,14 @@
 #include <enet/enet.h>
 
 #include "../net.h"
+#include "../objectClass.h"
 #include "../object.h"
 #include "renderer.h"
 #include "../vector2.h"
 #include "widget.h"
 #include "widgets/inputBox.h"
 
-namespace net{
+namespace net {
 	struct Client;
 }
 
@@ -37,7 +38,7 @@ const bool FULLSCREEN = false;
 const float ANIMATION_TIME = 0.5f;
 const int MULTISAMPLING_SAMPLES = 2;
 
-class Game{
+class Game {
 public:
 	Game(void);
 
@@ -63,6 +64,8 @@ private:
 	double previousTime;
 	double deltaTime;
 
+	std::map<std::string, ObjectClass> objectClasses;
+
 	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;
 	std::map<unsigned char, net::Client*> clients;
@@ -85,6 +88,9 @@ private:
 	Vector2 movingScreenStart;
 
 	bool snappingToGrid;
+
+	// TODO: Remove this and use objectClasses dynamically
+	ObjectClass *objectClass;
 
 	void mainLoop(void);
 	void quit(void);
