@@ -20,6 +20,7 @@
 
 #include "../net.h"
 #include "../utils.h"
+#include "../objectClassManager.h"
 #include "../objectClass.h"
 #include "../object.h"
 #include "renderer.h"
@@ -65,7 +66,7 @@ private:
 	double previousTime;
 	double deltaTime;
 
-	std::map<std::string, ObjectClass> objectClasses;
+	ObjectClassManager objectClassManager;
 
 	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;
@@ -89,9 +90,6 @@ private:
 	Vector2 movingScreenStart;
 
 	bool snappingToGrid;
-
-	// TODO: Remove this and use objectClasses dynamically
-	ObjectClass *objectClass;
 
 	void mainLoop(void);
 	void quit(void);

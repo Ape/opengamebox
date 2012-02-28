@@ -35,9 +35,6 @@ Game::Game(void) {
 	this->deltaTime = 0.0f;
 
 	this->localClient = net::MAX_CLIENTS;
-
-	// TODO: Remove this and use objectClasses dynamically
-	this->objectClass = new ObjectClass("core", "card");
 }
 
 int Game::run(std::string address, int port) {
@@ -241,7 +238,7 @@ void Game::localEvents() {
 				this->chatCommand("create core.card.Kh");
 				this->chatCommand("create core.card.As");
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_V) {
-				this->chatCommand("create core.chessboard");
+				this->chatCommand("create core.board.chess");
 				for (int i = 0; i < 12; ++i) {
 					this->chatCommand("create core.piece.red");
 					this->chatCommand("create core.piece.blue");
@@ -606,10 +603,9 @@ void Game::receivePacket(ENetEvent event) {
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
 				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15), '.');
 
-				// TODO: Get the real object class
-				std::cout << "DEBUG: ObjectData = " << objectData.at(0) << "::" << objectData.at(1) << "::" << objectData.at(2) << std::endl;
+				ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
-				Object *object = new Object(this->objectClass, objectData.at(2), objId, location);
+				Object *object = new Object(objectClass, objectData.at(2), objId, location);
 				object->select(selected);
 				object->own(owner);
 				object->setFlipped(flipped);

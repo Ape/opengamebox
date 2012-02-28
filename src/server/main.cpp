@@ -30,9 +30,6 @@ Server::Server(unsigned int port) {
 	this->lastStreamTime = 0.0;
 
 	this->randomGenerator.seed(enet_time_get());
-
-	// TODO: Remove this and use objectClasses dynamically
-    this->objectClass = new ObjectClass("core", "card");
 }
 
 int Server::run() {
@@ -289,10 +286,12 @@ void Server::receivePacket(ENetEvent event) {
 				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[2]);
 				bool flipped = event.packet->data[3];
 				Vector2 location = net::bytesToVector2(event.packet->data + 4);
-				std::string objectId = std::string(reinterpret_cast<char*>(event.packet->data + 12), event.packet->dataLength - 12);
+				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 12), event.packet->dataLength - 12), '.');
+
+				ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
 				unsigned short objId = util::firstUnusedKey(this->objects);
-				Object *object = new Object(this->objectClass, objectId, objId, location);
+				Object *object = new Object(objectClass, objectData.at(2), objId, location);
 				object->select(selected);
 				object->own(owner);
 				object->setFlipped(flipped);
@@ -308,7 +307,8 @@ void Server::receivePacket(ENetEvent event) {
 					std::cout << clients[*id]->nick << " created a new " << object->getName() << "." << std::endl;
 					net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 3);
 				} else {
-					std::cout << "Error: object " << objectId << " is not recognized by the server!" << std::endl;
+					std::cout << "Error: object " << objectData.at(0) << "." << objectData.at(1) << "." << objectData.at(2) << " is not recognized by the server!"
+					          << std::endl;
 					this->objects.erase(objId);
 				}
 			}

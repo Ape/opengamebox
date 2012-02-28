@@ -2,7 +2,7 @@
 
 Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, Vector2 location) {
 	this->objectClass = objectClass;
-	this->objectId = objectId;
+	this->objectId    = objectId;
 	this->id          = id;
 	this->location    = location;
 	this->flipped     = false;

@@ -7,7 +7,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass) {
 	this->objectClass = objectClass;
 	this->name = "Object";
 	this->size = Vector2(135.0f, 189.0f);
-	this->flipsideImage = this->package + "/" + "card_flipside.png";
+	this->flipsideImage = this->package + "/objects/" + "card_flipside.png";
 }
 
 std::string ObjectClass::getObjectClass() const {

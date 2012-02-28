@@ -1,4 +1,4 @@
-set(srcSources coordinates.cpp vector2.cpp color.cpp utils.cpp objectClass.cpp object.cpp net.cpp)
+set(srcSources coordinates.cpp vector2.cpp color.cpp utils.cpp objectClassManager.cpp objectClass.cpp object.cpp net.cpp)
 
 foreach(srcSource ${srcSources})
 	set(commonSources ${commonSources} ${CMAKE_CURRENT_SOURCE_DIR}/${srcSource})

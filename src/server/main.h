@@ -14,6 +14,7 @@
 #include "../net.h"
 #include "../utils.h"
 #include "../vector2.h"
+#include "../objectClassManager.h"
 #include "../object.h"
 
 class Server;
@@ -34,6 +35,8 @@ private:
 	ENetAddress address;
 	ENetHost *connection;
 
+	ObjectClassManager objectClassManager;
+
 	std::map<unsigned char, net::Client*> clients;
 	std::map<unsigned short, Object*> objects;
 
@@ -42,9 +45,6 @@ private:
 	double lastStreamTime;
 
 	std::mt19937 randomGenerator;
-
-	// TODO: Remove this and use objectClasses dynamically
-    ObjectClass *objectClass;
 
 	void mainLoop(void);
 	void dispose(void);
