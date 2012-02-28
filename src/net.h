@@ -61,12 +61,6 @@ namespace net {
 	void sendCommand(ENetHost *connection, const char *data, size_t length, bool isReliable=true);
 	void sendCommand(ENetPeer *peer, const char *data, size_t length);
 
-	template <class T>
-	unsigned char firstUnusedKey(std::map<unsigned char, T*> map);
-
-	template <class T>
-	unsigned short firstUnusedKey(std::map<unsigned short, T*> map);
-
 	void intToBytes(unsigned char *bytes, unsigned int value);
 	unsigned int bytesToInt(unsigned char *bytes);
 
@@ -88,28 +82,6 @@ namespace net {
 	std::string AddressToString(ENetAddress address);
 
 	void removeObject(std::vector<Object*> &objectOrder, Object* object);
-}
-
-template <class T>
-unsigned char net::firstUnusedKey(std::map<unsigned char, T*> map) {
-	for (unsigned char i = 0; i < 255; ++i) {
-		if (map.count(i) == 0) {
-			return i;
-		}
-	}
-
-	return 255;
-}
-
-template <class T>
-unsigned short net::firstUnusedKey(std::map<unsigned short, T*> map) {
-	for (unsigned short i = 0; i < 65535; ++i) {
-		if (map.count(i) == 0) {
-			return i;
-		}
-	}
-
-	return 65535;
 }
 
 #endif

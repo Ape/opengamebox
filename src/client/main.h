@@ -19,6 +19,7 @@
 #include <enet/enet.h>
 
 #include "../net.h"
+#include "../utils.h"
 #include "../objectClass.h"
 #include "../object.h"
 #include "renderer.h"

@@ -604,10 +604,12 @@ void Game::receivePacket(ENetEvent event) {
 				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
 				bool flipped = event.packet->data[6];
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
-				std::string objectId = std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15);
+				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15), '.');
 
 				// TODO: Get the real object class
-				Object *object = new Object(this->objectClass, objectId, objId, location);
+				std::cout << "DEBUG: ObjectData = " << objectData.at(0) << "::" << objectData.at(1) << "::" << objectData.at(2) << std::endl;
+
+				Object *object = new Object(this->objectClass, objectData.at(2), objId, location);
 				object->select(selected);
 				object->own(owner);
 				object->setFlipped(flipped);
@@ -821,9 +823,7 @@ void Game::sendChat(std::string text) {
 }
 
 void Game::chatCommand(std::string commandstr) {
-	std::istringstream command(commandstr);
-	std::vector<std::string> parameters;
-	std::copy(std::istream_iterator<std::string>(command), std::istream_iterator<std::string>(), std::back_inserter<std::vector<std::string>>(parameters));
+	std::vector<std::string> parameters = util::splitString(commandstr, ' ');
 
 	if (parameters.at(0) == "create") {
 		if (parameters.size() == 2) {

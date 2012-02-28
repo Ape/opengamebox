@@ -107,7 +107,7 @@ void Server::networkEvents() {
 				std::cout << "A new client connected from " << net::AddressToString(event.peer->address) << "." << std::endl;
 
 				unsigned char *id = new unsigned char;
-				*id = net::firstUnusedKey(this->clients);
+				*id = util::firstUnusedKey(this->clients);
 				net::Client *client = new net::Client(event.peer);
 				client->joined = false;
 				client->peer = event.peer;
@@ -291,7 +291,7 @@ void Server::receivePacket(ENetEvent event) {
 				Vector2 location = net::bytesToVector2(event.packet->data + 4);
 				std::string objectId = std::string(reinterpret_cast<char*>(event.packet->data + 12), event.packet->dataLength - 12);
 
-				unsigned short objId = net::firstUnusedKey(this->objects);
+				unsigned short objId = util::firstUnusedKey(this->objects);
 				Object *object = new Object(this->objectClass, objectId, objId, location);
 				object->select(selected);
 				object->own(owner);
