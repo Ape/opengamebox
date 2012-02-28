@@ -5,11 +5,17 @@ ObjectClassManager::ObjectClassManager() {
 }
 
 ObjectClassManager::~ObjectClassManager() {
-	// TODO: Release data
+	for (auto& package : this->packages) {
+		for (auto& objectClass : *package.second) {
+			delete objectClass.second;
+		}
+
+		delete package.second;
+	}
 }
 
 ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string objectClass) {
-	std::map<std::string, std::map<std::string, ObjectClass*>*>::iterator packageIterator = this->packages.find(package);
+	auto packageIterator = this->packages.find(package);
 	std::map<std::string, ObjectClass*> *selectedPackage;
 
 	// Add a new package to the list if it was not already loaded
@@ -21,7 +27,7 @@ ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string
 		selectedPackage = packageIterator->second;
 	}
 
-	std::map<std::string, ObjectClass*>::iterator objectClassIterator = selectedPackage->find(objectClass);
+	auto objectClassIterator = selectedPackage->find(objectClass);
 	ObjectClass *selectedObjectClass;
 
 	// Add a new objectClass to the package if it was not already loaded

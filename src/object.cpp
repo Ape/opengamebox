@@ -23,6 +23,10 @@ std::string Object::getObjectId() const {
 	return this->objectId;
 }
 
+std::string Object::getFullId() const {
+	return this->objectClass->getPackage() + "." + this->objectClass->getObjectClass() + "." + this->objectId;
+}
+
 unsigned short Object::getId() const {
 	return this->id;
 }

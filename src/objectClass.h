@@ -12,7 +12,6 @@ public:
 	std::string getObjectClass(void) const;
 	std::string getPackage(void) const;
 	std::string getName(void) const;
-	std::string getPath(void) const;
 	Vector2 getSize(void) const;
 	std::string getFlipsideImage(void) const;
 

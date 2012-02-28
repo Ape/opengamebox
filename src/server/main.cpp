@@ -212,7 +212,7 @@ void Server::receivePacket(ENetEvent event) {
 						data += net::clientToClientId(object.second->getOwner());
 						data += object.second->isFlipped();
 						net::dataAppendVector2(data, object.second->getLocation());
-						data.append(object.second->getObjectId());
+						data.append(object.second->getFullId());
 
 						net::sendCommand(event.peer, data.c_str(), data.length());
 					}

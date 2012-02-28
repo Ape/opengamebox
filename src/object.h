@@ -21,6 +21,7 @@ public:
 
 	ObjectClass* getObjectClass(void) const;
 	std::string getObjectId(void) const;
+	std::string getFullId(void) const;
 	std::string getName(void) const;
 	unsigned short getId(void) const;
 	Vector2 getLocation(void) const;
