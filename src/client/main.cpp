@@ -30,7 +30,7 @@ Game::Game(void) {
 
 	this->dragging = false;
 	this->movingScreen = false;
-	this->snappingToGrid = false;
+	this->keyStatus.snappingToGrid = false;
 
 	this->deltaTime = 0.0f;
 
@@ -301,7 +301,7 @@ void Game::localEvents() {
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) {
 				this->keyStatus.screenMoveDown = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
-				this->snappingToGrid = true;
+				this->keyStatus.snappingToGrid = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_Q) {
 				this->keyStatus.screenRotateClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
@@ -311,7 +311,7 @@ void Game::localEvents() {
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {
 		if (input == nullptr) {
 			if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
-				this->snappingToGrid = false;
+				this->keyStatus.snappingToGrid = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
 				this->keyStatus.screenMoveLeft = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
@@ -431,7 +431,7 @@ void Game::localEvents() {
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
-			if (this->snappingToGrid) {
+			if (this->keyStatus.snappingToGrid) {
 				Vector2 grid = this->selectedObjects.front()->getSize() + Vector2(0.001f, 0.001f);
 
 				if (location.x < 0.0f) {
