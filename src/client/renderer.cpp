@@ -36,9 +36,7 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 
 	this->screenZoom = 2.0f;
 	this->screenLocation = Vector2(0.0f, 0.0f);
-	this->screenMoving = Vector2(0.0f, 0.0f);
 	this->screenRotation = 0.0f;
-	this->screenRotating = 0.0f;
 
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
@@ -99,15 +97,11 @@ void Renderer::mulScreenZoom(float zoom) {
 }
 
 void Renderer::addScreenLocation(Vector2 location) {
-	this->screenMoving += location;
+	this->screenLocation += location * 2.0f / this->screenZoom;
 }
 
 void Renderer::setScreenSize(Coordinates screenSize) {
 	this->screenSize = screenSize;
-}
-
-void Renderer::rotateScreen(float angle) {
-	this->screenRotating += angle;
 }
 
 void Renderer::loadTexture(std::string texture) {
@@ -238,11 +232,11 @@ void Renderer::hsvToRgb(float hue, float saturation, float value, Color *color) 
 	al_color_hsv_to_rgb(hue, saturation, value, &color->red, &color->green, &color->blue);
 }
 
-void Renderer::moveScreen()
+void Renderer::moveScreen(Vector2 location, float rotation)
 {
-	this->screenLocation += this->screenMoving;
-	this->screenRotation += this->screenRotating;
-	if(this->screenMoving != Vector2(0.0f, 0.0f) or this->screenRotating != 0.0f)
+	this->screenLocation += location;
+	this->screenRotation += rotation;
+	if(location != Vector2(0.0f, 0.0f) or rotation != 0.0f)
 	{
 		this->updateTransformations();
 	}

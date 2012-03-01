@@ -20,7 +20,6 @@ public:
 	virtual void mulScreenZoom(float zoom) = 0;
 	virtual void addScreenLocation(Vector2 location) = 0;
 	virtual void setScreenSize(Coordinates screenSize) = 0;
-	virtual void rotateScreen(float angle) = 0;
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,

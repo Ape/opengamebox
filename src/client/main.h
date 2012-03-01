@@ -108,6 +108,18 @@ private:
 	void animate(void);
 	void renderGame(void);
 	void renderUI(void);
+
+	struct KeyStatus
+	{
+		bool screenMoveLeft;
+		bool screenMoveRight;
+		bool screenMoveUp;
+		bool screenMoveDown;
+		bool screenRotateClockwise;
+		bool screenRotateCClockwise;
+	};
+
+	KeyStatus keyStatus;
 };
 
 #endif
