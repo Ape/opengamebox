@@ -81,8 +81,22 @@ private:
 	bool dragging;
 	Vector2 draggingStart;
 
-	bool movingScreen;
-	Vector2 movingScreenStart;
+	struct KeyStatus
+	{
+		bool screenZoomIn;
+		bool screenZoomOut;
+		bool screenMoveLeft;
+		bool screenMoveRight;
+		bool screenMoveUp;
+		bool screenMoveDown;
+		bool screenRotateClockwise;
+		bool screenRotateCClockwise;
+		bool snappingToGrid;
+		bool moveScreen;
+	};
+
+	KeyStatus keyStatus;
+	Vector2 moveScreenStart;
 
 	void mainLoop(void);
 	void quit(void);
@@ -106,19 +120,6 @@ private:
 	void animate(void);
 	void renderGame(void);
 	void renderUI(void);
-
-	struct KeyStatus
-	{
-		bool screenMoveLeft;
-		bool screenMoveRight;
-		bool screenMoveUp;
-		bool screenMoveDown;
-		bool screenRotateClockwise;
-		bool screenRotateCClockwise;
-		bool snappingToGrid;
-	};
-
-	KeyStatus keyStatus;
 };
 
 #endif

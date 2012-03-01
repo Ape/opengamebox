@@ -17,8 +17,9 @@ public:
 	virtual Coordinates getDisplaySize(void) const = 0;
 	virtual void updateTransformations(void) = 0;
 
-	virtual void mulScreenZoom(float zoom) = 0;
-	virtual void addScreenLocation(Vector2 location) = 0;
+	virtual void zoomScreen(float zoom) = 0;
+	virtual void scrollScreen(Vector2 translation) = 0;
+	virtual void rotateScreen(float angle) = 0;
 	virtual void setScreenSize(Coordinates screenSize) = 0;
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,

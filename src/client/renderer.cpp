@@ -91,13 +91,17 @@ void Renderer::updateTransformations() {
 	al_identity_transform(&this->cameraUI);
 }
 
-void Renderer::mulScreenZoom(float zoom) {
-	if (this->screenZoom * zoom > 0.1f && this->screenZoom * zoom < 30.0f)
-	this->screenZoom *= zoom;
+void Renderer::zoomScreen(float factor) {
+	if (this->screenZoom * factor > 0.1f && this->screenZoom * factor < 30.0f)
+	this->screenZoom *= factor;
 }
 
-void Renderer::addScreenLocation(Vector2 location) {
-	this->screenLocation += location * 2.0f / this->screenZoom;
+void Renderer::scrollScreen(Vector2 translation) {
+	this->screenLocation += translation * 2.0f / this->screenZoom;
+}
+
+void Renderer::rotateScreen(float angle) {
+	this->screenRotation += angle;
 }
 
 void Renderer::setScreenSize(Coordinates screenSize) {
@@ -230,14 +234,4 @@ void Renderer::useTransformation(Transformation transformation) {
 
 void Renderer::hsvToRgb(float hue, float saturation, float value, Color *color) {
 	al_color_hsv_to_rgb(hue, saturation, value, &color->red, &color->green, &color->blue);
-}
-
-void Renderer::moveScreen(Vector2 location, float rotation)
-{
-	this->screenLocation += location;
-	this->screenRotation += rotation;
-	if(location != Vector2(0.0f, 0.0f) or rotation != 0.0f)
-	{
-		this->updateTransformations();
-	}
 }

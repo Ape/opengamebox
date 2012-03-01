@@ -29,8 +29,9 @@ public:
 	virtual Coordinates getDisplaySize(void) const;
 	virtual void updateTransformations(void);
 
-	virtual void mulScreenZoom(float zoom);
-	virtual void addScreenLocation(Vector2 location);
+	virtual void zoomScreen(float zoom);
+	virtual void scrollScreen(Vector2 translation);
+	virtual void rotateScreen(float angle);
 	virtual void setScreenSize(Coordinates screenSize);
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
@@ -51,8 +52,6 @@ public:
 	virtual void useTransformation(Transformation transformation);
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color);
-
-	virtual void moveScreen(Vector2 location, float rotation);
 
 private:
 	ALLEGRO_DISPLAY *display;
