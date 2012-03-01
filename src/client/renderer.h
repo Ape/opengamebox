@@ -30,10 +30,10 @@ public:
 	virtual Coordinates getDisplaySize(void) const;
 	virtual void updateTransformations(void);
 
-	virtual void mulScreenZoom(float zoom);
-	virtual void addScreenLocation(Vector2 location);
-	virtual void setScreenSize(Coordinates screenSize);
+	virtual void zoomScreen(float zoom);
+	virtual void scrollScreen(Vector2 translation);
 	virtual void rotateScreen(float angle);
+	virtual void setScreenSize(Coordinates screenSize);
 
 	virtual void drawBitmap(std::string texture, Vector2 source_location,
 	                        Vector2 source_size, Vector2 dest_location,
@@ -54,8 +54,6 @@ public:
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color);
 
-	virtual void moveScreen(void);
-
 private:
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_FONT *font;
@@ -67,9 +65,7 @@ private:
 	Coordinates screenSize;
 	float screenZoom;
 	Vector2 screenLocation;
-	Vector2 screenMoving;
 	float screenRotation;
-	float screenRotating;
 
 	std::map<std::string, ALLEGRO_BITMAP*> textures;
 

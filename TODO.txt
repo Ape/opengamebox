@@ -19,10 +19,8 @@ Mechanics:
 
 Graphics:
 	- use player colors in chat messages
-	- better screen rotating
-		- rotate around screen center or mouse location
-		- rotate temporary mouse coordinates when dragging an object
-	- screen zooming with + and - keys
+	- rotate around screen center or mouse location
+	- rotate temporary mouse coordinates when dragging an object
 	- background image
 
 Resources:

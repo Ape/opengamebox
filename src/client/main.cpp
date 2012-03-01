@@ -29,12 +29,12 @@ Game::Game(void) {
 	this->input = nullptr;
 
 	this->dragging = false;
-	this->movingScreen = false;
-	this->snappingToGrid = false;
 
 	this->deltaTime = 0.0f;
 
 	this->localClient = net::MAX_CLIENTS;
+
+	this->keyStatus = KeyStatus();
 }
 
 int Game::run(std::string address, int port) {
@@ -284,38 +284,46 @@ void Game::localEvents() {
 
 					net::sendCommand(connection, data.c_str(), data.length());
 				}
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_PAD_PLUS) {
+				this->keyStatus.screenZoomIn = true;
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_PAD_MINUS) {
+				this->keyStatus.screenZoomOut = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-				this->renderer->addScreenLocation(Vector2(2.0f, 0.0f));
+				this->keyStatus.screenMoveLeft = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-				this->renderer->addScreenLocation(Vector2(-2.0f, 0.0f));
+				this->keyStatus.screenMoveRight = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_UP) {
-				this->renderer->addScreenLocation(Vector2(0.0f, 2.0f));
+				this->keyStatus.screenMoveUp = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-				this->renderer->addScreenLocation(Vector2(0.0f, -2.0f));
+				this->keyStatus.screenMoveDown = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
-				this->snappingToGrid = true;
+				this->keyStatus.snappingToGrid = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_Q) {
-				this->renderer->rotateScreen(-Renderer::PI / 100.0f);
+				this->keyStatus.screenRotateCClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
-				this->renderer->rotateScreen(Renderer::PI / 100.0f);
+				this->keyStatus.screenRotateClockwise = true;
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {
 		if (input == nullptr) {
-			if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
-				this->snappingToGrid = false;
+			if (event.keyboard.keycode == ALLEGRO_KEY_PAD_PLUS) {
+				this->keyStatus.screenZoomIn = false;
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_PAD_MINUS) {
+				this->keyStatus.screenZoomOut = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-				this->renderer->addScreenLocation(Vector2(-2.0f, 0.0f));
+				this->keyStatus.screenMoveLeft = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-				this->renderer->addScreenLocation(Vector2(2.0f, 0.0f));
+				this->keyStatus.screenMoveRight = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_UP) {
-				this->renderer->addScreenLocation(Vector2(0.0f, -2.0f));
+				this->keyStatus.screenMoveUp = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-				this->renderer->addScreenLocation(Vector2(0.0f, 2.0f));
+				this->keyStatus.screenMoveDown = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_Q) {
-				this->renderer->rotateScreen(Renderer::PI / 100.0f);
+				this->keyStatus.screenRotateCClockwise = false;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
-				this->renderer->rotateScreen(-Renderer::PI / 100.0f);
+				this->keyStatus.screenRotateClockwise = false;
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_LCTRL) {
+				this->keyStatus.snappingToGrid = false;
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
@@ -392,8 +400,8 @@ void Game::localEvents() {
 			net::sendCommand(connection, data.c_str(), data.length());
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3) {
-		this->movingScreen = true;
-		this->movingScreenStart = Vector2(event.mouse.x, event.mouse.y);
+		this->keyStatus.moveScreen = true;
+		this->moveScreenStart = Vector2(event.mouse.x, event.mouse.y);
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1) {
 		if (this->dragging) {
 			Vector2 location(event.mouse.x, event.mouse.y);
@@ -414,16 +422,16 @@ void Game::localEvents() {
 			this->dragging = false;
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
-		this->movingScreen = false;
+		this->keyStatus.moveScreen = false;
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_AXES) {
 		if (event.mouse.dz != 0) {
-			this->renderer->mulScreenZoom(1 - 0.1f * event.mouse.dz);
+			this->renderer->zoomScreen(1 + 0.1f * event.mouse.dz);
 			this->renderer->updateTransformations();
 		} else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
-			if (this->snappingToGrid) {
+			if (this->keyStatus.snappingToGrid) {
 				Vector2 grid = this->selectedObjects.front()->getSize() + Vector2(0.001f, 0.001f);
 
 				if (location.x < 0.0f) {
@@ -457,11 +465,11 @@ void Game::localEvents() {
 
 				object->setLocation(destination);
 			}
-		} else if (this->movingScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
+		} else if (this->keyStatus.moveScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
 			Vector2 location(event.mouse.x, event.mouse.y);
 
-			this->renderer->addScreenLocation(location - this->movingScreenStart);
-			this->movingScreenStart = location;
+			this->renderer->scrollScreen(location - this->moveScreenStart);
+			this->moveScreenStart = location;
 
 			this->renderer->updateTransformations();
 		}
@@ -907,11 +915,38 @@ void Game::render() {
 	// Animate objects
 	this->animate();
 
+	// Translate, rotate and scale the screen
+	if (this->keyStatus.screenZoomIn) {
+		this->renderer->zoomScreen(1.05f);
+	}
+	if (this->keyStatus.screenZoomOut) {
+		this->renderer->zoomScreen(1.0f / 1.05f);
+	}
+
+	if (this->keyStatus.screenMoveLeft) {
+		this->renderer->scrollScreen(Vector2(10.0f, 0.0f) * this->deltaTime * 60.0f);
+	}
+	if (this->keyStatus.screenMoveRight) {
+		this->renderer->scrollScreen(Vector2(-10.0f, 0.0f) * this->deltaTime * 60.0f);
+	}
+	if (this->keyStatus.screenMoveUp) {
+		this->renderer->scrollScreen(Vector2(0.0f, 10.0f) * this->deltaTime * 60.0f);
+	}
+	if (this->keyStatus.screenMoveDown) {
+		this->renderer->scrollScreen(Vector2(0.0f, -10.0f) * this->deltaTime * 60.0f);
+	}
+
+	if (this->keyStatus.screenRotateClockwise) {
+		this->renderer->rotateScreen(Renderer::PI / 40.0f * this->deltaTime * 60.0f);
+	}
+	if (this->keyStatus.screenRotateCClockwise) {
+		this->renderer->rotateScreen(-Renderer::PI / 40.0f * this->deltaTime * 60.0f);
+	}
+
+	this->renderer->updateTransformations();
+
 	// Clear the screen
 	al_clear_to_color(al_map_rgb_f(0.1f, 0.1f, 0.1f));
-
-	//movescreen and update transformations
-	this->renderer->moveScreen();
 
 	// Begin render
 	al_hold_bitmap_drawing(true);
