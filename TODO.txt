@@ -23,7 +23,3 @@ Graphics:
 	- rotate around screen center or mouse location
 	- rotate temporary mouse coordinates when dragging an object
 	- background image
-
-Resources:
-	- full set of 52 playing cards
-	- extenal packages for game resources

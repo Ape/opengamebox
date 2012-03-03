@@ -11,3 +11,9 @@ std::vector<std::string> util::splitString(std::string string, char delimeter) {
 
 	return items;
 }
+
+std::string util::toString(int i) {
+	std::ostringstream stream;
+	stream << i;
+	return stream.str();
+}

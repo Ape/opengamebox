@@ -1,0 +1,12 @@
+# Create 10 purple pieces
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dcreate core.piece.purple
+dflush

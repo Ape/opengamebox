@@ -2,6 +2,3 @@ This is a basic package that includes the following objects:
 	- A deck of playing cards
 	- Some general game pieces
 	- A chessboard
-
-TODO:
-	- Complete set of playing cards

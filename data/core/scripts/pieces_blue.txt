@@ -1,0 +1,12 @@
+# Create 10 blue pieces
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dcreate core.piece.blue
+dflush

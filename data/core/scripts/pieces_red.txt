@@ -1,0 +1,12 @@
+# Create 10 red pieces
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dcreate core.piece.red
+dflush

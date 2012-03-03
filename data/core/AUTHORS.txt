@@ -1,5 +1,5 @@
-Objects
---------
+Objects and scripts
+--------------------
 *.txt:
 	Creative Commons Attribution-Share Alike 3.0 Unported
 	Lauri Niskanen <ape@ape3000.com>

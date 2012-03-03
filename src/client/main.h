@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <algorithm>
@@ -82,6 +83,7 @@ private:
 	std::vector<Widget*> widgets;
 	InputBox* input;
 
+	std::vector<std::string> dCreateBuffer;
 	std::list<Object*> selectedObjects;
 	bool dragging;
 	Vector2 draggingStart;
@@ -116,6 +118,7 @@ private:
 
 	void addMessage(std::string message);
 	void chatCommand(std::string commandstr);
+	void loadScript(std::string script);
 	void createObject(std::string object, Vector2 location = Vector2(0.0f, 0.0f));
 	void checkObjectOrder(void);
 

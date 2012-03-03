@@ -1,0 +1,12 @@
+# Create 10 cyan pieces
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dcreate core.piece.cyan
+dflush

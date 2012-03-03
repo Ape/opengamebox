@@ -233,16 +233,6 @@ void Game::localEvents() {
 
 					net::sendCommand(connection, data.c_str(), data.length());
 				}
-			} else if (event.keyboard.keycode == ALLEGRO_KEY_C) {
-				this->chatCommand("create core.card.7c");
-				this->chatCommand("create core.card.Kh");
-				this->chatCommand("create core.card.As");
-			} else if (event.keyboard.keycode == ALLEGRO_KEY_V) {
-				this->chatCommand("create core.board.chess");
-				for (int i = 0; i < 12; ++i) {
-					this->chatCommand("create core.piece.red");
-					this->chatCommand("create core.piece.blue");
-				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
 				// TODO: Shuffle the objects on the server
 				if (this->dragging) {
@@ -609,7 +599,8 @@ void Game::receivePacket(ENetEvent event) {
 				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
 				bool flipped = event.packet->data[6];
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
-				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15), '.');
+				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15),
+				                                                        '.');
 
 				ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
@@ -664,10 +655,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (numberObjects == 1) {
 					this->addMessage(client->nick + " moved " + lastObject->getName() + ".");
 				} else if (numberObjects >= 2) {
-					std::ostringstream stream;
-					stream << numberObjects;
-
-					this->addMessage(client->nick + " moved " + stream.str() + " objects.");
+					this->addMessage(client->nick + " moved " + util::toString(numberObjects) + " objects.");
 				}
 
 				this->checkObjectOrder();
@@ -724,10 +712,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (numberObjects == 1) {
 					this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
 				} else if (numberObjects >= 2) {
-					std::ostringstream stream;
-					stream << numberObjects;
-
-					this->addMessage(client->nick + " flipped " + stream.str() + " objects.");
+					this->addMessage(client->nick + " flipped " + util::toString(numberObjects) + " objects.");
 				}
 			}
 
@@ -770,10 +755,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (numberObjects == 1) {
 					this->addMessage(client->nick + " " + verb + " " + lastObject->getName() + ".");
 				} else if (numberObjects >= 2) {
-					std::ostringstream stream;
-					stream << numberObjects;
-
-					this->addMessage(client->nick + " " + verb + " " + stream.str() + " objects.");
+					this->addMessage(client->nick + " " + verb + " " + util::toString(numberObjects) + " objects.");
 				}
 
 				this->checkObjectOrder();
@@ -830,7 +812,13 @@ void Game::sendChat(std::string text) {
 void Game::chatCommand(std::string commandstr) {
 	std::vector<std::string> parameters = util::splitString(commandstr, ' ');
 
-	if (parameters.at(0) == "create") {
+	if (parameters.at(0) == "load") {
+		if (parameters.size() == 2) {
+			this->loadScript(parameters.at(1));
+		} else {
+			this->addMessage("Usage: /" + parameters.at(0) + " script");
+		}
+	} else if (parameters.at(0) == "create") {
 		if (parameters.size() == 2) {
 			this->createObject(parameters.at(1));
 		} else if (parameters.size() == 4) {
@@ -848,6 +836,19 @@ void Game::chatCommand(std::string commandstr) {
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " object [x y]");
 		}
+	} else if (parameters.at(0) == "dcreate") {
+		if (parameters.size() == 2) {
+			this->dCreateBuffer.push_back(parameters.at(1));
+		} else {
+			this->addMessage("Usage: /" + parameters.at(0) + " object");
+		}
+	} else if (parameters.at(0) == "dflush") {
+		int x = 0;
+		for (std::string object : this->dCreateBuffer) {
+			this->chatCommand("create " + object + " " + util::toString(x) + " 0");
+			x += 4;
+		}
+		this->dCreateBuffer.clear();
 	} else if (parameters.at(0) == "roll") {
 		if (parameters.size() <= 3) {
 			unsigned short maxValue = 6;
@@ -866,6 +867,31 @@ void Game::chatCommand(std::string commandstr) {
 		}
 	} else {
 		this->addMessage(parameters.at(0) + ": command not found!");
+	}
+}
+
+void Game::loadScript(std::string script) {
+	std::vector<std::string> scriptPath = util::splitString(script, '.');
+
+	if (scriptPath.size() == 2) {
+		this->addMessage("Running script '" + script + "'.");
+
+		std::ifstream file;
+		file.open("data/" + scriptPath.at(0) + "/scripts/" + scriptPath.at(1) + ".txt");
+
+		std::string line;
+		while (file.good()) {
+			getline(file, line);
+			if (line.length() == 0 || line.at(0) == '#') {
+				// Ignore comment lines
+			} else {
+				this->chatCommand(line);
+			}
+		}
+
+		file.close();
+	} else {
+		this->addMessage("Could not run script '" + script + "'.");
 	}
 }
 
@@ -982,19 +1008,17 @@ void Game::renderGame() {
 void Game::renderUI() {
 	this->renderer->useTransformation(IRenderer::UI);
 
-	std::ostringstream tmpText;
-
 	int i = 0;
 	for (auto& client : this->clients) {
 		if (client.second->joined) {
-			tmpText.str(std::string());
+			std::string text;
 			if (client.second->ping != 65535) {
-				tmpText << client.second->nick << " (" << client.second->ping << " ms)";
+				text = client.second->nick + " (" + util::toString(client.second->ping) + " ms)";
 			} else {
-				tmpText << client.second->nick;
+				text = client.second->nick;
 			}
 
-			this->renderer->drawText(tmpText.str(), Vector2(0.0f, i * 20.0f), Color(this->renderer, client.second->id));
+			this->renderer->drawText(text, Vector2(0.0f, i * 20.0f), Color(this->renderer, client.second->id));
 		}
 
 		++i;
@@ -1007,9 +1031,8 @@ void Game::renderUI() {
 		}
 	}
 
-	tmpText.str(std::string());
-	tmpText << "FPS: " << static_cast<int>(1.0 / this->deltaTime + 0.25);
-	this->renderer->drawText(tmpText.str(), Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f), Color(1.0f, 1.0f, 1.0f));
+	this->renderer->drawText("FPS: " + util::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
+	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f), Color(1.0f, 1.0f, 1.0f));
 
 	for (auto& widget : this->widgets) {
 		widget->draw(this->renderer);

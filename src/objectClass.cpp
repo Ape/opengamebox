@@ -8,7 +8,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass) {
 	this->name = "Object";
 	this->gridSize = Vector2(0.0f, 0.0f);
 
-	std::fstream file;
+	std::ifstream file;
 	file.open("data/" + this->package + "/objects/" + this->objectClass + ".txt", std::ios::in);
 
 	std::string line;
