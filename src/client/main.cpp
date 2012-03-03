@@ -201,6 +201,18 @@ void Game::localEvents() {
 		if (input == nullptr) {
 			if (event.keyboard.keycode == ALLEGRO_KEY_F10) {
 				this->quit();
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_DELETE) {
+				if (this->selectedObjects.size() > 0) {
+					std::string data;
+					data.push_back(net::PACKET_REMOVE);
+
+					for (auto& object : this->selectedObjects) {
+						net::dataAppendShort(data, object->getId());
+					}
+
+					net::sendCommand(connection, data.c_str(), data.length());
+					this->selectedObjects.clear();
+				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE) {
 				if (this->selectedObjects.size() > 0) {
 					std::string data;
@@ -679,6 +691,41 @@ void Game::receivePacket(ENetEvent event) {
 					this->objects.find(objId)->second->select(client);
 
 					i += 2;
+				}
+			}
+
+			break;
+		}
+
+		case net::PACKET_REMOVE: {
+			if (event.packet->dataLength >= 2) {
+				net::Client *client = this->clients.find(event.packet->data[1])->second;
+
+				unsigned int numberObjects = 0;
+				std::string lastObject;
+
+				size_t i = 2;
+				while (i < event.packet->dataLength) {
+					++numberObjects;
+
+					unsigned short objId = net::bytesToShort(event.packet->data + i);
+
+					Object *object = this->objects.find(objId)->second;
+					net::removeObject(this->objectOrder, object);
+					this->objects.erase(objId);
+
+					lastObject = object->getName();
+					delete object;
+
+					i += 2;
+				}
+
+				this->checkObjectOrder();
+
+				if (numberObjects == 1) {
+					this->addMessage(client->nick + " removed " + lastObject + ".");
+				} else if (numberObjects >= 2) {
+					this->addMessage(client->nick + " removed " + util::toString(numberObjects) + " objects.");
 				}
 			}
 

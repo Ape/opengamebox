@@ -5,7 +5,6 @@ General:
 
 Mechanics:
 	- shuffle to happen on server-side
-	- ability to remove selected objects
 	- box select
 	- merge move and flip packets
 	- flip whole selection, not individual objects
