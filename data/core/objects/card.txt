@@ -1,2 +1,2 @@
 name: Card
-flipside: card_flipside.png
+flipside: card_flipside
