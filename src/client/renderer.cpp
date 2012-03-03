@@ -147,17 +147,12 @@ void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float 
 	Vector2 pointAB = Vector2(pointA.x, pointB.y);
 	Vector2 pointBA = Vector2(pointB.x, pointA.y);
 
-	if (transformation != Transformation::UI) {
-		this->transformLocation(transformation, pointA);
-		this->transformLocation(transformation, pointB);
-		this->transformLocation(transformation, pointAB);
-		this->transformLocation(transformation, pointBA);
-	}
-
-	al_draw_line(pointA.x, pointA.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
-	al_draw_line(pointA.x, pointA.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
-	al_draw_line(pointB.x, pointB.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
-	al_draw_line(pointB.x, pointB.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness);
+	al_hold_bitmap_drawing(false);
+	al_draw_line(pointA.x, pointA.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
+	al_draw_line(pointA.x, pointA.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
+	al_draw_line(pointB.x, pointB.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
+	al_draw_line(pointB.x, pointB.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
+	al_hold_bitmap_drawing(true);
 }
 
 void Renderer::drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, Transformation transformation) {

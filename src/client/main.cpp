@@ -420,7 +420,7 @@ void Game::localEvents() {
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 			if (this->keyStatus.snappingToGrid) {
-				Vector2 grid = this->selectedObjects.front()->getGridSize() + Vector2(0.001f, 0.001f);
+				Vector2 grid = this->selectedObjects.front()->getGridSize() + Vector2(0.002f, 0.002f);
 
 				if (location.x < 0.0f) {
 					location.x -= grid.x;

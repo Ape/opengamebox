@@ -4,17 +4,19 @@ General:
 	- use member initialization lists
 
 Mechanics:
-	- ability to rotate objects
-		- free angle and 90 degree steps
 	- shuffle to happen on server-side
 	- ability to remove selected objects
+	- box select
+	- merge move and flip packets
+	- flip whole selection, not individual objects
+	- ability to rotate objects
+		- free angle and 90 degree steps
+		- use move packet
 	- fix object ordering bug
 	- server to know object ordering
-	- handling unknown objects
-		- fix: /create test => segfault on server
+	- multiobject create
 	- downloading objects from the server
 	- uploading objects to the server
-	- multiobject create
 
 Graphics:
 	- use player colors in chat messages
