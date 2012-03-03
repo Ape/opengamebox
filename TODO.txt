@@ -12,7 +12,8 @@ Mechanics:
 	- ability to remove selected objects
 	- fix object ordering bug
 	- server to know object ordering
-	- loading objects from the filesystem
+	- handling unknown objects
+		- fix: /create test => segfault on server
 	- downloading objects from the server
 	- uploading objects to the server
 	- multiobject create
@@ -25,5 +26,4 @@ Graphics:
 
 Resources:
 	- full set of 52 playing cards
-	- classic board game sets
 	- extenal packages for game resources

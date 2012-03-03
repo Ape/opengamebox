@@ -15,6 +15,11 @@ Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, 
 	this->animationTime = 0.0f;
 }
 
+void Object::initForClient(IRenderer *renderer) {
+	Coordinates textureSize = renderer->getTextureSize(this->image); 
+	this->size = Vector2(textureSize.x, textureSize.y);
+}
+
 ObjectClass* Object::getObjectClass() const {
 	return this->objectClass;
 }
@@ -48,7 +53,21 @@ std::string Object::getName() const {
 }
 
 Vector2 Object::getSize() const {
-	return this->objectClass->getSize();
+	return this->size;
+}
+
+Vector2 Object::getGridSize() const {
+	Vector2 gridSize = this->objectClass->getGridSize();
+
+	if (gridSize.x == 0.0f) {
+		gridSize.x = this->size.x;
+	}
+
+	if (gridSize.y == 0.0f) {
+		gridSize.y = this->size.y;
+	}
+
+	return gridSize;
 }
 
 bool Object::testLocation(Vector2 location) const {

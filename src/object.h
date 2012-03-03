@@ -19,6 +19,7 @@ class Object {
 public:
 	Object(ObjectClass *objectClass, std::string objectId, unsigned int id, Vector2 location);
 
+	void initForClient(IRenderer *renderer);
 	ObjectClass* getObjectClass(void) const;
 	std::string getObjectId(void) const;
 	std::string getFullId(void) const;
@@ -27,6 +28,7 @@ public:
 	Vector2 getLocation(void) const;
 	Vector2 getTargetLocation(void) const;
 	Vector2 getSize(void) const;
+	Vector2 getGridSize(void) const;
 	bool testLocation(Vector2 location) const;
 	bool testCollision(const Object *object, bool second = false) const;
 
@@ -55,6 +57,7 @@ private:
 	std::string objectId;
 	unsigned short id;
 	Vector2 location;
+	Vector2 size;
 	bool flipped;
 	std::string image;
 	std::string backside;

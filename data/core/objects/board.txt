@@ -1,1 +1,3 @@
 name: Board
+gridwidth: 64
+gridheight: 64

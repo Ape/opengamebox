@@ -432,7 +432,7 @@ void Game::localEvents() {
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 			if (this->keyStatus.snappingToGrid) {
-				Vector2 grid = this->selectedObjects.front()->getSize() + Vector2(0.001f, 0.001f);
+				Vector2 grid = this->selectedObjects.front()->getGridSize() + Vector2(0.001f, 0.001f);
 
 				if (location.x < 0.0f) {
 					location.x -= grid.x;
@@ -614,6 +614,7 @@ void Game::receivePacket(ENetEvent event) {
 				ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
 				Object *object = new Object(objectClass, objectData.at(2), objId, location);
+				object->initForClient(this->renderer);
 				object->select(selected);
 				object->own(owner);
 				object->setFlipped(flipped);
@@ -622,7 +623,7 @@ void Game::receivePacket(ENetEvent event) {
 				this->objectOrder.push_back(object);
 
 				if (event.packet->data[1] != 255) {
-					this->addMessage(client->nick + " created a new " + object->getName());
+					this->addMessage(client->nick + " created a new " + object->getName() + ".");
 				}
 
 				this->checkObjectOrder();
