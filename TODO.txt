@@ -1,9 +1,7 @@
 General:
-	- history for sent chat messages
-		- up and down arrows on inputBox to scroll messages
-	- history for received chat messages
-		- hold a key to show more received chat messages
+	- ability to scroll received chat messages
 	- loading settings from a file
+	- use member initialization lists
 
 Mechanics:
 	- ability to rotate objects

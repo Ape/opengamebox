@@ -8,7 +8,7 @@
 
 class Game;
 
-class InputBox : public Widget{
+class InputBox : public Widget {
 public:
 	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen);
 	~InputBox();
@@ -28,6 +28,7 @@ private:
 	ALLEGRO_USTR *text;
 	size_t inputLocation;
 	unsigned char maxLength;
+	size_t historyIndex;
 };
 
 #endif

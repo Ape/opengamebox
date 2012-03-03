@@ -10,6 +10,7 @@ InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string capt
 	this->text = al_ustr_new("");
 	this->inputLocation = 0;
 	this->maxLength = maxLen;
+	this->historyIndex = 0;
 }
 InputBox::~InputBox() {
 	al_ustr_free(this->text);
@@ -60,6 +61,28 @@ bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 	} else if (keyboard.keycode == ALLEGRO_KEY_RIGHT) {
 		if (this->inputLocation < al_ustr_length(this->text)) {
 			++this->inputLocation;
+		}
+	} else if (keyboard.keycode == ALLEGRO_KEY_UP) {
+		if (this->historyIndex < this->game->getSentMessageCount()) {
+			++this->historyIndex;
+
+			al_ustr_free(this->text);
+			this->text = al_ustr_new(this->game->getSentMessage(this->historyIndex).c_str());
+			this->inputLocation = al_ustr_length(this->text);
+		}
+	} else if (keyboard.keycode == ALLEGRO_KEY_DOWN) {
+		if (this->historyIndex > 1) {
+			--this->historyIndex;
+
+			al_ustr_free(this->text);
+			this->text = al_ustr_new(this->game->getSentMessage(this->historyIndex).c_str());
+			this->inputLocation = al_ustr_length(this->text);
+		} else if (this->historyIndex == 1) {
+			--this->historyIndex;
+
+			al_ustr_free(this->text);
+			this->text = al_ustr_new("");
+			this->inputLocation = 0;
 		}
 	} else if (keyboard.unichar > 0 && this->inputLocation < this->maxLength) {
 		al_ustr_insert_chr(this->text, al_ustr_offset(this->text, this->inputLocation), keyboard.unichar);

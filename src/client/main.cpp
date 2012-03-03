@@ -24,16 +24,13 @@ int main(int argc, char **argv) {
 
 Game::Game(void) {
 	this->exiting = false;
-	this->redraw = true;
+	this->nextFrame = true;
+	this->deltaTime = 0.0f;
 	this->disconnecting = false;
 	this->input = nullptr;
-
-	this->dragging = false;
-
-	this->deltaTime = 0.0f;
-
 	this->localClient = net::MAX_CLIENTS;
 
+	this->dragging = false;
 	this->keyStatus = KeyStatus();
 }
 
@@ -47,8 +44,8 @@ int Game::run(std::string address, int port) {
 	this->connection = enet_host_create (NULL,          // Create a client host
 	                                     1,             // Only allow 1 outgoing connection
 	                                     net::CHANNELS, // Number of channels
-	                                     100000,        // Downstream bandwidth limited to 100 kB/s
-	                                     100000);       // Upstream bandwidth limited to 100 kB/s
+	                                     0,             // Unlimited downstream bandwidth
+	                                     0);            // Unlimited upstream bandwidth
 
 	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
 		std::cerr << "Unknown host!" << std::endl;
@@ -149,8 +146,9 @@ void Game::mainLoop() {
 		this->localEvents();
 
 		// Render the screen with limited FPS
-		if (this->redraw && al_is_event_queue_empty(this->event_queue)) {
-			this->redraw = false;
+		if (this->nextFrame && al_is_event_queue_empty(this->event_queue)) {
+			this->nextFrame = false;
+			this->update();
 			this->render();
 		}
 	}
@@ -186,7 +184,7 @@ void Game::localEvents() {
 	al_wait_for_event(event_queue, &event);
 
 	if (event.type == ALLEGRO_EVENT_TIMER) {
-		this->redraw = true;
+		this->nextFrame = true;
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 		this->quit();
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
@@ -806,7 +804,19 @@ void Game::sendChat(std::string text) {
 
 			net::sendCommand(connection, data.c_str(), data.length());
 		}
+
+		if (this->sentMessages.size() == 0 || text != this->sentMessages.at(this->sentMessages.size() - 1)) {
+			this->sentMessages.push_back(text);
+		}
 	}
+}
+
+std::string Game::getSentMessage(size_t index) {
+	return this->sentMessages.at(this->sentMessages.size() - index);
+}
+
+size_t Game::getSentMessageCount() {
+	return this->sentMessages.size();
 }
 
 void Game::chatCommand(std::string commandstr) {
@@ -934,13 +944,15 @@ void Game::identifyToServer(std::string nick) {
 	}
 }
 
-void Game::render() {
+void Game::update() {
 	// Calculate deltaTime
 	this->deltaTime = al_get_time() - this->previousTime;
 	this->previousTime = al_get_time();
 
 	// Animate objects
-	this->animate();
+	for (auto& object : this->objectOrder) {
+		object->animate(this->deltaTime);
+	}
 
 	// Translate, rotate and scale the screen
 	if (this->keyStatus.screenZoomIn) {
@@ -971,7 +983,9 @@ void Game::render() {
 	}
 
 	this->renderer->updateTransformations();
+}
 
+void Game::render() {
 	// Clear the screen
 	al_clear_to_color(al_map_rgb_f(0.1f, 0.1f, 0.1f));
 
@@ -986,12 +1000,6 @@ void Game::render() {
 
 	// Draw the rendering
 	al_flip_display();
-}
-
-void Game::animate() {
-	for (auto& object : this->objectOrder) {
-		object->animate(this->deltaTime);
-	}
 }
 
 void Game::renderGame() {
@@ -1025,7 +1033,7 @@ void Game::renderUI() {
 	}
 
 	for (std::vector<Message>::size_type i = this->messages.size(); i > 0; --i) {
-		if (al_get_time() < this->messages[i-1].time + 10.0) {
+		if (this->input != nullptr || al_get_time() < this->messages[i-1].time + MESSAGE_TIME) {
 			this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f),
 			                         Color(1.0f, 1.0f, 1.0f));
 		}

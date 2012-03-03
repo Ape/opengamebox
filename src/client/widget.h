@@ -1,15 +1,14 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
-#include "../vector2.h"
-
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
 
+#include "../vector2.h"
 #include "../irenderer.h"
 
-class Widget{
+class Widget {
 protected:
 	Vector2 location;
 	Vector2 size;

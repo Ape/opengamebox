@@ -24,8 +24,8 @@
 #include "../objectClassManager.h"
 #include "../objectClass.h"
 #include "../object.h"
-#include "renderer.h"
 #include "../vector2.h"
+#include "renderer.h"
 #include "widget.h"
 #include "widgets/inputBox.h"
 
@@ -38,8 +38,9 @@ const int SCREEN_W = 1024;
 const int SCREEN_H = 768;
 const float FPS_LIMIT = 60.0f;
 const bool FULLSCREEN = false;
-const float ANIMATION_TIME = 0.5f;
 const int MULTISAMPLING_SAMPLES = 2;
+const float ANIMATION_TIME = 0.5f;
+const float MESSAGE_TIME = 20.0f;
 
 class Game {
 public:
@@ -48,6 +49,8 @@ public:
 	int run(std::string address, int port);
 
 	void sendChat(std::string text);
+	std::string getSentMessage(size_t index);
+	size_t getSentMessageCount(void);
 	void identifyToServer(std::string nick);
 
 private:
@@ -61,9 +64,8 @@ private:
 	Renderer *renderer;
 
 	bool exiting;
-	bool redraw;
 	bool disconnecting;
-
+	bool nextFrame;
 	double previousTime;
 	double deltaTime;
 
@@ -74,7 +76,7 @@ private:
 	std::map<unsigned char, net::Client*> clients;
 	unsigned char localClient;
 
-	struct Message{
+	struct Message {
 		std::string message;
 		double time;
 	};
@@ -82,14 +84,14 @@ private:
 	std::vector<Message> messages;
 	std::vector<Widget*> widgets;
 	InputBox* input;
+	std::vector<std::string> sentMessages;
 
 	std::vector<std::string> dCreateBuffer;
 	std::list<Object*> selectedObjects;
 	bool dragging;
 	Vector2 draggingStart;
 
-	struct KeyStatus
-	{
+	struct KeyStatus {
 		bool screenZoomIn;
 		bool screenZoomOut;
 		bool screenMoveLeft;
@@ -114,8 +116,6 @@ private:
 	void networkEvents(void);
 	void receivePacket(ENetEvent event);
 
-	void sendAction(unsigned char action, bool enable);
-
 	void addMessage(std::string message);
 	void chatCommand(std::string commandstr);
 	void loadScript(std::string script);
@@ -124,8 +124,8 @@ private:
 
 	void askNick(void);
 
+	void update(void);
 	void render(void);
-	void animate(void);
 	void renderGame(void);
 	void renderUI(void);
 };
