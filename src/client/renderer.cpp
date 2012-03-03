@@ -110,13 +110,17 @@ void Renderer::setScreenSize(Coordinates screenSize) {
 
 void Renderer::loadTexture(std::string texture) {
 	if (this->textures[texture] == nullptr) {
-		std::string path = "data/" + texture;
-
+		std::string path = "data/" + texture + ".png";
 		this->textures[texture] = al_load_bitmap(path.c_str());
 
 		if (this->textures[texture] == nullptr) {
-			std::cout << "Error: Texture " << texture << " could not be loaded" << std::endl;
-			this->textures[texture] = al_load_bitmap("gfx/error.png");
+			std::string path = "data/" + texture + ".jpg";
+			this->textures[texture] = al_load_bitmap(path.c_str());
+
+			if (this->textures[texture] == nullptr) {
+				std::cout << "Error: Texture " << texture << ".{png|jpg}" << " could not be loaded." << std::endl;
+				this->textures[texture] = al_load_bitmap("gfx/error.png");
+			}
 		}
 	}
 }
