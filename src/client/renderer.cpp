@@ -62,7 +62,10 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 
 Renderer::~Renderer() {
 	for (auto& texture : this->textures) {
-		al_destroy_bitmap(texture.second);
+		if (texture.second != nullptr) {
+			al_destroy_bitmap(texture.second);
+			texture.second = nullptr;
+		}
 	}
 
 	al_destroy_font(this->font);
@@ -86,6 +89,13 @@ void Renderer::resize() {
 
 	this->setScreenSize(Coordinates(al_get_display_width(this->display), al_get_display_height(this->display)));
     this->updateTransformations();
+}
+
+void Renderer::setWindowTitle(std::string title, std::string icon) {
+	this->loadTexture(icon);
+
+	al_set_window_title(this->display, title.c_str());
+	al_set_display_icon(this->display, this->textures[icon]);
 }
 
 void Renderer::updateTransformations() {
@@ -127,16 +137,17 @@ void Renderer::setScreenSize(Coordinates screenSize) {
 
 void Renderer::loadTexture(std::string texture) {
 	if (this->textures[texture] == nullptr) {
-		std::string path = "data/" + texture + ".png";
+		std::string path = texture + ".png";
 		this->textures[texture] = al_load_bitmap(path.c_str());
 
 		if (this->textures[texture] == nullptr) {
-			std::string path = "data/" + texture + ".jpg";
+			std::string path = texture + ".jpg";
 			this->textures[texture] = al_load_bitmap(path.c_str());
 
 			if (this->textures[texture] == nullptr) {
 				std::cout << "Error: Texture " << texture << ".{png|jpg}" << " could not be loaded." << std::endl;
-				this->textures[texture] = al_load_bitmap("gfx/error.png");
+				this->loadTexture("gfx/error");
+				this->textures[texture] = this->textures["gfx/error"];
 			}
 		}
 	}
@@ -144,9 +155,7 @@ void Renderer::loadTexture(std::string texture) {
 
 void Renderer::drawBitmap(std::string texture, Vector2 source_location, Vector2 source_size,
                           Vector2 dest_location, Vector2 dest_size) {
-	if (this->textures[texture] == nullptr) {
-		this->loadTexture(texture);
-	}
+	this->loadTexture(texture);
 
 	al_draw_scaled_bitmap(this->textures[texture], source_location.x, source_location.y,
 	                      source_size.x * this->getTextureSize(texture).x, source_size.y * this->getTextureSize(texture).y,
@@ -155,9 +164,7 @@ void Renderer::drawBitmap(std::string texture, Vector2 source_location, Vector2 
 
 void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Vector2 source_size,
                                 Vector2 dest_location, Vector2 dest_size, Color color) {
-	if (this->textures[texture] == nullptr) {
-		this->loadTexture(texture);
-	}
+	this->loadTexture(texture);
 
 	al_draw_tinted_scaled_bitmap(this->textures[texture], al_map_rgba_f(color.red, color.green, color.blue, color.alpha), source_location.x, source_location.y,
 	                      source_size.x * this->getTextureSize(texture).x, source_size.y * this->getTextureSize(texture).y,
@@ -168,21 +175,25 @@ void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float 
 	Vector2 pointAB = Vector2(pointA.x, pointB.y);
 	Vector2 pointBA = Vector2(pointB.x, pointA.y);
 
+	float thicknessFactor;
+	if (transformation == Transformation::CAMERA) {
+		thicknessFactor = 2.0f / this->screenZoom;
+	} else {
+		thicknessFactor = 1.0f;
+	}
+
 	al_hold_bitmap_drawing(false);
-	al_draw_line(pointA.x, pointA.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
-	al_draw_line(pointA.x, pointA.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
-	al_draw_line(pointB.x, pointB.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
-	al_draw_line(pointB.x, pointB.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thickness * 2.0f / this->screenZoom);
+	al_draw_line(pointA.x, pointA.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
+	al_draw_line(pointA.x, pointA.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
+	al_draw_line(pointB.x, pointB.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
+	al_draw_line(pointB.x, pointB.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
 	al_hold_bitmap_drawing(true);
 }
 
 void Renderer::drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, Transformation transformation) {
-	if (transformation != Transformation::UI) {
-		this->transformLocation(transformation, pointA);
-		this->transformLocation(transformation, pointB);
-	}
-
+	al_hold_bitmap_drawing(false);
 	al_draw_filled_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha));
+	al_hold_bitmap_drawing(true);
 }
 
 void Renderer::drawText(std::string text, Vector2 location, Color color, Alignment alignment) {
@@ -190,9 +201,7 @@ void Renderer::drawText(std::string text, Vector2 location, Color color, Alignme
 }
 
 Coordinates Renderer::getTextureSize(std::string texture) {
-	if (this->textures[texture] == nullptr) {
-		this->loadTexture(texture);
-	}
+	this->loadTexture(texture);
 
 	return Coordinates(al_get_bitmap_width(this->textures[texture]), al_get_bitmap_height(this->textures[texture]));
 }

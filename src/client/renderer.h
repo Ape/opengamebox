@@ -43,8 +43,9 @@ public:
 	ALLEGRO_DISPLAY* getDisplay(void) const;
 	ALLEGRO_FONT* getFont(void) const;
 
-	virtual void resize(void);
 	virtual Coordinates getDisplaySize(void) const;
+	virtual void resize(void);
+	virtual void setWindowTitle(std::string title, std::string icon);
 	virtual void updateTransformations(void);
 
 	virtual void zoomScreen(float zoom);

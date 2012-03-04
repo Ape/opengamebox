@@ -32,6 +32,8 @@ public:
 	enum Alignment {LEFT, CENTER, RIGHT};
 
 	virtual Coordinates getDisplaySize(void) const = 0;
+	virtual void resize(void) = 0;
+	virtual void setWindowTitle(std::string title, std::string icon) = 0;
 	virtual void updateTransformations(void) = 0;
 
 	virtual void zoomScreen(float zoom) = 0;

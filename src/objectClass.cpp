@@ -39,7 +39,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass) {
 		} else if (this->parseLine(line, "name", value)) {
 			this->name = value;
 		} else if (this->parseLine(line, "flipside", value)) {
-			this->flipsideImage = this->package + "/objects/" + value;
+			this->flipsideImage = "data/" + this->package + "/objects/" + value;
 		} else if (this->parseLineFloat(line, "gridwidth", valueFloat)) {
 			this->gridSize.x = valueFloat;
 		} else if (this->parseLineFloat(line, "gridheight", valueFloat)) {
