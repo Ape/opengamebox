@@ -229,15 +229,15 @@ void Object::animate(double deltaTime) {
 
 void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 	std::string image;
-	if (! this->flipped || this->objectClass->getFlipsideImage().empty()) {
+	if ((! this->flipped && (this->owner == nullptr || this->owner == localClient)) || this->objectClass->getFlipsideImage().empty()) {
 		image = this->image;
 	} else {
 		image = this->objectClass->getFlipsideImage();
 	}
 
 	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
-	if (this->owner == localClient) {
-		renderer->drawText(localClient->nick, this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), Color(renderer, localClient->id),
+	if (this->owner != nullptr) {
+		renderer->drawText(this->owner->nick, this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), Color(renderer, this->owner->id),
 		                   IRenderer::Alignment::CENTER);
 		tint.alpha = 0.75f;
 	}
@@ -248,14 +248,12 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 		tint.blue = 0.75f;
 	}
 	
-	if (this->owner == nullptr || this->owner == localClient) {
-		if (this->selected != nullptr) {
-			Vector2 pointA = this->location - this->getSize()/2.0f - Vector2(1.0f, 1.0f);
-			Vector2 pointB = this->location + this->getSize()/2.0f + Vector2(1.0f, 1.0f);
+	if (this->selected != nullptr) {
+		Vector2 pointA = this->location - this->getSize()/2.0f - Vector2(1.0f, 1.0f);
+		Vector2 pointB = this->location + this->getSize()/2.0f + Vector2(1.0f, 1.0f);
 
-			renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f, IRenderer::Transformation::CAMERA);
-		}
-
-		renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->getSize()/2.0f, this->getSize(), tint);
+		renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f, IRenderer::Transformation::CAMERA);
 	}
+
+	renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->getSize()/2.0f, this->getSize(), tint);
 }

@@ -665,10 +665,12 @@ void Game::receivePacket(ENetEvent event) {
 					i += 10;
 				}
 
-				if (numberObjects == 1) {
-					this->addMessage(client->nick + " moved " + lastObject->getName() + ".");
-				} else if (numberObjects >= 2) {
-					this->addMessage(client->nick + " moved " + util::toString(numberObjects) + " objects.");
+				if (lastObject->isOwnedBy(nullptr)) {
+					if (numberObjects == 1) {
+						this->addMessage(client->nick + " moved " + lastObject->getName() + ".");
+					} else if (numberObjects >= 2) {
+						this->addMessage(client->nick + " moved " + util::toString(numberObjects) + " objects.");
+					}
 				}
 
 				this->checkObjectOrder();
@@ -757,10 +759,12 @@ void Game::receivePacket(ENetEvent event) {
 					i += 2;
 				}
 
-				if (numberObjects == 1) {
-					this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
-				} else if (numberObjects >= 2) {
-					this->addMessage(client->nick + " flipped " + util::toString(numberObjects) + " objects.");
+				if (lastObject->isOwnedBy(nullptr)) {
+					if (numberObjects == 1) {
+						this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
+					} else if (numberObjects >= 2) {
+						this->addMessage(client->nick + " flipped " + util::toString(numberObjects) + " objects.");
+					}
 				}
 			}
 

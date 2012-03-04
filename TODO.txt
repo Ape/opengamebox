@@ -5,7 +5,7 @@ General:
 	- add README.txt
 
 Mechanics:
-	- don't show messages about moving private objects
+	- ability to save all objects to a script
 	- fix shuffle
 	- box select
 	- merge move and flip packets
@@ -20,7 +20,6 @@ Mechanics:
 	- uploading objects to the server
 
 Graphics:
-	- show private objects to other players, but upside-down
 	- use player colors in chat messages
 	- rotate around screen center or mouse location
 	- rotate temporary mouse coordinates when dragging an object

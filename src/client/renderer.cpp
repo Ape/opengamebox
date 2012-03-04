@@ -145,9 +145,13 @@ void Renderer::loadTexture(std::string texture) {
 			this->textures[texture] = al_load_bitmap(path.c_str());
 
 			if (this->textures[texture] == nullptr) {
-				std::cout << "Error: Texture " << texture << ".{png|jpg}" << " could not be loaded." << std::endl;
-				this->loadTexture("gfx/error");
-				this->textures[texture] = this->textures["gfx/error"];
+				if (texture != "gfx/error") {
+					std::cout << "Error: Texture " << texture << ".{png|jpg}" << " could not be loaded." << std::endl;
+					this->loadTexture("gfx/error");
+					this->textures[texture] = this->textures["gfx/error"];
+				} else {
+					std::cout << "Fatal: Could not load fallback texture." << std::endl;
+				}
 			}
 		}
 	}
