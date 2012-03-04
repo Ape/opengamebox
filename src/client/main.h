@@ -135,6 +135,7 @@ private:
 	void addMessage(std::string message);
 	void chatCommand(std::string commandstr);
 	void loadScript(std::string script);
+	void saveScript(std::string name);
 	void createObject(std::string object, Vector2 location = Vector2(0.0f, 0.0f));
 	void checkObjectOrder(void);
 

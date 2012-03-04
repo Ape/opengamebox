@@ -882,6 +882,12 @@ void Game::chatCommand(std::string commandstr) {
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " script");
 		}
+	} else if (parameters.at(0) == "save") {
+		if (parameters.size() == 2) {
+			this->saveScript(parameters.at(1));
+		} else {
+			this->addMessage("Usage: /" + parameters.at(0) + " name");
+		}
 	} else if (parameters.at(0) == "create") {
 		if (parameters.size() == 2) {
 			this->createObject(parameters.at(1));
@@ -937,11 +943,15 @@ void Game::chatCommand(std::string commandstr) {
 void Game::loadScript(std::string script) {
 	std::vector<std::string> scriptPath = util::splitString(script, '.');
 
-	if (scriptPath.size() == 2) {
+	if (scriptPath.size() == 1 || scriptPath.size() == 2) {
 		this->addMessage("Running script '" + script + "'.");
 
 		std::ifstream file;
-		file.open("data/" + scriptPath.at(0) + "/scripts/" + scriptPath.at(1) + ".txt");
+		if (scriptPath.size() == 1) {
+			file.open("scripts/" + scriptPath.at(0) + ".txt");
+		} else { // scriptPath.size() == 2
+			file.open("data/" + scriptPath.at(0) + "/scripts/" + scriptPath.at(1) + ".txt");
+		}
 
 		std::string line;
 		while (file.good()) {
@@ -957,6 +967,19 @@ void Game::loadScript(std::string script) {
 	} else {
 		this->addMessage("Could not run script '" + script + "'.");
 	}
+}
+
+void Game::saveScript(std::string name) {
+	this->addMessage("Saving objects to script '" + name + "'.");
+
+	std::ofstream file;
+	file.open("scripts/" + name + ".txt");
+
+	for (auto& object : this->objectOrder) {
+		file << "create " << object->getFullId() << " " << object->getLocation().x << " " << object->getLocation().y << std::endl;
+	}
+
+	file.close();
 }
 
 void Game::createObject(std::string objectId, Vector2 location) {
