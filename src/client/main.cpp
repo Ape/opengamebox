@@ -132,7 +132,7 @@ int Game::run(std::string address, int port) {
 
 	// Initialize the connection
 	this->addMessage("Connecting to " + net::AddressToString(this->hostAddress) + "...");
-	host = enet_host_connect(connection, &this->hostAddress, 1, 0);
+	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
 	if (this->host == NULL) {
 		std::cerr << "Could not connect to the server." << std::endl;
@@ -230,7 +230,7 @@ void Game::localEvents() {
 						net::dataAppendShort(data, object->getId());
 					}
 
-					net::sendCommand(connection, data.c_str(), data.length());
+					net::sendCommand(this->connection, data.c_str(), data.length());
 					this->selectedObjects.clear();
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE) {
@@ -261,32 +261,15 @@ void Game::localEvents() {
 						net::dataAppendShort(data, object->getId());
 					}
 
-					net::sendCommand(connection, data.c_str(), data.length());
+					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
-				// TODO: Shuffle the objects on the server
-				if (this->dragging) {
-					std::vector<Object*> objects;
-					std::vector<Vector2> locations;
-					for (auto& object : this->selectedObjects) {
-						objects.push_back(object);
-						locations.push_back(object->getLocation());
-					}
-
-					std::random_shuffle(objects.begin(), objects.end());
+				if (this->selectedObjects.size() > 0) {
+					std::string data;
+					data += net::PACKET_SHUFFLE;
+					net::sendCommand(this->connection, data.c_str(), data.length());
 
 					this->selectedObjects.clear();
-					std::vector<Vector2>::size_type location = 0;
-					for (auto& object : objects) {
-						object->setLocation(locations.at(location));
-						++location;
-						this->selectedObjects.push_back(object);
-
-						net::removeObject(this->objectOrder, object);
-						this->objectOrder.push_back(object);
-					}
-
-					this->checkObjectOrder();
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_F) {
 				if (this->selectedObjects.size() > 0) {
@@ -302,7 +285,7 @@ void Game::localEvents() {
 						nextLocation += object->getStackDelta();
 					}
 
-					net::sendCommand(connection, data.c_str(), data.length());
+					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_PAD_PLUS) {
 				this->keyStatus.screenZoomIn = true;
@@ -380,7 +363,7 @@ void Game::localEvents() {
 				}
 			}
 
-			net::sendCommand(connection, data.c_str(), data.length());
+			net::sendCommand(this->connection, data.c_str(), data.length());
 		}
 
 		if (!this->selectedObjects.empty()) {
@@ -417,7 +400,7 @@ void Game::localEvents() {
 				net::dataAppendShort(data, object->getId());
 			}
 
-			net::sendCommand(connection, data.c_str(), data.length());
+			net::sendCommand(this->connection, data.c_str(), data.length());
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3) {
 		this->keyStatus.moveScreen = true;
@@ -437,7 +420,7 @@ void Game::localEvents() {
 				object->setAnimation(object->getLocation(), 0.0f);
 			}
 
-			net::sendCommand(connection, data.c_str(), data.length());
+			net::sendCommand(this->connection, data.c_str(), data.length());
 
 			this->dragging = false;
 		}
@@ -869,7 +852,7 @@ void Game::sendChat(std::string text) {
 			data.push_back(net::PACKET_CHAT);
 			data.append(text);
 
-			net::sendCommand(connection, data.c_str(), data.length());
+			net::sendCommand(this->connection, data.c_str(), data.length());
 		}
 
 		if (this->sentMessages.size() == 0 || text != this->sentMessages.at(this->sentMessages.size() - 1)) {
@@ -938,7 +921,7 @@ void Game::chatCommand(std::string commandstr) {
 			std::string data;
 			data.push_back(net::PACKET_ROLL);
 			net::dataAppendShort(data, maxValue);
-			net::sendCommand(connection, data.c_str(), data.length());
+			net::sendCommand(this->connection, data.c_str(), data.length());
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " [max value]");
 		}
@@ -982,7 +965,7 @@ void Game::createObject(std::string objectId, Vector2 location) {
 	net::dataAppendVector2(data, location);
 	data.append(objectId);
 
-	net::sendCommand(connection, data.c_str(), data.length());
+	net::sendCommand(this->connection, data.c_str(), data.length());
 }
 
 void Game::checkObjectOrder() {
@@ -1005,7 +988,7 @@ void Game::identifyToServer(std::string nick) {
 		data.push_back(net::PACKET_HANDSHAKE);
 		data.append(nick, 0, 16); // Limit nick to 16 characters
 
-		net::sendCommand(connection, data.c_str(), data.length());
+		net::sendCommand(this->connection, data.c_str(), data.length());
 	} else {
 		this->askNick();
 	}

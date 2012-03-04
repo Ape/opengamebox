@@ -529,6 +529,47 @@ void Server::receivePacket(ENetEvent event) {
 
 			break;
 		}
+
+		case net::PACKET_SHUFFLE: {
+			if (event.packet->dataLength == 1) {
+				// Randomize object locations
+				{
+					std::string data;
+					data += net::PACKET_MOVE;
+					data += *id;
+
+					std::vector<Object*> objects;
+					std::vector<Vector2> locations;
+					for (auto& object : this->objects) {
+						if (object.second->isSelectedBy(this->clients[*id])) {
+							objects.push_back(object.second);
+							locations.push_back(object.second->getLocation());
+						}
+					}
+
+					std::random_shuffle(objects.begin(), objects.end());
+
+					std::vector<Vector2>::size_type location = 0;
+					for (auto& object : objects) {
+						object->setLocation(locations.at(location));
+						net::dataAppendShort(data, object->getId());
+						net::dataAppendVector2(data, object->getLocation());
+						++location;
+					}
+
+					net::sendCommand(this->connection, data.c_str(), data.length());
+				}
+
+				// Deselect objects
+				{
+					std::string data;
+					data += net::PACKET_SELECT;
+					data += *id;
+
+					net::sendCommand(this->connection, data.c_str(), data.length());
+				}
+			}
+		}
 	}
 }
 

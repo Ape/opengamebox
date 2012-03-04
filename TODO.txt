@@ -2,9 +2,11 @@ General:
 	- ability to scroll received chat messages
 	- loading settings from a file
 	- use member initialization lists
+	- add README.txt
 
 Mechanics:
-	- shuffle to happen on server-side
+	- don't show messages about moving private objects
+	- fix shuffle
 	- box select
 	- merge move and flip packets
 	- flip whole selection, not individual objects
@@ -18,6 +20,7 @@ Mechanics:
 	- uploading objects to the server
 
 Graphics:
+	- show private objects to other players, but upside-down
 	- use player colors in chat messages
 	- rotate around screen center or mouse location
 	- rotate temporary mouse coordinates when dragging an object
