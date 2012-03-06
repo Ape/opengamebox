@@ -21,7 +21,6 @@ Mechanics:
 	- uploading objects to the server
 
 Graphics:
-	- use player colors in chat messages
 	- rotate around screen center or mouse location
 	- rotate temporary mouse coordinates when dragging an object
 	- background image

@@ -94,6 +94,8 @@ private:
 
 	struct Message {
 		std::string message;
+		std::string nick;
+		Color color;
 		double time;
 	};
 
@@ -132,7 +134,7 @@ private:
 	void networkEvents(void);
 	void receivePacket(ENetEvent event);
 
-	void addMessage(std::string message);
+	void addMessage(std::string message,  net::Client* client = 0);
 	void chatCommand(std::string commandstr);
 	void loadScript(std::string script);
 	void saveScript(std::string name);
