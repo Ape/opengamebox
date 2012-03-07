@@ -209,7 +209,7 @@ void Renderer::drawText(std::string text, Vector2 location, Alignment alignment)
 	do {
 		position = text.find("^", oldposition);
 
-		int tempint;
+		int tempint = 0;
 		if(position != std::string::npos and position + 5 <= text.length()) {
 			al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
 							this->getAlignment(alignment), text.substr(oldposition, position - oldposition).c_str());
