@@ -64,7 +64,5 @@ std::string Color::encodedString() {
 	sprintf(tempChar, "%X", static_cast<int>(this->blue*15 + 0.5));
 	tempString.append(tempChar);
 
-	std::cout<<*this<<std::endl;
-
 	return tempString;
 }

@@ -201,9 +201,9 @@ void Renderer::drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, 
 }
 
 void Renderer::drawText(std::string text, Vector2 location, Alignment alignment) {
-	unsigned int position = 0;
-	unsigned int oldposition = 0;
-	unsigned int drawposition = 0;
+	size_t position = 0;
+	size_t oldposition = 0;
+	float drawposition = 0;
 	Color color = Color(1.0f, 1.0f, 1.0f); //default color
 	bool iter = true;
 	do {
@@ -233,8 +233,7 @@ void Renderer::drawText(std::string text, Vector2 location, Alignment alignment)
 			iter = false;
 		}
 		oldposition = position + 4;
-		if(oldposition >= text.length())
-		{
+		if(oldposition >= text.length()) {
 			oldposition = text.length() -1;
 		}
 	} while (iter);

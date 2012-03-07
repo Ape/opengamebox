@@ -591,13 +591,10 @@ void Game::receivePacket(ENetEvent event) {
 				if (event.packet->data[1] == 255) {
 					this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				} else {
-					std::cout<<Color(this->renderer, event.packet->data[1])<<std::endl;
 					this->addMessage(Color(this->renderer, event.packet->data[1]).encodedString() + net::clientIdToClient(this->clients, event.packet->data[1])->nick +
 										": " + Color().encodedString() + std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				}
-
 			}
-
 			break;
 		}
 
@@ -1104,26 +1101,12 @@ void Game::renderUI() {
 
 			this->renderer->drawText(text, Vector2(0.0f, i * 20.0f));
 		}
-
 		++i;
 	}
 
 	for (std::vector<Message>::size_type i = this->messages.size(); i > 0; --i) {
 		if (this->input != nullptr || al_get_time() < this->messages[i-1].time + MESSAGE_TIME) {
-//			if(this->messages[i-1].nick == std::string(""))
-//			{
-				this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
-/*			}
-			else
-			{
-//				this->renderer->drawText(this->messages[i-1].nick + ": " + this->messages[i-1].message,
-//										Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f), this->messages[i-1].color);
-
-				this->renderer->drawText(this->messages[i-1].nick + ": ",
-											Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
-				this->renderer->drawText(this->messages[i-1].message, Vector2(al_get_text_width(this->renderer->getFont(), (this->messages[i-1].nick + ": ").c_str()),
-											this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
-			}*/
+			this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
 		}
 	}
 
