@@ -50,3 +50,21 @@ void Color::setFromId(IRenderer *renderer, unsigned int id) {
 	// The magical float values below are based on the golden angle on the hue circle
 	this->setHsv(renderer, 217.75608f + 137.50776f * id, 1.0f, 1 - ((id - id % 7) / 7) % 2 * 0.4f);
 }
+
+std::string Color::encodedString() {
+	char tempChar[1];
+	std::string tempString = std::string("^");
+
+	sprintf(tempChar, "%X", static_cast<int>(this->red*15 + 0.5));
+	tempString.append(tempChar);
+
+	sprintf(tempChar, "%X", static_cast<int>(this->green*15 + 0.5));
+	tempString.append(tempChar);
+
+	sprintf(tempChar, "%X", static_cast<int>(this->blue*15 + 0.5));
+	tempString.append(tempChar);
+
+	std::cout<<*this<<std::endl;
+
+	return tempString;
+}

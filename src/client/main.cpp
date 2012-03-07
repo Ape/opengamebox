@@ -591,7 +591,9 @@ void Game::receivePacket(ENetEvent event) {
 				if (event.packet->data[1] == 255) {
 					this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				} else {
-					this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2), net::clientIdToClient(this->clients, event.packet->data[1]));
+					std::cout<<Color(this->renderer, event.packet->data[1])<<std::endl;
+					this->addMessage(Color(this->renderer, event.packet->data[1]).encodedString() + net::clientIdToClient(this->clients, event.packet->data[1])->nick +
+										": " + Color().encodedString() + std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				}
 
 			}
@@ -832,24 +834,11 @@ void Game::receivePacket(ENetEvent event) {
 	}
 }
 
-void Game::addMessage(std::string text, net::Client* client) {
+void Game::addMessage(std::string text) {
 	Message message;
 	message.message = text;
 	message.time = previousTime;
-
-
-	if(client!=0)
-	{
-		message.nick = client->nick;
-		message.color = Color(this->renderer, client->id);
-		std::cout << client->nick << ": " << message.message << std::endl;
-	}
-	else
-	{
-		message.nick = std::string("");
-		message.color = Color(1.0f, 1.0f, 1.0f);
-		std::cout << message.message << std::endl;
-	}
+	std::cout << message.message << std::endl; //Todo: colors
 	this->messages.push_back(message);
 }
 
@@ -1113,7 +1102,7 @@ void Game::renderUI() {
 				text = client.second->nick;
 			}
 
-			this->renderer->drawText(text, Vector2(0.0f, i * 20.0f), Color(this->renderer, client.second->id));
+			this->renderer->drawText(text, Vector2(0.0f, i * 20.0f));
 		}
 
 		++i;
@@ -1121,26 +1110,25 @@ void Game::renderUI() {
 
 	for (std::vector<Message>::size_type i = this->messages.size(); i > 0; --i) {
 		if (this->input != nullptr || al_get_time() < this->messages[i-1].time + MESSAGE_TIME) {
-			if(this->messages[i-1].nick == std::string(""))
-			{
-				this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f),
-										Color(1.0f, 1.0f, 1.0f));
-			}
+//			if(this->messages[i-1].nick == std::string(""))
+//			{
+				this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
+/*			}
 			else
 			{
 //				this->renderer->drawText(this->messages[i-1].nick + ": " + this->messages[i-1].message,
 //										Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f), this->messages[i-1].color);
 
 				this->renderer->drawText(this->messages[i-1].nick + ": ",
-											Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f), this->messages[i-1].color);
+											Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
 				this->renderer->drawText(this->messages[i-1].message, Vector2(al_get_text_width(this->renderer->getFont(), (this->messages[i-1].nick + ": ").c_str()),
-											this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f), Color(1.0f, 1.0f, 1.0f));
-			}
+											this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
+			}*/
 		}
 	}
 
 	this->renderer->drawText("FPS: " + util::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
-	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f), Color(1.0f, 1.0f, 1.0f));
+	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f));
 
 	for (auto& widget : this->widgets) {
 		widget->draw(this->renderer);

@@ -33,7 +33,7 @@ Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, 
 }
 
 void Object::initForClient(IRenderer *renderer) {
-	Coordinates textureSize = renderer->getTextureSize(this->image); 
+	Coordinates textureSize = renderer->getTextureSize(this->image);
 	this->size = Vector2(textureSize.x, textureSize.y);
 }
 
@@ -237,17 +237,16 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 
 	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
 	if (this->owner != nullptr) {
-		renderer->drawText(this->owner->nick, this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), Color(renderer, this->owner->id),
-		                   IRenderer::Alignment::CENTER);
+		renderer->drawText(this->owner->nick, this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), IRenderer::Alignment::CENTER);
 		tint.alpha = 0.75f;
 	}
-	
+
 	if (this->isUnder()) {
 		tint.red = 0.75f;
 		tint.green = 0.75f;
 		tint.blue = 0.75f;
 	}
-	
+
 	if (this->selected != nullptr) {
 		Vector2 pointA = this->location - this->getSize()/2.0f - Vector2(1.0f, 1.0f);
 		Vector2 pointB = this->location + this->getSize()/2.0f + Vector2(1.0f, 1.0f);

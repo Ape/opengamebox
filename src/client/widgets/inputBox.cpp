@@ -54,7 +54,7 @@ void InputBox::draw(IRenderer *renderer) {
 	tmpText << al_cstr(tmpUstr);
 	al_ustr_free(tmpUstr);
 
-	renderer->drawText(tmpText.str(), Vector2(this->location), Color(1.0f, 1.0f, 1.0f));
+	renderer->drawText(tmpText.str(), Vector2(this->location));
 }
 
 bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {

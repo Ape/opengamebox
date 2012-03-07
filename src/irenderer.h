@@ -52,7 +52,7 @@ public:
 	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation = Transformation::UI) = 0;
 	virtual void drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, Transformation transformation = Transformation::UI) = 0;
 
-	virtual void drawText(std::string text, Vector2 location, Color color, Alignment alignment = Alignment::LEFT) = 0;
+	virtual void drawText(std::string text, Vector2 location, Alignment alignment = Alignment::LEFT) = 0;
 
 	virtual Coordinates getTextureSize(std::string texture) = 0;
 

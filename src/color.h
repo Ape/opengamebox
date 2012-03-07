@@ -19,6 +19,7 @@
 #define COLOR_H
 
 #include <iostream>
+#include <stdio.h>
 
 #include "irenderer.h"
 
@@ -42,6 +43,8 @@ public:
 
 	void setHsv(IRenderer *renderer, float hue, float saturation, float value);
 	void setFromId(IRenderer *renderer, unsigned int id);
+
+	std::string encodedString();
 };
 
 inline Color Color::cpy() const {
