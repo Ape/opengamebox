@@ -26,6 +26,7 @@
 namespace util {
 	std::vector<std::string> splitString(std::string, char delimeter);
 	std::string toString(int i);
+	unsigned int hexStringToInt(std::string string);
 
 	template <class T>
 	unsigned char firstUnusedKey(std::map<unsigned char, T*> map);

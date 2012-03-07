@@ -203,40 +203,34 @@ void Renderer::drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, 
 void Renderer::drawText(std::string text, Vector2 location, Alignment alignment) {
 	size_t position = 0;
 	size_t oldposition = 0;
-	float drawposition = 0;
-	Color color = Color(1.0f, 1.0f, 1.0f); //default color
-	bool iter = true;
+	float drawposition = 0.0f;
+	Color color = Color(1.0f, 1.0f, 1.0f);
+	bool loop = true;
+
 	do {
 		position = text.find("^", oldposition);
 
-		int tempint = 0;
-		if(position != std::string::npos and position + 5 <= text.length()) {
+		if (position != std::string::npos && position + 5 <= text.length()) {
 			al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
-							this->getAlignment(alignment), text.substr(oldposition, position - oldposition).c_str());
+			             this->getAlignment(alignment), text.substr(oldposition, position - oldposition).c_str());
 			drawposition += al_get_text_width(this->font, text.substr(oldposition, position - oldposition).c_str());
 
-			char tempchar = text[position + 1];
-			sscanf(&tempchar, "%x", &tempint);
-			color.red = tempint / 16.0f;
-
-			tempchar = text[position + 2];
-			sscanf(&tempchar, "%x", &tempint);
-			color.green = tempint / 16.0f;
-
-			tempchar = text[position + 3];
-			sscanf(&tempchar, "%x", &tempint);
-			color.blue = tempint / 16.0f;
+			color.red   = util::hexStringToInt(text.substr(position + 1, 1)) / 16.0f;
+			color.green = util::hexStringToInt(text.substr(position + 2, 1)) / 16.0f;
+			color.blue  = util::hexStringToInt(text.substr(position + 3, 1)) / 16.0f;
 		} else {
 			al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
-							this->getAlignment(alignment), text.substr(oldposition).c_str());
+			             this->getAlignment(alignment), text.substr(oldposition).c_str());
 			drawposition += al_get_text_width(this->font, text.substr(oldposition).c_str());
-			iter = false;
+			loop = false;
 		}
+
 		oldposition = position + 4;
-		if(oldposition >= text.length()) {
+
+		if (oldposition >= text.length()) {
 			oldposition = text.length() -1;
 		}
-	} while (iter);
+	} while (loop);
 }
 
 Coordinates Renderer::getTextureSize(std::string texture) {

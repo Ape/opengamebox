@@ -34,3 +34,10 @@ std::string util::toString(int i) {
 	stream << i;
 	return stream.str();
 }
+
+unsigned int util::hexStringToInt(std::string string) {
+	unsigned int i;
+	std::istringstream stream(string);
+	stream >> std::hex >> i;
+	return i;
+}

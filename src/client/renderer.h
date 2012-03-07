@@ -31,6 +31,7 @@
 #include <allegro5/allegro_color.h>
 
 #include "../irenderer.h"
+#include "../utils.h"
 #include "../vector2.h"
 #include "../color.h"
 

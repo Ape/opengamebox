@@ -51,18 +51,14 @@ void Color::setFromId(IRenderer *renderer, unsigned int id) {
 	this->setHsv(renderer, 217.75608f + 137.50776f * id, 1.0f, 1 - ((id - id % 7) / 7) % 2 * 0.4f);
 }
 
-std::string Color::encodedString() {
-	char tempChar[1];
-	std::string tempString = std::string("^");
+std::string Color::encodedString() const {
+	std::ostringstream stream;
 
-	sprintf(tempChar, "%X", static_cast<int>(this->red*15 + 0.5));
-	tempString.append(tempChar);
+	stream << "^";
+	stream << std::hex;
+	stream << static_cast<int>(this->red * 15.0f + 0.5f);
+	stream << static_cast<int>(this->green * 15.0f + 0.5f);
+	stream << static_cast<int>(this->blue * 15.0f + 0.5f);
 
-	sprintf(tempChar, "%X", static_cast<int>(this->green*15 + 0.5));
-	tempString.append(tempChar);
-
-	sprintf(tempChar, "%X", static_cast<int>(this->blue*15 + 0.5));
-	tempString.append(tempChar);
-
-	return tempString;
+	return stream.str();
 }
