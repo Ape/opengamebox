@@ -27,10 +27,7 @@
 #include "irenderer.h"
 #include "vector2.h"
 #include "objectClass.h"
-
-namespace net {
-	struct Client;
-}
+#include "client.h"
 
 class Object {
 public:
@@ -53,21 +50,21 @@ public:
 	Vector2 getStackDelta(void) const;
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
 	bool checkIfUnder(std::vector<Object*> objectOrder);
-	bool isSelectedBy(net::Client *client) const;
-	net::Client* getSelected(void);
-	bool isOwnedBy(net::Client *client) const;
-	net::Client* getOwner(void);
+	bool isSelectedBy(Client *client) const;
+	Client* getSelected(void);
+	bool isOwnedBy(Client *client) const;
+	Client* getOwner(void);
 	bool isFlipped(void) const;
 
 	void setLocation(Vector2 location);
-	void select(net::Client *client);
-	void own(net::Client *client);
+	void select(Client *client);
+	void own(Client *client);
 	void flip(void);
 	void setFlipped(bool flipped);
 	void setAnimation(Vector2 target, float time);
 
 	void animate(double deltaTime);
-	void draw(IRenderer *renderer, net::Client *localClient) const;
+	void draw(IRenderer *renderer, Client *localClient) const;
 
 private:
 	ObjectClass *objectClass;
@@ -80,8 +77,8 @@ private:
 	std::string backside;
 	Vector2 stackDelta;
 
-	net::Client *selected;
-	net::Client *owner;
+	Client *selected;
+	Client *owner;
 	std::list<Object*> objectsAbove;
 
 	Vector2 animationTarget;

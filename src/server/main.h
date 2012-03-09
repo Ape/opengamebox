@@ -55,7 +55,7 @@ private:
 
 	ObjectClassManager objectClassManager;
 
-	std::map<unsigned char, net::Client*> clients;
+	std::map<unsigned char, Client*> clients;
 	std::map<unsigned short, Object*> objects;
 
 	bool exiting;

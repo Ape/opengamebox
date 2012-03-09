@@ -527,7 +527,7 @@ void Game::receivePacket(ENetEvent event) {
 				// Update the local client list
 				size_t i = 2;
 				while (i < event.packet->dataLength) {
-					net::Client *client = new net::Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]));
+					Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]), Color(this->renderer, event.packet->data[i]));
 					client->id = event.packet->data[i];
 					client->ping = 65535;
 					this->clients[event.packet->data[i]] = client;
@@ -552,12 +552,12 @@ void Game::receivePacket(ENetEvent event) {
 		case net::PACKET_JOIN: {
 			if (event.packet->dataLength >= 3 && event.packet->dataLength <= 35) {
 				// Store the client information
-				net::Client *client = new net::Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
+				Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2), Color(this->renderer, event.packet->data[1]));
 				client->id = event.packet->data[1];
 				client->ping = 65535;
 				this->clients[event.packet->data[1]] = client;
 
-				this->addMessage(client->nick + " has joined the server!");
+				this->addMessage(client->getNick() + " has joined the server!");
 			}
 
 			break;
@@ -565,7 +565,7 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_LEAVE: {
 			if (event.packet->dataLength == 2) {
-				this->addMessage(this->clients[event.packet->data[1]]->nick + " has left the server!");
+				this->addMessage(this->clients[event.packet->data[1]]->getNick() + " has left the server!");
 
 				// Release selected and owned objects
 				for (auto& object : this->objects) {
@@ -591,8 +591,8 @@ void Game::receivePacket(ENetEvent event) {
 				if (event.packet->data[1] == 255) {
 					this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				} else {
-					this->addMessage(Color(this->renderer, event.packet->data[1]).encodedString() + net::clientIdToClient(this->clients, event.packet->data[1])->nick +
-										": " + Color().encodedString() + std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
+					this->addMessage(net::clientIdToClient(this->clients, event.packet->data[1])->getColoredNick() + ": " +
+										std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 				}
 			}
 			break;
@@ -600,14 +600,14 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_CREATE: {
 			if (event.packet->dataLength >= 1 + 6 + 8 + 1 && event.packet->dataLength <= 1 + 6 + 8 + 255) {
-				net::Client *client;
+				Client *client;
 				if (event.packet->data[1] != 255) {
 					client = this->clients.find(event.packet->data[1])->second;
 				}
 
 				unsigned short objId = net::bytesToShort(event.packet->data + 2);
-				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[4]);
-				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
+				Client *selected = net::clientIdToClient(this->clients, event.packet->data[4]);
+				Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
 				bool flipped = event.packet->data[6];
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
 				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15),
@@ -625,7 +625,7 @@ void Game::receivePacket(ENetEvent event) {
 				this->objectOrder.push_back(object);
 
 				if (event.packet->data[1] != 255) {
-					this->addMessage(client->nick + " created a new " + object->getName() + ".");
+					this->addMessage(client->getColoredNick() + " created a new " + object->getName() + ".");
 				}
 
 				this->checkObjectOrder();
@@ -636,7 +636,7 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_MOVE: {
 			if (event.packet->dataLength >= 2 + 10) {
-				net::Client *client = this->clients.find(event.packet->data[1])->second;
+				Client *client = this->clients.find(event.packet->data[1])->second;
 
 				unsigned int numberObjects = 0;
 				Object *lastObject;
@@ -665,9 +665,9 @@ void Game::receivePacket(ENetEvent event) {
 
 				if (lastObject->isOwnedBy(nullptr)) {
 					if (numberObjects == 1) {
-						this->addMessage(client->nick + " moved " + lastObject->getName() + ".");
+						this->addMessage(client->getColoredNick() + " moved " + lastObject->getName() + ".");
 					} else if (numberObjects >= 2) {
-						this->addMessage(client->nick + " moved " + util::toString(numberObjects) + " objects.");
+						this->addMessage(client->getColoredNick() + " moved " + util::toString(numberObjects) + " objects.");
 					}
 				}
 
@@ -679,7 +679,7 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_SELECT: {
 			if (event.packet->dataLength >= 2) {
-				net::Client *client = this->clients.find(event.packet->data[1])->second;
+				Client *client = this->clients.find(event.packet->data[1])->second;
 
 				for (auto& object : this->objects) {
 					if (object.second->isSelectedBy(client)) {
@@ -702,7 +702,7 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_REMOVE: {
 			if (event.packet->dataLength >= 2) {
-				net::Client *client = this->clients.find(event.packet->data[1])->second;
+				Client *client = this->clients.find(event.packet->data[1])->second;
 
 				unsigned int numberObjects = 0;
 				std::string lastObject;
@@ -726,9 +726,9 @@ void Game::receivePacket(ENetEvent event) {
 				this->checkObjectOrder();
 
 				if (numberObjects == 1) {
-					this->addMessage(client->nick + " removed " + lastObject + ".");
+					this->addMessage(client->getColoredNick() + " removed " + lastObject + ".");
 				} else if (numberObjects >= 2) {
-					this->addMessage(client->nick + " removed " + util::toString(numberObjects) + " objects.");
+					this->addMessage(client->getColoredNick() + " removed " + util::toString(numberObjects) + " objects.");
 				}
 			}
 
@@ -737,7 +737,7 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_FLIP: {
 			if (event.packet->dataLength >= 2) {
-				net::Client *client = this->clients.find(event.packet->data[1])->second;
+				Client *client = this->clients.find(event.packet->data[1])->second;
 
 				unsigned int numberObjects = 0;
 				Object *lastObject;
@@ -759,9 +759,9 @@ void Game::receivePacket(ENetEvent event) {
 
 				if (lastObject->isOwnedBy(nullptr)) {
 					if (numberObjects == 1) {
-						this->addMessage(client->nick + " flipped " + lastObject->getName() + ".");
+						this->addMessage(client->getColoredNick() + " flipped " + lastObject->getName() + ".");
 					} else if (numberObjects >= 2) {
-						this->addMessage(client->nick + " flipped " + util::toString(numberObjects) + " objects.");
+						this->addMessage(client->getColoredNick() + " flipped " + util::toString(numberObjects) + " objects.");
 					}
 				}
 			}
@@ -771,7 +771,7 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_OWN: {
 			if (event.packet->dataLength >= 2) {
-				net::Client *client = this->clients.find(event.packet->data[1])->second;
+				Client *client = this->clients.find(event.packet->data[1])->second;
 
 				unsigned int numberObjects = 0;
 				Object *lastObject;
@@ -803,9 +803,9 @@ void Game::receivePacket(ENetEvent event) {
 				}
 
 				if (numberObjects == 1) {
-					this->addMessage(client->nick + " " + verb + " " + lastObject->getName() + ".");
+					this->addMessage(client->getColoredNick() + " " + verb + " " + lastObject->getName() + ".");
 				} else if (numberObjects >= 2) {
-					this->addMessage(client->nick + " " + verb + " " + util::toString(numberObjects) + " objects.");
+					this->addMessage(client->getColoredNick() + " " + verb + " " + util::toString(numberObjects) + " objects.");
 				}
 
 				this->checkObjectOrder();
@@ -1094,9 +1094,9 @@ void Game::renderUI() {
 		if (client.second->joined) {
 			std::string text;
 			if (client.second->ping != 65535) {
-				text = client.second->nick + " (" + util::toString(client.second->ping) + " ms)";
+				text = client.second->getColoredNick() + " (" + util::toString(client.second->ping) + " ms)";
 			} else {
-				text = client.second->nick;
+				text = client.second->getColoredNick();
 			}
 
 			this->renderer->drawText(text, Vector2(0.0f, i * 20.0f));

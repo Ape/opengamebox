@@ -122,11 +122,7 @@ void Server::networkEvents() {
 
 				unsigned char *id = new unsigned char;
 				*id = util::firstUnusedKey(this->clients);
-				net::Client *client = new net::Client(event.peer);
-				client->joined = false;
-				client->peer = event.peer;
-				client->nick.clear();
-				client->id = *id;
+				Client *client = new Client(event.peer, *id);
 				this->clients[*id] = client;
 				event.peer->data = id;
 
@@ -149,7 +145,7 @@ void Server::networkEvents() {
 				unsigned char *id = static_cast<unsigned char*>(event.peer->data);
 
 				if (this->clients[*id]->joined) {
-					std::cout << this->clients[*id]->nick << " has left the server!" << std::endl;
+					std::cout << this->clients[*id]->getNick() << " has left the server!" << std::endl;
 
 					// Broadcast the received event
 					char data[2];
@@ -195,11 +191,11 @@ void Server::receivePacket(ENetEvent event) {
 			if (event.packet->dataLength >= 2 && event.packet->dataLength <= 17) {
 				std::string nick = std::string(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1);
 
-				if (! isNickTaken(this->clients, nick)) {
+				if (! net::isNickTaken(this->clients, nick)) {
 					this->clients[*id]->joined = true;
-					this->clients[*id]->nick = nick;
+					this->clients[*id]->setNick(nick);
 
-					std::cout << this->clients[*id]->nick << " has joined the server!" << std::endl;
+					std::cout << this->clients[*id]->getNick() << " has joined the server!" << std::endl;
 
 					// Reply to the joining client with his ID and the list of clients
 					{
@@ -207,12 +203,12 @@ void Server::receivePacket(ENetEvent event) {
 						data += net::PACKET_HANDSHAKE;
 						data += *id;
 
-						for (std::map<unsigned char, net::Client*>::iterator client = this->clients.begin(); client != this->clients.end(); ++client) {
+						for (std::map<unsigned char, Client*>::iterator client = this->clients.begin(); client != this->clients.end(); ++client) {
 							if (client->second->joined && client->first != *id)
 							{
 								data += client->first;
-								data += static_cast<char>(client->second->nick.length());
-								data += client->second->nick;
+								data += static_cast<char>(client->second->getNick().length());
+								data += client->second->getNick();
 							}
 						}
 
@@ -265,7 +261,7 @@ void Server::receivePacket(ENetEvent event) {
 				data += *id;
 				data.append(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1);
 
-				std::cout << this->clients[*id]->nick << ": " << std::string(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1) << std::endl;
+				std::cout << this->clients[*id]->getNick() << ": " << std::string(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1) << std::endl;
 				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
 			}
 
@@ -283,7 +279,7 @@ void Server::receivePacket(ENetEvent event) {
 				std::uniform_int_distribution<unsigned short> distribution(1, maxValue);
 
 				std::ostringstream reply;
-				reply << this->clients[*id]->nick << " rolled a " << "d" << maxValue << " and got " << distribution(this->randomGenerator) << ".";
+				reply << this->clients[*id]->getNick() << " rolled a " << "d" << maxValue << " and got " << distribution(this->randomGenerator) << ".";
 
 				std::string data;
 				data += net::PACKET_CHAT;
@@ -299,8 +295,8 @@ void Server::receivePacket(ENetEvent event) {
 
 		case net::PACKET_CREATE: {
 			if (event.packet->dataLength >= 1 + 9 + 1 && event.packet->dataLength <= 1 + 9 + 255) {
-				net::Client *selected = net::clientIdToClient(this->clients, event.packet->data[1]);
-				net::Client *owner = net::clientIdToClient(this->clients, event.packet->data[2]);
+				Client *selected = net::clientIdToClient(this->clients, event.packet->data[1]);
+				Client *owner = net::clientIdToClient(this->clients, event.packet->data[2]);
 				bool flipped = event.packet->data[3];
 				Vector2 location = net::bytesToVector2(event.packet->data + 4);
 				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 12), event.packet->dataLength - 12),
@@ -315,7 +311,7 @@ void Server::receivePacket(ENetEvent event) {
 					object->own(owner);
 					object->setFlipped(flipped);
 					this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
-					
+
 					if (! object->getName().empty()) {
 						std::string data;
 						data += net::PACKET_CREATE;
@@ -323,7 +319,7 @@ void Server::receivePacket(ENetEvent event) {
 						net::dataAppendShort(data, objId);
 						data.append(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1);
 
-						std::cout << this->clients[*id]->nick << " created a new " << object->getName() << "." << std::endl;
+						std::cout << this->clients[*id]->getNick() << " created a new " << object->getName() << "." << std::endl;
 						net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 3);
 					} else {
 						std::cout << "Error: object " << objectData.at(0) << "." << objectData.at(1) << "." << objectData.at(2) << " is not recognized by the server!"
@@ -352,7 +348,7 @@ void Server::receivePacket(ENetEvent event) {
 					size_t i = 1;
 					while (i < event.packet->dataLength) {
 						++numberObjects;
-	
+
 						unsigned short objId = net::bytesToShort(event.packet->data + i);
 						Vector2 location = net::bytesToVector2(event.packet->data + i + 2);
 
@@ -364,9 +360,9 @@ void Server::receivePacket(ENetEvent event) {
 					}
 
 					if (numberObjects == 1) {
-						std::cout << this->clients[*id]->nick << " moved " << lastObject->getName() << "." << std::endl;
+						std::cout << this->clients[*id]->getNick() << " moved " << lastObject->getName() << "." << std::endl;
 					} else if (numberObjects >= 2) {
-						std::cout << this->clients[*id]->nick << " moved " << numberObjects << " objects." << std::endl;
+						std::cout << this->clients[*id]->getNick() << " moved " << numberObjects << " objects." << std::endl;
 					}
 				}
 			}
@@ -431,9 +427,9 @@ void Server::receivePacket(ENetEvent event) {
 				}
 
 				if (numberObjects == 1) {
-					std::cout << this->clients[*id]->nick << " removed " << lastObject << "." << std::endl;
+					std::cout << this->clients[*id]->getNick() << " removed " << lastObject << "." << std::endl;
 				} else if (numberObjects >= 2) {
-					std::cout << this->clients[*id]->nick << " removed " << util::toString(numberObjects) << " objects." << std::endl;
+					std::cout << this->clients[*id]->getNick() << " removed " << util::toString(numberObjects) << " objects." << std::endl;
 				}
 
 				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
@@ -469,9 +465,9 @@ void Server::receivePacket(ENetEvent event) {
 				}
 
 				if (numberObjects == 1) {
-					std::cout << this->clients[*id]->nick << " flipped " << lastObject->getName() << "." << std::endl;
+					std::cout << this->clients[*id]->getNick() << " flipped " << lastObject->getName() << "." << std::endl;
 				} else if (numberObjects >= 2) {
-					std::cout << this->clients[*id]->nick << " flipped " << numberObjects << " objects." << std::endl;
+					std::cout << this->clients[*id]->getNick() << " flipped " << numberObjects << " objects." << std::endl;
 				}
 
 				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);
@@ -519,9 +515,9 @@ void Server::receivePacket(ENetEvent event) {
 				}
 
 				if (numberObjects == 1) {
-					std::cout << this->clients[*id]->nick << " " << verb << " " << lastObject->getName() << "." << std::endl;
+					std::cout << this->clients[*id]->getNick() << " " << verb << " " << lastObject->getName() << "." << std::endl;
 				} else if (numberObjects >= 2) {
-					std::cout << this->clients[*id]->nick << " " << verb << " " << numberObjects << " objects." << std::endl;
+					std::cout << this->clients[*id]->getNick() << " " << verb << " " << numberObjects << " objects." << std::endl;
 				}
 
 				net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 1);

@@ -17,22 +17,13 @@
 
 #include "net.h"
 
-net::Client::Client(ENetPeer *peer) {
-	this->peer = peer;
-	this->joined = false;
-	this->nick.clear();
-}
 
-net::Client::Client(std::string nick) {
-	this->joined = true;
-	this->nick = nick;
-}
 
 
 // Check if a nick is already used
-bool net::isNickTaken(std::map<unsigned char, net::Client*> clients, std::string nick) {
-	for (std::map<unsigned char, net::Client*>::iterator client = clients.begin(); client != clients.end(); ++client) {
-		if (client->second->joined && client->second->nick.compare(nick) == 0) {
+bool net::isNickTaken(std::map<unsigned char, Client*> clients, std::string nick) {
+	for (std::map<unsigned char, Client*>::iterator client = clients.begin(); client != clients.end(); ++client) {
+		if (client->second->joined && client->second->getNick().compare(nick) == 0) {
 			return true;
 		}
 	}
@@ -130,7 +121,7 @@ void net::dataAppendVector2(std::string &data, Vector2 value) {
 	data.append(reinterpret_cast<char*>(bytes), 4);
 }
 
-net::Client* net::clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId) {
+Client* net::clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId) {
 	if (clients.count(clientId) != 0) {
 		return clients.find(clientId)->second;
 	} else {
@@ -138,7 +129,7 @@ net::Client* net::clientIdToClient(std::map<unsigned char, Client*> clients, uns
 	}
 }
 
-unsigned char net::clientToClientId(net::Client *client) {
+unsigned char net::clientToClientId(Client *client) {
 	if (client == nullptr) {
 		return 255;
 	} else {

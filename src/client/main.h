@@ -44,10 +44,7 @@
 #include "renderer.h"
 #include "widget.h"
 #include "widgets/inputBox.h"
-
-namespace net {
-	struct Client;
-}
+#include "../client.h"
 
 // Default screen configuration
 const int SCREEN_W = 1024;
@@ -89,7 +86,7 @@ private:
 
 	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;
-	std::map<unsigned char, net::Client*> clients;
+	std::map<unsigned char, Client*> clients;
 	unsigned char localClient;
 
 	struct Message {

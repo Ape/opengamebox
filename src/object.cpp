@@ -167,19 +167,19 @@ bool Object::checkIfUnder(std::vector<Object*> objectOrder) {
 	}
 }
 
-bool Object::isSelectedBy(net::Client *client) const {
+bool Object::isSelectedBy(Client* client) const {
 	return this->selected == client;
 }
 
-net::Client* Object::getSelected() {
+Client* Object::getSelected() {
 	return this->selected;
 }
 
-bool Object::isOwnedBy(net::Client *client) const {
+bool Object::isOwnedBy(Client *client) const {
 	return this->owner == client;
 }
 
-net::Client* Object::getOwner() {
+Client* Object::getOwner() {
 	return this->owner;
 }
 
@@ -191,11 +191,11 @@ void Object::setLocation(Vector2 location) {
 	this->location = location;
 }
 
-void Object::select(net::Client* client) {
+void Object::select(Client* client) {
 	this->selected = client;
 }
 
-void Object::own(net::Client* client) {
+void Object::own(Client* client) {
 	this->owner = client;
 }
 
@@ -227,7 +227,7 @@ void Object::animate(double deltaTime) {
 	}
 }
 
-void Object::draw(IRenderer *renderer, net::Client *localClient) const {
+void Object::draw(IRenderer *renderer, Client *localClient) const {
 	std::string image;
 	if ((! this->flipped && (this->owner == nullptr || this->owner == localClient)) || this->objectClass->getFlipsideImage().empty()) {
 		image = this->image;
@@ -237,7 +237,7 @@ void Object::draw(IRenderer *renderer, net::Client *localClient) const {
 
 	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
 	if (this->owner != nullptr) {
-		renderer->drawText(this->owner->nick, this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), IRenderer::Alignment::CENTER);
+		renderer->drawText(this->owner->getNick(), this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), IRenderer::Alignment::CENTER);
 		tint.alpha = 0.75f;
 	}
 
