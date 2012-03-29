@@ -17,13 +17,10 @@
 
 #include "net.h"
 
-
-
-
 // Check if a nick is already used
 bool net::isNickTaken(std::map<unsigned char, Client*> clients, std::string nick) {
 	for (std::map<unsigned char, Client*>::iterator client = clients.begin(); client != clients.end(); ++client) {
-		if (client->second->joined && client->second->getNick().compare(nick) == 0) {
+		if (client->second->isJoined() && client->second->getNick().compare(nick) == 0) {
 			return true;
 		}
 	}
@@ -129,11 +126,11 @@ Client* net::clientIdToClient(std::map<unsigned char, Client*> clients, unsigned
 	}
 }
 
-unsigned char net::clientToClientId(Client *client) {
+unsigned char net::clientToClientId(Client *client) { //Todo move this to client.cpp
 	if (client == nullptr) {
 		return 255;
 	} else {
-		return client->id;
+		return client->getId();
 	}
 }
 

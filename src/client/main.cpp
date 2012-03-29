@@ -527,8 +527,8 @@ void Game::receivePacket(ENetEvent event) {
 				// Update the local client list
 				size_t i = 2;
 				while (i < event.packet->dataLength) {
-					Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]), Color(this->renderer, event.packet->data[i]));
-					client->id = event.packet->data[i];
+					Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]),
+												Color(this->renderer, event.packet->data[i]), event.packet->data[i]);
 					client->ping = 65535;
 					this->clients[event.packet->data[i]] = client;
 
@@ -552,8 +552,8 @@ void Game::receivePacket(ENetEvent event) {
 		case net::PACKET_JOIN: {
 			if (event.packet->dataLength >= 3 && event.packet->dataLength <= 35) {
 				// Store the client information
-				Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2), Color(this->renderer, event.packet->data[1]));
-				client->id = event.packet->data[1];
+				Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2),
+											Color(this->renderer, event.packet->data[1]), event.packet->data[1]);
 				client->ping = 65535;
 				this->clients[event.packet->data[1]] = client;
 
@@ -1091,7 +1091,7 @@ void Game::renderUI() {
 
 	int i = 0;
 	for (auto& client : this->clients) {
-		if (client.second->joined) {
+		if (client.second->isJoined()) {
 			std::string text;
 			if (client.second->ping != 65535) {
 				text = client.second->getColoredNick() + " (" + util::toString(client.second->ping) + " ms)";

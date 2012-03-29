@@ -251,7 +251,7 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 		Vector2 pointA = this->location - this->getSize()/2.0f - Vector2(1.0f, 1.0f);
 		Vector2 pointB = this->location + this->getSize()/2.0f + Vector2(1.0f, 1.0f);
 
-		renderer->drawRectangle(pointA, pointB, Color(renderer, this->selected->id), 2.0f, IRenderer::Transformation::CAMERA);
+		renderer->drawRectangle(pointA, pointB, this->selected->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
 	}
 
 	renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->getSize()/2.0f, this->getSize(), tint);

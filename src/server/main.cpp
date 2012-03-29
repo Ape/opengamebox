@@ -79,8 +79,8 @@ int Server::run() {
 
 	// Disconnect all remaining clients
 	for (auto& client : this->clients) {
-		enet_peer_disconnect_now(client.second->peer, 0);
-		delete static_cast<unsigned char*>(client.second->peer->data);
+		enet_peer_disconnect_now(client.second->getPeer(), 0);
+		delete static_cast<unsigned char*>(client.second->getPeer()->data);
 		delete client.second;
 	}
 
@@ -132,7 +132,7 @@ void Server::networkEvents() {
 			case ENET_EVENT_TYPE_RECEIVE: {
 				unsigned char *id = static_cast<unsigned char*>(event.peer->data);
 
-				if (this->clients[*id]->joined || event.packet->data[0] == net::PACKET_HANDSHAKE) {
+				if (this->clients[*id]->isJoined() || event.packet->data[0] == net::PACKET_HANDSHAKE) {
 					this->receivePacket(event);
 				}
 
@@ -144,7 +144,7 @@ void Server::networkEvents() {
 			case ENET_EVENT_TYPE_DISCONNECT: {
 				unsigned char *id = static_cast<unsigned char*>(event.peer->data);
 
-				if (this->clients[*id]->joined) {
+				if (this->clients[*id]->isJoined()) {
 					std::cout << this->clients[*id]->getNick() << " has left the server!" << std::endl;
 
 					// Broadcast the received event
@@ -192,7 +192,7 @@ void Server::receivePacket(ENetEvent event) {
 				std::string nick = std::string(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1);
 
 				if (! net::isNickTaken(this->clients, nick)) {
-					this->clients[*id]->joined = true;
+					this->clients[*id]->setJoined();
 					this->clients[*id]->setNick(nick);
 
 					std::cout << this->clients[*id]->getNick() << " has joined the server!" << std::endl;
@@ -204,7 +204,7 @@ void Server::receivePacket(ENetEvent event) {
 						data += *id;
 
 						for (std::map<unsigned char, Client*>::iterator client = this->clients.begin(); client != this->clients.end(); ++client) {
-							if (client->second->joined && client->first != *id)
+							if (client->second->isJoined() && client->first != *id)
 							{
 								data += client->first;
 								data += static_cast<char>(client->second->getNick().length());
@@ -579,9 +579,9 @@ void Server::sendStream() {
 			data += net::PACKET_PINGS;
 
 			for (unsigned char id = 0; id < net::MAX_CLIENTS; ++id) {
-				if (this->clients.count(id) > 0 && this->clients[id]->joined) {
+				if (this->clients.count(id) > 0 && this->clients[id]->isJoined()) {
 					data += id;
-					net::dataAppendShort(data, this->clients[id]->peer->roundTripTime);
+					net::dataAppendShort(data, this->clients[id]->getPeer()->roundTripTime);
 				}
 			}
 
