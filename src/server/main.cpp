@@ -294,41 +294,44 @@ void Server::receivePacket(ENetEvent event) {
 		}
 
 		case net::PACKET_CREATE: {
-			if (event.packet->dataLength >= 1 + 9 + 1 && event.packet->dataLength <= 1 + 9 + 255) {
-				Client *selected = net::clientIdToClient(this->clients, event.packet->data[1]);
-				Client *owner = net::clientIdToClient(this->clients, event.packet->data[2]);
-				bool flipped = event.packet->data[3];
-				Vector2 location = net::bytesToVector2(event.packet->data + 4);
-				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 12), event.packet->dataLength - 12),
-				                                                        '.');
+			unsigned int i = 0;
+			unsigned int ammount = 0;
+			if (event.packet->dataLength >= 1 + 9 + 1) {
+				while (i < event.packet->dataLength - 1) {
+					Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 1]);
+					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 2]);
+					bool flipped = event.packet->data[i + 3];
+					Vector2 location = net::bytesToVector2(event.packet->data + i + 4);
+					unsigned char length = event.packet->data[i + 12];
+					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 13), static_cast<int>(length)), '.');
+					if (objectData.size() == 3) {
+						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
-				if (objectData.size() == 3) {
-					ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
+						unsigned short objId = util::firstUnusedKey(this->objects);
+						Object *object = new Object(objectClass, objectData.at(2), objId, location);
+						object->select(selected);
+						object->own(owner);
+						object->setFlipped(flipped);
+						this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
 
-					unsigned short objId = util::firstUnusedKey(this->objects);
-					Object *object = new Object(objectClass, objectData.at(2), objId, location);
-					object->select(selected);
-					object->own(owner);
-					object->setFlipped(flipped);
-					this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
-
-					if (! object->getName().empty()) {
-						std::string data;
-						data += net::PACKET_CREATE;
-						data += *id;
-						net::dataAppendShort(data, objId);
-						data.append(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1);
-
-						std::cout << this->clients[*id]->getNick() << " created a new " << object->getName() << "." << std::endl;
-						net::sendCommand(this->connection, data.c_str(), event.packet->dataLength + 3);
-					} else {
-						std::cout << "Error: object " << objectData.at(0) << "." << objectData.at(1) << "." << objectData.at(2) << " is not recognized by the server!"
-								  << std::endl;
-						this->objects.erase(objId);
+						if (! object->getName().empty()) {
+							std::string data;
+							data += net::PACKET_CREATE;
+							data += *id;
+							net::dataAppendShort(data, objId);
+							data.append(reinterpret_cast<char*>(event.packet->data + i + 1), length + 12);
+							net::sendCommand(this->connection, data.c_str(), data.size()); //Todo send all objects in one packet
+							ammount++;
+						} else {
+							std::cout << "Error: object " << objectData.at(0) << "." << objectData.at(1) << "." << objectData.at(2)
+										<< " is not recognized by the server!" << std::endl;
+							this->objects.erase(objId);
+						}
 					}
+					i += length + 12;
 				}
+				std::cout << this->clients[*id]->getNick() << " created "<<ammount<<" objects."<<std::endl;
 			}
-
 			break;
 		}
 

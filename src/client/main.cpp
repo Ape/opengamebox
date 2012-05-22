@@ -270,6 +270,7 @@ void Game::localEvents() {
 					net::sendCommand(this->connection, data.c_str(), data.length());
 
 					this->selectedObjects.clear();
+					this->dragging = false;
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_F) {
 				if (this->selectedObjects.size() > 0) {
@@ -610,9 +611,9 @@ void Game::receivePacket(ENetEvent event) {
 				Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
 				bool flipped = event.packet->data[6];
 				Vector2 location = net::bytesToVector2(event.packet->data + 7);
-				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 15), event.packet->dataLength - 15),
-				                                                        '.');
-
+				unsigned char length = event.packet->data[15];
+				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 16),
+																		static_cast<int>(length)), '.');
 				ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
 				Object *object = new Object(objectClass, objectData.at(2), objId, location);
@@ -886,7 +887,11 @@ void Game::chatCommand(std::string commandstr) {
 		}
 	} else if (parameters.at(0) == "create") {
 		if (parameters.size() == 2) {
-			this->createObject(parameters.at(1));
+			std::string data;
+			data.push_back(net::PACKET_CREATE);
+			data += this->createObject(parameters.at(1));
+			std::cout<<data<<std::endl;
+			net::sendCommand(this->connection, data.c_str(), data.size());
 		} else if (parameters.size() == 4) {
 			Vector2 location;
 			{
@@ -897,8 +902,10 @@ void Game::chatCommand(std::string commandstr) {
 				std::istringstream stream(parameters.at(3));
 				stream >> location.y;
 			}
-
-			this->createObject(parameters.at(1), location);
+			std::string data;
+			data.push_back(net::PACKET_CREATE);
+			data += this->createObject(parameters.at(1), location);
+			net::sendCommand(this->connection, data.c_str(), data.size());
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " object [x y]");
 		}
@@ -909,11 +916,19 @@ void Game::chatCommand(std::string commandstr) {
 			this->addMessage("Usage: /" + parameters.at(0) + " object");
 		}
 	} else if (parameters.at(0) == "dflush") {
-		int x = 0;
-		for (std::string object : this->dCreateBuffer) {
-			this->chatCommand("create " + object + " " + util::toString(x) + " 0");
+		float x = 0.0f;
+		std::string data;
+		data.push_back(net::PACKET_CREATE);
+		for(auto object : this->dCreateBuffer)
+		{
+			std::string temp = this->createObject(object, Vector2(x, 0.0f));
+			for(char c : temp)
+			{
+				data.push_back(c);
+			}
 			x += 4;
 		}
+		net::sendCommand(this->connection, data.c_str(), data.size());
 		this->dCreateBuffer.clear();
 	} else if (parameters.at(0) == "roll") {
 		if (parameters.size() <= 3) {
@@ -978,17 +993,16 @@ void Game::saveScript(std::string name) {
 	file.close();
 }
 
-void Game::createObject(std::string objectId, Vector2 location) {
+std::string Game::createObject(std::string objectId, Vector2 location) {
 	std::string data;
-	data.push_back(net::PACKET_CREATE);
 	data += 255; // Not selected
 	data += 255; // Not owned
 	bool flipped = false;
 	data += flipped; // Not flipped
 	net::dataAppendVector2(data, location);
+	data += (objectId.size());
 	data.append(objectId);
-
-	net::sendCommand(this->connection, data.c_str(), data.length());
+	return data;
 }
 
 void Game::checkObjectOrder() {
