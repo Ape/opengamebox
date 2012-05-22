@@ -600,38 +600,46 @@ void Game::receivePacket(ENetEvent event) {
 		}
 
 		case net::PACKET_CREATE: {
-			if (event.packet->dataLength >= 1 + 6 + 8 + 1 && event.packet->dataLength <= 1 + 6 + 8 + 255) {
+			if (event.packet->dataLength >= 1 + 6 + 8 + 1) {
 				Client *client;
 				if (event.packet->data[1] != 255) {
 					client = this->clients.find(event.packet->data[1])->second;
 				}
 
-				unsigned short objId = net::bytesToShort(event.packet->data + 2);
-				Client *selected = net::clientIdToClient(this->clients, event.packet->data[4]);
-				Client *owner = net::clientIdToClient(this->clients, event.packet->data[5]);
-				bool flipped = event.packet->data[6];
-				Vector2 location = net::bytesToVector2(event.packet->data + 7);
-				unsigned char length = event.packet->data[15];
-				std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + 16),
-																		static_cast<int>(length)), '.');
-				ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
+				int amount = 0;
+				unsigned int i = 1;
 
-				Object *object = new Object(objectClass, objectData.at(2), objId, location);
-				object->initForClient(this->renderer);
-				object->select(selected);
-				object->own(owner);
-				object->setFlipped(flipped);
+				while (i < event.packet->dataLength - 1) {
+					unsigned short objId = net::bytesToShort(event.packet->data + i + 1);
+					Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 3]);
+					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 4]);
+					bool flipped = event.packet->data[i + 5];
+					Vector2 location = net::bytesToVector2(event.packet->data + i + 7);
+					unsigned char length = event.packet->data[i + 14];
+					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 15),
+																			static_cast<int>(length)), '.');
+					ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
-				this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
-				this->objectOrder.push_back(object);
+					Object *object = new Object(objectClass, objectData.at(2), objId, location);
+					object->initForClient(this->renderer);
+					object->select(selected);
+					object->own(owner);
+					object->setFlipped(flipped);
 
-				if (event.packet->data[1] != 255) {
-					this->addMessage(client->getColoredNick() + " created a new " + object->getName() + ".");
+					this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
+					this->objectOrder.push_back(object);
+
+/*					if (event.packet->data[1] != 255) {
+						this->addMessage(client->getColoredNick() + " created a new " + object->getName() + ".");
+					}
+*/
+					amount++;
+					this->checkObjectOrder();
+
+					i += 14 + length;
 				}
-
-				this->checkObjectOrder();
+				this->addMessage(client->getColoredNick() + " created " + util::toString(amount) + " objects.");
 			}
-
 			break;
 		}
 
@@ -890,7 +898,6 @@ void Game::chatCommand(std::string commandstr) {
 			std::string data;
 			data.push_back(net::PACKET_CREATE);
 			data += this->createObject(parameters.at(1));
-			std::cout<<data<<std::endl;
 			net::sendCommand(this->connection, data.c_str(), data.size());
 		} else if (parameters.size() == 4) {
 			Vector2 location;

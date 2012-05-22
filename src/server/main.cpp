@@ -295,7 +295,10 @@ void Server::receivePacket(ENetEvent event) {
 
 		case net::PACKET_CREATE: {
 			unsigned int i = 0;
-			unsigned int ammount = 0;
+			unsigned int amount = 0;
+			std::string data;
+			data.push_back(net::PACKET_CREATE);
+			data += *id;
 			if (event.packet->dataLength >= 1 + 9 + 1) {
 				while (i < event.packet->dataLength - 1) {
 					Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 1]);
@@ -315,13 +318,19 @@ void Server::receivePacket(ENetEvent event) {
 						this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
 
 						if (! object->getName().empty()) {
-							std::string data;
-							data += net::PACKET_CREATE;
-							data += *id;
-							net::dataAppendShort(data, objId);
-							data.append(reinterpret_cast<char*>(event.packet->data + i + 1), length + 12);
-							net::sendCommand(this->connection, data.c_str(), data.size()); //Todo send all objects in one packet
-							ammount++;
+							std::string temp;
+							net::dataAppendShort(temp, objId);
+							for(char c : temp)
+							{
+								data.push_back(c);
+							}
+
+							std::string temp2(reinterpret_cast<char*>(event.packet->data + i + 1), static_cast<int>(length) + 12);
+							for(char c : temp2)
+							{
+								data.push_back(c);
+							}
+							amount++;
 						} else {
 							std::cout << "Error: object " << objectData.at(0) << "." << objectData.at(1) << "." << objectData.at(2)
 										<< " is not recognized by the server!" << std::endl;
@@ -330,8 +339,9 @@ void Server::receivePacket(ENetEvent event) {
 					}
 					i += length + 12;
 				}
-				std::cout << this->clients[*id]->getNick() << " created "<<ammount<<" objects."<<std::endl;
+				std::cout << this->clients[*id]->getNick() << " created " <<amount<< " objects."<<std::endl;
 			}
+			net::sendCommand(this->connection, data.c_str(), data.size());
 			break;
 		}
 
