@@ -614,7 +614,7 @@ void Game::receivePacket(ENetEvent event) {
 					Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 3]);
 					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 4]);
 					bool flipped = event.packet->data[i + 5];
-					Vector2 location = net::bytesToVector2(event.packet->data + i + 7);
+					Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
 					unsigned char length = event.packet->data[i + 14];
 					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 15),
 																			static_cast<int>(length)), '.');
@@ -629,10 +629,6 @@ void Game::receivePacket(ENetEvent event) {
 					this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
 					this->objectOrder.push_back(object);
 
-/*					if (event.packet->data[1] != 255) {
-						this->addMessage(client->getColoredNick() + " created a new " + object->getName() + ".");
-					}
-*/
 					amount++;
 					this->checkObjectOrder();
 
@@ -928,11 +924,8 @@ void Game::chatCommand(std::string commandstr) {
 		data.push_back(net::PACKET_CREATE);
 		for(auto object : this->dCreateBuffer)
 		{
-			std::string temp = this->createObject(object, Vector2(x, 0.0f));
-			for(char c : temp)
-			{
-				data.push_back(c);
-			}
+			data += this->createObject(object, Vector2(x, 0.0f));
+
 			x += 4;
 		}
 		net::sendCommand(this->connection, data.c_str(), data.size());
