@@ -232,6 +232,7 @@ void Game::localEvents() {
 
 					net::sendCommand(this->connection, data.c_str(), data.length());
 					this->selectedObjects.clear();
+					this->dragging = false;
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE) {
 				if (this->selectedObjects.size() > 0) {
