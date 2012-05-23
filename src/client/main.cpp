@@ -635,7 +635,9 @@ void Game::receivePacket(ENetEvent event) {
 
 					i += 14 + length;
 				}
-				this->addMessage(client->getColoredNick() + " created " + util::toString(amount) + " objects.");
+				if(event.packet->data[1] != 255) {
+					this->addMessage(client->getColoredNick() + " created " + util::toString(amount) + " objects.");
+				}
 			}
 			break;
 		}
