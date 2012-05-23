@@ -212,12 +212,16 @@ void Renderer::drawText(std::string text, Vector2 location, Alignment alignment)
 
 		if (position != std::string::npos && position + 5 <= text.length()) {
 			al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
-			             this->getAlignment(alignment), text.substr(oldposition, position - oldposition).c_str());
+						 this->getAlignment(alignment), text.substr(oldposition, position - oldposition).c_str());
 			drawposition += al_get_text_width(this->font, text.substr(oldposition, position - oldposition).c_str());
 
-			color.red   = util::hexStringToInt(text.substr(position + 1, 1)) / 16.0f;
-			color.green = util::hexStringToInt(text.substr(position + 2, 1)) / 16.0f;
-			color.blue  = util::hexStringToInt(text.substr(position + 3, 1)) / 16.0f;
+			if (text.substr(position + 1, 1).compare("#") == 0) {
+				color.setFromId(this, util::hexStringToInt(text.substr(position + 2, 2)));
+			} else {
+				color.red   = util::hexStringToInt(text.substr(position + 1, 1)) / 16.0f;
+				color.green = util::hexStringToInt(text.substr(position + 2, 1)) / 16.0f;
+				color.blue  = util::hexStringToInt(text.substr(position + 3, 1)) / 16.0f;
+			}
 		} else {
 			al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
 			             this->getAlignment(alignment), text.substr(oldposition).c_str());

@@ -52,13 +52,12 @@ void Color::setFromId(IRenderer *renderer, unsigned int id) {
 }
 
 std::string Color::encodedString() const {
-	std::ostringstream stream;
+	std::ostringstream colorCode;
 
-	stream << "^";
-	stream << std::hex;
-	stream << static_cast<int>(this->red * 15.0f + 0.5f);
-	stream << static_cast<int>(this->green * 15.0f + 0.5f);
-	stream << static_cast<int>(this->blue * 15.0f + 0.5f);
+	colorCode << "^" << std::hex;
+	colorCode << static_cast<int>(this->red * 15.0f + 0.5f);
+	colorCode << static_cast<int>(this->green * 15.0f + 0.5f);
+	colorCode << static_cast<int>(this->blue * 15.0f + 0.5f);
 
-	return stream.str();
+	return colorCode.str();
 }

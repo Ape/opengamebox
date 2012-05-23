@@ -18,16 +18,23 @@ unsigned char Client::getId(){
 	return this->id;
 }
 
-Color Client::getColor() {
-	return this->color;
-}
-
 std::string Client::getNick() {
 	return this->nick;
 }
 
+Color Client::getColor() {
+	return this->color;
+}
+
+std::string Client::getColorCode() {
+	std::ostringstream colorCode;
+	colorCode << "^#" << std::setw(2) << std::setfill('0') << std::hex << static_cast<unsigned int>(this->id);
+
+	return colorCode.str();
+}
+
 std::string Client::getColoredNick() {
-	return this->getColor().encodedString() + this->getNick() + "^fff";
+	return this->getColorCode() + this->getNick() + "^fff";
 }
 
 bool Client::isJoined() {

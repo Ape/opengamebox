@@ -2,6 +2,8 @@
 #define CLIENT_H
 
 #include <enet/enet.h>
+#include <sstream>
+#include <iomanip>
 
 #include "color.h"
 
@@ -9,18 +11,19 @@ class Client {
 public:
 	Client(ENetPeer *peer, unsigned char id); // Constructor for server
 	Client(std::string nick, Color color, unsigned char id); // Constructor for client
-	~Client();
+	~Client(void);
 
-	unsigned char getId();
-	Color getColor();
-	std::string getNick();
-	std::string getColoredNick();
-	bool isJoined();
-	void setJoined();
+	unsigned char getId(void);
+	std::string getNick(void);
+	Color getColor(void);
+	std::string getColorCode(void);
+	std::string getColoredNick(void);
+	bool isJoined(void);
+	void setJoined(void);
 
 	void setNick(std::string nick);
 
-	ENetPeer* getPeer();
+	ENetPeer* getPeer(void);
 
 	unsigned short int ping; // Only needed on clients
 

@@ -279,7 +279,7 @@ void Server::receivePacket(ENetEvent event) {
 				std::uniform_int_distribution<unsigned short> distribution(1, maxValue);
 
 				std::ostringstream reply;
-				reply << this->clients[*id]->getNick() << " rolled a " << "d" << maxValue << " and got " << distribution(this->randomGenerator) << ".";
+				reply << this->clients[*id]->getColoredNick() << " rolled a " << "d" << maxValue << " and got " << distribution(this->randomGenerator) << ".";
 
 				std::string data;
 				data += net::PACKET_CHAT;
