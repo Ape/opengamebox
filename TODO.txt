@@ -7,20 +7,35 @@ General:
 Mechanics:
 	- fix shuffle
 	- box select
-	- merge move and flip packets
 	- flip whole selection, not individual objects
 	- ability to rotate objects
 		- free angle and 90 degree steps
 		- use move packet
 	- fix object ordering bug
 	- server to know object ordering
-	- multiobject create
 	- better script saving
 		- flip status, private cards as flipped, multiobject commands
-	- downloading objects from the server
-	- uploading objects to the server
 
 Graphics:
 	- rotate around screen center or mouse location
 	- rotate temporary mouse coordinates when dragging an object
 	- background image
+
+Network:
+	- merge move and flip packets
+	- game list
+		- master server for internet games
+		- lan broadcast
+	- downloading objects from the server
+	- uploading objects to the server
+
+Implementation:
+	- Packet class for creating and parsing network packets
+		- send usage:
+			Packet packet(Packet::PACKET_CHAT);
+			packet.writeString("This is a string.");
+			packet.send();
+		- receive usage:
+			Packet packet(enet.data);
+			if (packet.getType() == Packet::PACKET_CHAT)
+				message = packet.readString();
