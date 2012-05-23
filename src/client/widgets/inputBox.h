@@ -28,7 +28,7 @@ class Game;
 class InputBox : public Widget {
 public:
 	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen);
-	~InputBox();
+	virtual ~InputBox();
 
 	virtual void draw(IRenderer *renderer);
 	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);

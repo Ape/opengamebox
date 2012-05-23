@@ -32,6 +32,8 @@ protected:
 
 public:
 	Widget(Vector2 location, Vector2 size);
+	virtual ~Widget(void);
+
 	virtual void draw(IRenderer *renderer);
 	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
 };

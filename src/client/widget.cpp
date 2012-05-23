@@ -22,6 +22,10 @@ Widget::Widget(Vector2 location, Vector2 size) {
 	this->size = size;
 }
 
+Widget::~Widget() {
+	
+}
+
 void Widget::draw(IRenderer *renderer) {
 
 }

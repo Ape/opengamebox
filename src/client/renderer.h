@@ -40,7 +40,7 @@ public:
 	static const float PI;
 
 	Renderer(Coordinates screenSize, const int multisamplingSamples);
-	~Renderer(void);
+	virtual ~Renderer(void);
 
 	ALLEGRO_DISPLAY* getDisplay(void) const;
 	ALLEGRO_FONT* getFont(void) const;
