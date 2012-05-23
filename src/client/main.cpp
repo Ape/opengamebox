@@ -559,7 +559,7 @@ void Game::receivePacket(ENetEvent event) {
 				client->ping = 65535;
 				this->clients[event.packet->data[1]] = client;
 
-				this->addMessage(client->getNick() + " has joined the server!");
+				this->addMessage(client->getColoredNick() + " has joined the server!");
 			}
 
 			break;
@@ -567,7 +567,7 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_LEAVE: {
 			if (event.packet->dataLength == 2) {
-				this->addMessage(this->clients[event.packet->data[1]]->getNick() + " has left the server!");
+				this->addMessage(this->clients[event.packet->data[1]]->getColoredNick() + " has left the server!");
 
 				// Release selected and owned objects
 				for (auto& object : this->objects) {
