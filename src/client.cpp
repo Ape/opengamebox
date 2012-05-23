@@ -14,6 +14,12 @@ Client::Client(std::string nick, Color color, unsigned char id) {
 	this->id = id;
 }
 
+Client::~Client() {
+	if(this->peer != nullptr) {
+		delete this->peer;
+	}
+}
+
 unsigned char Client::getId(){
 	return this->id;
 }
@@ -41,14 +47,8 @@ bool Client::isJoined() {
 	return this->joined;
 }
 
-void Client::setJoined() {
+void Client::join() {
 	this->joined = true;
-}
-
-Client::~Client() {
-	if(this->peer != nullptr) {
-		delete this->peer;
-	}
 }
 
 void Client::setNick(std::string nick) {

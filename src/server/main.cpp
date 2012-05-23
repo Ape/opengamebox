@@ -192,7 +192,7 @@ void Server::receivePacket(ENetEvent event) {
 				std::string nick = std::string(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1);
 
 				if (! net::isNickTaken(this->clients, nick)) {
-					this->clients[*id]->setJoined();
+					this->clients[*id]->join();
 					this->clients[*id]->setNick(nick);
 
 					std::cout << this->clients[*id]->getNick() << " has joined the server!" << std::endl;

@@ -19,24 +19,19 @@ public:
 	std::string getColorCode(void);
 	std::string getColoredNick(void);
 	bool isJoined(void);
-	void setJoined(void);
-
+	void join(void);
 	void setNick(std::string nick);
-
 	ENetPeer* getPeer(void);
 
+	// TODO: Should be private with a getter function
 	unsigned short int ping; // Only needed on clients
 
 private:
 	std::string nick;
-
 	Color color;
-
-	bool joined; //only needed on server
+	bool joined; // Only needed on server
 	unsigned char id;
-
-	ENetPeer *peer; // Only needed on servers
-
+	ENetPeer *peer; // Only needed on server
 };
 
 #endif
