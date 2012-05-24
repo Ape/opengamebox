@@ -70,7 +70,7 @@ unsigned int net::bytesToShort(unsigned char* bytes) {
 	return (bytes[1] << 8) + bytes[0];
 }
 
-// Convert a float in range [-MAX_FLOAT, MAX_FLOAT] to a byte array (4-bit)
+// Convert a float in range [-MAX_FLOAT, MAX_FLOAT] to a byte array (4-byte)
 void net::floatToBytes(unsigned char* bytes, float value) {
 	float normalized = (value + MAX_FLOAT) / (2 * MAX_FLOAT);
 	if (normalized > 0.99999f) {

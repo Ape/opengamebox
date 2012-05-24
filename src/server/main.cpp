@@ -225,6 +225,9 @@ void Server::receivePacket(ENetEvent event) {
 						data += net::clientToClientId(object.second->getOwner());
 						data += object.second->isFlipped();
 						net::dataAppendVector2(data, object.second->getLocation());
+						unsigned char* temp = new unsigned char[4];
+						net::floatToBytes(temp, object.second->getRotation());
+						data.append(reinterpret_cast<char*>(temp));
 						data.push_back(static_cast<char>(object.second->getFullId().size()));
 						data.append(object.second->getFullId());
 
@@ -306,6 +309,7 @@ void Server::receivePacket(ENetEvent event) {
 					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 2]);
 					bool flipped = event.packet->data[i + 3];
 					Vector2 location = net::bytesToVector2(event.packet->data + i + 4);
+					float rotation = net::bytesToFloat(event.packet->data + i + 8);
 					unsigned char length = event.packet->data[i + 12];
 					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 13), static_cast<int>(length)), '.');
 					if (objectData.size() == 3) {
@@ -316,6 +320,7 @@ void Server::receivePacket(ENetEvent event) {
 						object->select(selected);
 						object->own(owner);
 						object->setFlipped(flipped);
+						object->rotate(rotation);
 						this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
 
 						if (! object->getName().empty()) {
@@ -579,6 +584,12 @@ void Server::receivePacket(ENetEvent event) {
 					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
 			}
+		}
+		case net::PACKET_ROTATE: {
+			unsigned short objId = net::bytesToShort(event.packet->data + 1);
+			float rotation = net::bytesToFloat(event.packet->data +3);
+			this->objects[objId]->rotate(rotation);
+			net::sendCommand(this->connection, reinterpret_cast<char*>(event.packet->data), event.packet->dataLength);
 		}
 	}
 }

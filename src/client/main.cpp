@@ -308,12 +308,32 @@ void Game::localEvents() {
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
 				this->keyStatus.screenRotateClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_E) {
-				for(auto object : this->selectedObjects) {
-					object->rotate(Renderer::PI / 2);
+				if(this->selectedObjects.size() > 0) {
+					for(auto object : this->selectedObjects) {
+						std::string data;
+						data.push_back(net::PACKET_ROTATE);
+						net::dataAppendShort(data, object->getId());
+						unsigned char* temp = new unsigned char[4];
+						net::floatToBytes(temp, Renderer::PI / 2);
+						data.append(reinterpret_cast<char*>(temp));
+
+						net::sendCommand(this->connection, data.c_str(), data.size());
+						//object->rotate(Renderer::PI / 2);
+					}
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_R) {
-				for(auto object : this->selectedObjects) {
-					object->rotate(-Renderer::PI / 2);
+				if(this->selectedObjects.size() > 0) {
+					for(auto object : this->selectedObjects) {
+						std::string data;
+						data.push_back(net::PACKET_ROTATE);
+						net::dataAppendShort(data, object->getId());
+						unsigned char* temp = new unsigned char[4];
+						net::floatToBytes(temp, -Renderer::PI / 2);
+						data.append(reinterpret_cast<char*>(temp));
+
+						net::sendCommand(this->connection, data.c_str(), data.size());
+						//object->rotate(-Renderer::PI / 2);
+					}
 				}
 			}
 		}
@@ -624,6 +644,7 @@ void Game::receivePacket(ENetEvent event) {
 					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 4]);
 					bool flipped = event.packet->data[i + 5];
 					Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
+					float rotation = net::bytesToFloat(event.packet->data + i + 10);
 					unsigned char length = event.packet->data[i + 14];
 					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 15),
 																			static_cast<int>(length)), '.');
@@ -634,6 +655,7 @@ void Game::receivePacket(ENetEvent event) {
 					object->select(selected);
 					object->own(owner);
 					object->setFlipped(flipped);
+					object->rotate(rotation);
 
 					this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
 					this->objectOrder.push_back(object);
@@ -844,6 +866,11 @@ void Game::receivePacket(ENetEvent event) {
 
 			break;
 		}
+		case net::PACKET_ROTATE: {
+			unsigned short objId = net::bytesToShort(event.packet->data + 1);
+			float rotation = net::bytesToFloat(event.packet->data +3);
+			this->objects[objId]->rotate(rotation);
+		}
 	}
 }
 
@@ -1011,6 +1038,9 @@ std::string Game::createObject(std::string objectId, Vector2 location) {
 	bool flipped = false;
 	data += flipped; // Not flipped
 	net::dataAppendVector2(data, location);
+	unsigned char* rotated = new unsigned char[4];
+	net::floatToBytes((rotated), 0.0f);
+	data.append(reinterpret_cast<char*>(rotated));//Not rotated
 	data += (objectId.size());
 	data.append(objectId);
 	return data;

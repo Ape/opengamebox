@@ -52,6 +52,7 @@ namespace net {
 	const unsigned char PACKET_FLIP    = 0x24; // Flip objects
 	const unsigned char PACKET_OWN     = 0x25; // Make objects private
 	const unsigned char PACKET_SHUFFLE = 0x26; // Shuffle objects
+	const unsigned char PACKET_ROTATE  = 0x27; // Rotate objects
 
 	// Other command packets
 	const unsigned char PACKET_CHAT = 0x40; // Send a chat message
