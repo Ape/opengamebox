@@ -50,6 +50,7 @@ public:
 	bool operator!=(const Vector2 &vector1) const;
 
 	float angle(void) const;
+	Vector2 rotate(float angle);
 
 	float len2(void) const;
 	float len(void) const;

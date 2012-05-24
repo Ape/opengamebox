@@ -157,22 +157,22 @@ void Renderer::loadTexture(std::string texture) {
 	}
 }
 
-void Renderer::drawBitmap(std::string texture, Vector2 source_location, Vector2 source_size,
-                          Vector2 dest_location, Vector2 dest_size) {
+void Renderer::drawBitmap(std::string texture, Vector2 dest_location, Vector2 dest_size,
+								float angle, float multipler) {
 	this->loadTexture(texture);
-
-	al_draw_scaled_bitmap(this->textures[texture], source_location.x, source_location.y,
-	                      source_size.x * this->getTextureSize(texture).x, source_size.y * this->getTextureSize(texture).y,
-	                      dest_location.x, dest_location.y, dest_size.x, dest_size.y, 0);
+	ALLEGRO_BITMAP* bitmap = this->textures[texture];
+	al_draw_scaled_rotated_bitmap(this->textures[texture], al_get_bitmap_width(bitmap) / 2, al_get_bitmap_height(bitmap) /2,
+								dest_location.x, dest_location.y, multipler, multipler, angle, 0);
 }
 
-void Renderer::drawBitmapTinted(std::string texture, Vector2 source_location, Vector2 source_size,
-                                Vector2 dest_location, Vector2 dest_size, Color color) {
+void Renderer::drawBitmapTinted(std::string texture, Vector2 dest_location, Vector2 dest_size,
+								Color color, float angle, float multipler) {
 	this->loadTexture(texture);
+	ALLEGRO_BITMAP* bitmap = this->textures[texture];
+	al_draw_tinted_scaled_rotated_bitmap(this->textures[texture], al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
+								al_get_bitmap_width(bitmap) / 2, al_get_bitmap_height(bitmap) /2,
+								dest_location.x, dest_location.y, multipler, multipler, angle, 0);
 
-	al_draw_tinted_scaled_bitmap(this->textures[texture], al_map_rgba_f(color.red, color.green, color.blue, color.alpha), source_location.x, source_location.y,
-	                      source_size.x * this->getTextureSize(texture).x, source_size.y * this->getTextureSize(texture).y,
-	                      dest_location.x, dest_location.y, dest_size.x, dest_size.y, 0);
 }
 
 void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation) {

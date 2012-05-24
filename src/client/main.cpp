@@ -307,6 +307,14 @@ void Game::localEvents() {
 				this->keyStatus.screenRotateCClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
 				this->keyStatus.screenRotateClockwise = true;
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_E) {
+				for(auto object : this->selectedObjects) {
+					object->rotate(Renderer::PI / 2);
+				}
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_R) {
+				for(auto object : this->selectedObjects) {
+					object->rotate(-Renderer::PI / 2);
+				}
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {

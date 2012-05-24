@@ -25,6 +25,7 @@ Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, 
 	this->flipped     = false;
 	this->selected    = nullptr;
 	this->owner       = nullptr;
+	this->rotation    = 0.0f;
 
 	this->image = "data/" + this->objectClass->getPackage() + "/objects/" + this->objectClass->getObjectClass() + "/" + this->objectId;
 	this->stackDelta = Vector2(4.0f, 0.0f);
@@ -248,11 +249,16 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 	}
 
 	if (this->selected != nullptr) {
-		Vector2 pointA = this->location - this->getSize()/2.0f - Vector2(1.0f, 1.0f);
-		Vector2 pointB = this->location + this->getSize()/2.0f + Vector2(1.0f, 1.0f);
+		Vector2 pointA = this->location - (this->getSize()/2.0f).rotate(this->rotation) - Vector2(1.0f, 1.0f).rotate(this->rotation);
+		Vector2 pointB = this->location + (this->getSize()/2.0f).rotate(this->rotation) + Vector2(1.0f, 1.0f).rotate(this->rotation);
 
 		renderer->drawRectangle(pointA, pointB, this->selected->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
 	}
 
-	renderer->drawBitmapTinted(image, Vector2(0.0f, 0.0f), Vector2(1.0f, 1.0f), this->location - this->getSize()/2.0f, this->getSize(), tint);
+	renderer->drawBitmapTinted(image, this->location, this->getSize(), tint, this->rotation);
+}
+
+void Object::rotate(float angle)
+{
+	this->rotation += angle;
 }

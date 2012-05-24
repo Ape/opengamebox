@@ -65,6 +65,7 @@ public:
 
 	void animate(double deltaTime);
 	void draw(IRenderer *renderer, Client *localClient) const;
+	void rotate(float angle);
 
 private:
 	ObjectClass *objectClass;
@@ -76,6 +77,7 @@ private:
 	std::string image;
 	std::string backside;
 	Vector2 stackDelta;
+	float rotation;
 
 	Client *selected;
 	Client *owner;

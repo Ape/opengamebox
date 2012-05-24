@@ -66,6 +66,14 @@ float Vector2::angle() const {
 	return atan2(this->y, this->x);
 }
 
+Vector2 Vector2::rotate(float angle) {
+	float length = this->len();
+	float newAngle = this->angle() + angle;
+	this->x = cos(newAngle) * length;
+	this->y = sin(newAngle) * length;
+	return *this;
+}
+
 float Vector2::len2() const {
 	return this->x * this->x + this->y * this->y;
 }
