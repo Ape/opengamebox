@@ -23,6 +23,8 @@
 #include <list>
 #include <set>
 
+#include <cmath>
+
 #include "net.h"
 #include "irenderer.h"
 #include "vector2.h"
@@ -43,6 +45,7 @@ public:
 	Vector2 getTargetLocation(void) const;
 	Vector2 getSize(void) const;
 	Vector2 getGridSize(void) const;
+	float getRotation(void) const;
 	bool testLocation(Vector2 location) const;
 	bool testCollision(const Object *object, bool second = false) const;
 

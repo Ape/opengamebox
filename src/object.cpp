@@ -88,9 +88,15 @@ Vector2 Object::getGridSize() const {
 	return gridSize;
 }
 
+float Object::getRotation() const {
+	return this->rotation;
+}
+
 bool Object::testLocation(Vector2 location) const {
-	if (location.x >= this->getTargetLocation().x - this->getSize().x/2.0f && location.x <= this->getTargetLocation().x + this->getSize().x/2.0f
-	    && location.y >= this->getTargetLocation().y - this->getSize().y/2.0f && location.y <= this->getTargetLocation().y + this->getSize().y/2.0f) {
+	if (location.x >= this->getTargetLocation().x - abs((this->getSize()/2.0f).rotate(this->rotation).x)
+		&& location.x <= this->getTargetLocation().x + abs((this->getSize()/2.0f).rotate(this->rotation).x)
+	    && location.y >= this->getTargetLocation().y - abs((this->getSize()/2.0f).rotate(this->rotation).y)
+		&& location.y <= this->getTargetLocation().y + abs((this->getSize()/2.0f).rotate(this->rotation).y)) {
 		return true;
 	} else {
 		return false;
@@ -98,9 +104,12 @@ bool Object::testLocation(Vector2 location) const {
 }
 
 bool Object::testCollision(const Object *object, bool second) const {
-	if (object->testLocation(this->getTargetLocation() - this->getSize()/2.0f) || object->testLocation(this->getTargetLocation() + this->getSize()/2.0f)
-	        || object->testLocation(Vector2(this->getTargetLocation().x - this->getSize().x/2.0f, this->getTargetLocation().y + this->getSize().y/2.0f))
-	        || object->testLocation(Vector2(this->getTargetLocation().x + this->getSize().x/2.0f, this->getTargetLocation().y - this->getSize().y/2.0f))
+	if (object->testLocation(this->getTargetLocation() - (this->getSize()/2.0f).rotate(this->rotation))
+			|| object->testLocation(this->getTargetLocation() + (this->getSize()/2.0f).rotate(this->rotation))
+	        || object->testLocation(Vector2(this->getTargetLocation().x - abs((this->getSize()).rotate(this->rotation).x/2.0f),
+			this->getTargetLocation().y + abs((this->getSize()).rotate(this->rotation).y/2.0f)))
+			|| object->testLocation(Vector2(this->getTargetLocation().x + abs((this->getSize()).rotate(this->rotation).x/2.0f),
+			this->getTargetLocation().y - abs((this->getSize()).rotate(this->rotation).y/2.0f)))
 	        || (! second && object->testCollision(this, true))) {
 		return true;
 	} else {
