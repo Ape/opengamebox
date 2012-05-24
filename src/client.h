@@ -11,7 +11,6 @@ class Client {
 public:
 	Client(ENetPeer *peer, unsigned char id); // Constructor for server
 	Client(std::string nick, Color color, unsigned char id); // Constructor for client
-	~Client(void);
 
 	unsigned char getId(void);
 	std::string getNick(void);
