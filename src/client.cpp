@@ -14,12 +14,6 @@ Client::Client(std::string nick, Color color, unsigned char id) {
 	this->id = id;
 }
 
-Client::~Client() {
-	if(this->peer != nullptr) {
-		delete this->peer;
-	}
-}
-
 unsigned char Client::getId(){
 	return this->id;
 }
