@@ -225,9 +225,7 @@ void Server::receivePacket(ENetEvent event) {
 						data += net::clientToClientId(object.second->getOwner());
 						data += object.second->isFlipped();
 						net::dataAppendVector2(data, object.second->getLocation());
-						unsigned char* temp = new unsigned char[4];
-						net::floatToBytes(temp, object.second->getRotation());
-						data.append(reinterpret_cast<char*>(temp));
+						data.push_back(floor(object.second->getRotation()/(3.141592653589f/8) + 0.5f));
 						data.push_back(static_cast<char>(object.second->getFullId().size()));
 						data.append(object.second->getFullId());
 
@@ -309,9 +307,9 @@ void Server::receivePacket(ENetEvent event) {
 					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 2]);
 					bool flipped = event.packet->data[i + 3];
 					Vector2 location = net::bytesToVector2(event.packet->data + i + 4);
-					float rotation = net::bytesToFloat(event.packet->data + i + 8);
-					unsigned char length = event.packet->data[i + 12];
-					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 13), static_cast<int>(length)), '.');
+					float rotation = event.packet->data[i+12] * 3.141592653589f / 8;
+					unsigned char length = event.packet->data[i + 13];
+					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 14), static_cast<int>(length)), '.');
 					if (objectData.size() == 3) {
 						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
@@ -331,7 +329,7 @@ void Server::receivePacket(ENetEvent event) {
 								data.push_back(c);
 							}
 
-							std::string temp2(reinterpret_cast<char*>(event.packet->data + i + 1), static_cast<int>(length) + 12);
+							std::string temp2(reinterpret_cast<char*>(event.packet->data + i + 1), static_cast<int>(length) + 13);
 							for(char c : temp2)
 							{
 								data.push_back(c);
@@ -343,7 +341,7 @@ void Server::receivePacket(ENetEvent event) {
 							this->objects.erase(objId);
 						}
 					}
-					i += length + 12;
+					i += length + 13;
 				}
 				std::cout << this->clients[*id]->getNick() << " created " <<amount<< " objects."<<std::endl;
 			}
@@ -587,8 +585,8 @@ void Server::receivePacket(ENetEvent event) {
 		}
 		case net::PACKET_ROTATE: {
 			unsigned short objId = net::bytesToShort(event.packet->data + 1);
-			float rotation = net::bytesToFloat(event.packet->data +3);
-			this->objects[objId]->rotate(rotation);
+			char rotation = event.packet->data[3];
+			this->objects[objId]->rotate(rotation * 3.141592653589f / 8);
 			net::sendCommand(this->connection, reinterpret_cast<char*>(event.packet->data), event.packet->dataLength);
 		}
 	}
