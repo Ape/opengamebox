@@ -41,11 +41,9 @@ public:
 	virtual void rotateScreen(float angle) = 0;
 	virtual void setScreenSize(Coordinates screenSize) = 0;
 
-	virtual void drawBitmap(std::string texture, Vector2 dest_location, Vector2 dest_size,
-								float angle = 0, float multipler = 1) = 0;
+	virtual void drawBitmap(std::string texture, Vector2 dest_location, Vector2 dest_size, float angle = 0) = 0;
 
-	virtual void drawBitmapTinted(std::string texture, Vector2 dest_location, Vector2 dest_size,
-								Color color, float angle = 0, float multipler = 1) = 0;
+	virtual void drawBitmapTinted(std::string texture, Vector2 dest_location, Vector2 dest_size, Color color, float angle = 0) = 0;
 
 	virtual void drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation = Transformation::UI) = 0;
 	virtual void drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, Transformation transformation = Transformation::UI) = 0;

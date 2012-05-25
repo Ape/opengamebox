@@ -157,21 +157,19 @@ void Renderer::loadTexture(std::string texture) {
 	}
 }
 
-void Renderer::drawBitmap(std::string texture, Vector2 dest_location, Vector2 dest_size,
-								float angle, float multipler) {
+void Renderer::drawBitmap(std::string texture, Vector2 dest_location, Vector2 dest_size, float angle) {
 	this->loadTexture(texture);
-	ALLEGRO_BITMAP* bitmap = this->textures[texture];
-	al_draw_scaled_rotated_bitmap(this->textures[texture], al_get_bitmap_width(bitmap) / 2, al_get_bitmap_height(bitmap) /2,
-								dest_location.x, dest_location.y, multipler, multipler, angle, 0);
+	Vector2 sizeFactor(dest_size.x / al_get_bitmap_width(this->textures[texture]), dest_size.y / al_get_bitmap_height(this->textures[texture]));
+	al_draw_scaled_rotated_bitmap(this->textures[texture], dest_size.x / (2.0f * sizeFactor.x), dest_size.y / (2.0f * sizeFactor.y),
+	                              dest_location.x, dest_location.y, sizeFactor.x, sizeFactor.y, angle, 0);
 }
 
-void Renderer::drawBitmapTinted(std::string texture, Vector2 dest_location, Vector2 dest_size,
-								Color color, float angle, float multipler) {
+void Renderer::drawBitmapTinted(std::string texture, Vector2 dest_location, Vector2 dest_size, Color color, float angle) {
 	this->loadTexture(texture);
-	ALLEGRO_BITMAP* bitmap = this->textures[texture];
+	Vector2 sizeFactor(dest_size.x / al_get_bitmap_width(this->textures[texture]), dest_size.y / al_get_bitmap_height(this->textures[texture]));
 	al_draw_tinted_scaled_rotated_bitmap(this->textures[texture], al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
-								al_get_bitmap_width(bitmap) / 2, al_get_bitmap_height(bitmap) /2,
-								dest_location.x, dest_location.y, multipler, multipler, angle, 0);
+	                                     dest_size.x / (2.0f * sizeFactor.x), dest_size.y / (2.0f * sizeFactor.y), dest_location.x, dest_location.y,
+	                                     sizeFactor.x, sizeFactor.y, angle, 0);
 
 }
 

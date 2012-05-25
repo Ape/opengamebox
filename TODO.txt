@@ -3,22 +3,22 @@ General:
 	- loading settings from a file
 	- use member initialization lists
 	- add README.txt
+	- fix segmentation fault on fallback texture disposal
 
 Mechanics:
 	- fix shuffle
 	- box select
 	- flip whole selection, not individual objects
-	- ability to rotate objects
-		- free angle and 90 degree steps
-		- use move packet
 	- fix object ordering bug
 	- server to know object ordering
 	- better script saving
 		- flip status, private cards as flipped, multiobject commands
 
 Graphics:
-	- rotate around screen center or mouse location
-	- rotate temporary mouse coordinates when dragging an object
+	- rotate screen with 90 degree steps
+	- (?) rotate temporary mouse coordinates when dragging an object
+	- animations for rotations
+		- screen and objects
 	- background image
 
 Network:
