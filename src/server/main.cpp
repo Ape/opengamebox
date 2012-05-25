@@ -582,12 +582,16 @@ void Server::receivePacket(ENetEvent event) {
 					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
 			}
+
+			break;
 		}
 		case net::PACKET_ROTATE: {
 			unsigned short objId = net::bytesToShort(event.packet->data + 1);
 			char rotation = event.packet->data[3];
 			this->objects[objId]->rotate(rotation * utils::PI / 8.0f);
 			net::sendCommand(this->connection, reinterpret_cast<char*>(event.packet->data), event.packet->dataLength);
+
+			break;
 		}
 	}
 }
