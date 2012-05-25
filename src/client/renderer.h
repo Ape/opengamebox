@@ -37,8 +37,6 @@
 
 class Renderer : public IRenderer{
 public:
-	static const float PI;
-
 	Renderer(Coordinates screenSize, const int multisamplingSamples);
 	virtual ~Renderer(void);
 

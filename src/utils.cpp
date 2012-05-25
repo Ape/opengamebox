@@ -17,7 +17,7 @@
 
 #include "utils.h"
 
-std::vector<std::string> util::splitString(std::string string, char delimeter) {
+std::vector<std::string> utils::splitString(std::string string, char delimeter) {
 	std::vector<std::string> items;
 	std::string item;
 	std::stringstream stream(string);
@@ -29,13 +29,13 @@ std::vector<std::string> util::splitString(std::string string, char delimeter) {
 	return items;
 }
 
-std::string util::toString(int i) {
+std::string utils::toString(int i) {
 	std::ostringstream stream;
 	stream << i;
 	return stream.str();
 }
 
-unsigned int util::hexStringToInt(std::string string) {
+unsigned int utils::hexStringToInt(std::string string) {
 	unsigned int i;
 	std::istringstream stream(string);
 	stream >> std::hex >> i;

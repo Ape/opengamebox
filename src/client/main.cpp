@@ -316,7 +316,7 @@ void Game::localEvents() {
 						data.push_back(0xfc); //-4 twos complement
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
-						//object->rotate(Renderer::PI / 2);
+						//object->rotate(utils::PI / 2);
 					}
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_R) {
@@ -328,7 +328,7 @@ void Game::localEvents() {
 						data.push_back(0x04);
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
-						//object->rotate(-Renderer::PI / 2);
+						//object->rotate(-utils::PI / 2);
 					}
 				}
 			}
@@ -640,9 +640,9 @@ void Game::receivePacket(ENetEvent event) {
 					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 4]);
 					bool flipped = event.packet->data[i + 5];
 					Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
-					float rotation = event.packet->data[i + 14] * Renderer::PI / 8;
+					float rotation = event.packet->data[i + 14] * utils::PI / 8;
 					unsigned char length = event.packet->data[i + 15];
-					std::vector<std::string> objectData = util::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
+					std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
 																			static_cast<int>(length)), '.');
 					ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
 
@@ -662,7 +662,7 @@ void Game::receivePacket(ENetEvent event) {
 					i += 15 + length;
 				}
 				if(event.packet->data[1] != 255) {
-					this->addMessage(client->getColoredNick() + " created " + util::toString(amount) + " objects.");
+					this->addMessage(client->getColoredNick() + " created " + utils::toString(amount) + " objects.");
 				}
 			}
 			break;
@@ -701,7 +701,7 @@ void Game::receivePacket(ENetEvent event) {
 					if (numberObjects == 1) {
 						this->addMessage(client->getColoredNick() + " moved " + lastObject->getName() + ".");
 					} else if (numberObjects >= 2) {
-						this->addMessage(client->getColoredNick() + " moved " + util::toString(numberObjects) + " objects.");
+						this->addMessage(client->getColoredNick() + " moved " + utils::toString(numberObjects) + " objects.");
 					}
 				}
 
@@ -762,7 +762,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (numberObjects == 1) {
 					this->addMessage(client->getColoredNick() + " removed " + lastObject + ".");
 				} else if (numberObjects >= 2) {
-					this->addMessage(client->getColoredNick() + " removed " + util::toString(numberObjects) + " objects.");
+					this->addMessage(client->getColoredNick() + " removed " + utils::toString(numberObjects) + " objects.");
 				}
 			}
 
@@ -795,7 +795,7 @@ void Game::receivePacket(ENetEvent event) {
 					if (numberObjects == 1) {
 						this->addMessage(client->getColoredNick() + " flipped " + lastObject->getName() + ".");
 					} else if (numberObjects >= 2) {
-						this->addMessage(client->getColoredNick() + " flipped " + util::toString(numberObjects) + " objects.");
+						this->addMessage(client->getColoredNick() + " flipped " + utils::toString(numberObjects) + " objects.");
 					}
 				}
 			}
@@ -839,7 +839,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (numberObjects == 1) {
 					this->addMessage(client->getColoredNick() + " " + verb + " " + lastObject->getName() + ".");
 				} else if (numberObjects >= 2) {
-					this->addMessage(client->getColoredNick() + " " + verb + " " + util::toString(numberObjects) + " objects.");
+					this->addMessage(client->getColoredNick() + " " + verb + " " + utils::toString(numberObjects) + " objects.");
 				}
 
 				this->checkObjectOrder();
@@ -865,7 +865,7 @@ void Game::receivePacket(ENetEvent event) {
 		case net::PACKET_ROTATE: {
 			unsigned short objId = net::bytesToShort(event.packet->data + 1);
 			char rotation = event.packet->data[3];
-			this->objects[objId]->rotate(rotation * Renderer::PI / 8);
+			this->objects[objId]->rotate(rotation * utils::PI / 8);
 		}
 	}
 }
@@ -909,7 +909,7 @@ size_t Game::getSentMessageCount() {
 }
 
 void Game::chatCommand(std::string commandstr) {
-	std::vector<std::string> parameters = util::splitString(commandstr, ' ');
+	std::vector<std::string> parameters = utils::splitString(commandstr, ' ');
 
 	if (parameters.at(0) == "load") {
 		if (parameters.size() == 2) {
@@ -986,7 +986,7 @@ void Game::chatCommand(std::string commandstr) {
 }
 
 void Game::loadScript(std::string script) {
-	std::vector<std::string> scriptPath = util::splitString(script, '.');
+	std::vector<std::string> scriptPath = utils::splitString(script, '.');
 
 	if (scriptPath.size() == 1 || scriptPath.size() == 2) {
 		this->addMessage("Running script '" + script + "'.");
@@ -1098,10 +1098,10 @@ void Game::update() {
 	}
 
 	if (this->keyStatus.screenRotateClockwise) {
-		this->renderer->rotateScreen(Renderer::PI / 40.0f * this->deltaTime * 60.0f);
+		this->renderer->rotateScreen(utils::PI / 40.0f * this->deltaTime * 60.0f);
 	}
 	if (this->keyStatus.screenRotateCClockwise) {
-		this->renderer->rotateScreen(-Renderer::PI / 40.0f * this->deltaTime * 60.0f);
+		this->renderer->rotateScreen(-utils::PI / 40.0f * this->deltaTime * 60.0f);
 	}
 
 	this->renderer->updateTransformations();
@@ -1143,7 +1143,7 @@ void Game::renderUI() {
 		if (client.second->isJoined()) {
 			std::string text;
 			if (client.second->ping != 65535) {
-				text = client.second->getColoredNick() + " (" + util::toString(client.second->ping) + " ms)";
+				text = client.second->getColoredNick() + " (" + utils::toString(client.second->ping) + " ms)";
 			} else {
 				text = client.second->getColoredNick();
 			}
@@ -1159,7 +1159,7 @@ void Game::renderUI() {
 		}
 	}
 
-	this->renderer->drawText("FPS: " + util::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
+	this->renderer->drawText("FPS: " + utils::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
 	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f));
 
 	for (auto& widget : this->widgets) {
