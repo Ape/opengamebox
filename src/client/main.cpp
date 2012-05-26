@@ -638,6 +638,9 @@ void Game::networkEvents() {
 					if (this->localClient != net::MAX_CLIENTS || event.packet->data[0] == net::PACKET_HANDSHAKE ||
 					    event.packet->data[0] == net::PACKET_NICK_TAKEN) {
 						this->receivePacket(event);
+					} else if (event.packet->data[0] == net::PACKET_MS_QUERY) {
+						this->addMessage("Error: Can't use a master server as a game server!");
+						this->disconnectMasterServer();
 					}
 				}
 
@@ -996,6 +999,7 @@ void Game::receivePacket(ENetEvent event) {
 			if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER && event.packet->dataLength >= 1) {
 				this->addMessage("Server list: [TODO]");
 				// TODO: Show the server list
+
 				this->disconnectMasterServer();
 			}
 

@@ -135,6 +135,11 @@ void Server::networkEvents() {
 
 				if (this->clients[*id]->isJoined() || event.packet->data[0] == net::PACKET_HANDSHAKE) {
 					this->receivePacket(event);
+				} else if (event.packet->data[0] == net::PACKET_MS_QUERY) {
+					// This is not a master server
+					enet_peer_disconnect_now(event.peer, 0);
+
+					// TODO: Serve as a master server with only the local server on the list
 				}
 
 				enet_packet_destroy(event.packet);

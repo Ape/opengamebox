@@ -156,5 +156,15 @@ void MasterServer::receivePacket(ENetEvent event) {
 
 			break;
 		}
+
+		case net::PACKET_HANDSHAKE: {
+			// This is not a game server
+
+			std::string data;
+			data += net::PACKET_MS_QUERY;
+			net::sendCommand(event.peer, data.c_str(), data.length());
+
+			break;
+		}
 	}
 }
