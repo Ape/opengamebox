@@ -72,7 +72,7 @@ Game::Game(void) {
 bool Game::init() {
 	// Initialize Allegro
 	if (! al_init()) {
-		std::cerr << "Failed to initialize Allegro!" << std::endl;
+		std::cerr << "Error: Failed to initialize Allegro!" << std::endl;
 		return false;
 	}
 
@@ -81,7 +81,7 @@ bool Game::init() {
 
 	// Initialize input
 	if (! al_install_keyboard() || ! al_install_mouse()) {
-		std::cerr << "Failed to initialize the input components!" << std::endl;
+		std::cerr << "Error: Failed to initialize the input components!" << std::endl;
 		return false;
 	}
 
@@ -101,14 +101,14 @@ bool Game::init() {
 	// Create a timer for the main loop
 	this->timer = al_create_timer(1.0f / FPS_LIMIT);
 	if (! this->timer) {
-		std::cerr << "Failed to create a timer!" << std::endl;
+		std::cerr << "Error: Failed to create a timer!" << std::endl;
 		return false;
 	}
 
 	// Create an event queue
 	this->event_queue = al_create_event_queue();
 	if (! this->event_queue) {
-		std::cerr << "Failed to create an event queue!" << std::endl;
+		std::cerr << "Error: Failed to create an event queue!" << std::endl;
 		return false;
 	}
 
@@ -122,7 +122,7 @@ bool Game::init() {
 
 	// Initialize enet
 	if (enet_initialize() != 0) {
-		std::cerr << "Failed to initialize the network components!" << std::endl;
+		std::cerr << "Error: Failed to initialize the network components!" << std::endl;
 		return false;
 	}
 
@@ -130,6 +130,14 @@ bool Game::init() {
 }
 
 bool Game::connect(std::string address, int port) {
+	if (this->connectionState == Game::ConnectionState::CONNECTED) {
+		this->addMessage("Error: You are already connected!");
+		return false;
+	} else if (this->connectionState == Game::ConnectionState::CONNECTING_MASTER_SERVER
+	           || this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER) {
+		this->disconnectMasterServer();
+	}
+
 	this->connection = enet_host_create (NULL,          // Create a client host
 	                                     1,             // Only allow 1 outgoing connection
 	                                     net::CHANNELS, // Number of channels
@@ -137,18 +145,18 @@ bool Game::connect(std::string address, int port) {
 	                                     0);            // Unlimited upstream bandwidth
 
 	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
-		std::cerr << "Unknown host!" << std::endl;
+		this->addMessage("Error: Unknown host!");
 		return false;
 	}
 
 	if (port == 0) {
-		std::cerr << "Illegal port number!" << std::endl;
+		this->addMessage("Error: Illegal port number!");
 		return false;
 	}
 	this->hostAddress.port = port;
 
 	if (this->connection == NULL) {
-		std::cerr << "Could not create a connection!" << std::endl;
+		std::cerr << "Error: Could not create a connection!" << std::endl;
 		return false;
 	}
 
@@ -157,7 +165,7 @@ bool Game::connect(std::string address, int port) {
 	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
 	if (this->host == NULL) {
-		std::cerr << "Could not connect to the server!" << std::endl;
+		std::cerr << "Error: Could not connect to the server!" << std::endl;
 		return false;
 	}
 
@@ -171,18 +179,18 @@ bool Game::connectMasterServer(std::string address, int port) {
 	this->connection = enet_host_create (NULL, 1, 1, 0, 0);
 
 	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
-		std::cerr << "Unknown master server host!" << std::endl;
+		std::cerr << "Error: Unknown master server host!" << std::endl;
 		return false;
 	}
 
 	if (port == 0) {
-		std::cerr << "Illegal master server port number!" << std::endl;
+		std::cerr << "Error: Illegal master server port number!" << std::endl;
 		return false;
 	}
 	this->hostAddress.port = port;
 
 	if (this->connection == NULL) {
-		std::cerr << "Could not create a connection to the master server!" << std::endl;
+		std::cerr << "Error: Could not create a connection to the master server!" << std::endl;
 		return false;
 	}
 
@@ -191,7 +199,7 @@ bool Game::connectMasterServer(std::string address, int port) {
 	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
 	if (this->host == NULL) {
-		std::cerr << "Could not connect to the master server!" << std::endl;
+		std::cerr << "Error: Could not connect to the master server!" << std::endl;
 		return false;
 	}
 
@@ -230,14 +238,35 @@ void Game::mainLoop() {
 
 void Game::quit() {
 	if (this->connectionState == Game::ConnectionState::CONNECTED) {
-		this->addMessage("Disconnecting...");
-		enet_peer_disconnect(this->host, 0);
-
 		this->state = Game::State::EXITING;
-		this->connectionState = Game::ConnectionState::DISCONNECTING;
+		this->disconnect();
 	} else {
 		this->state = Game::State::TERMINATED;
 	}
+}
+
+void Game::disconnect() {
+	if (this->connectionState == Game::ConnectionState::CONNECTED
+	    || this->connectionState == Game::ConnectionState::CONNECTING) {
+		this->addMessage("Disconnecting...");
+		enet_peer_disconnect(this->host, 0);
+
+		this->connectionState = Game::ConnectionState::DISCONNECTING;
+	} else if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER
+	           || this->connectionState == Game::ConnectionState::CONNECTING_MASTER_SERVER) {
+		this->addMessage("Disconnected from the master server.");
+		this->disconnectMasterServer();
+	} else {
+		this->addMessage("Error: You are not connected!");
+	}
+}
+
+void Game::disconnectMasterServer() {
+	enet_peer_disconnect_now(this->host, 0);
+	enet_host_destroy(this->connection);
+	this->connection = nullptr;
+
+	this->connectionState = Game::ConnectionState::NOT_CONNECTED;
 }
 
 void Game::dispose() {
@@ -965,14 +994,9 @@ void Game::receivePacket(ENetEvent event) {
 
 		case net::PACKET_MS_QUERY: {
 			if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER && event.packet->dataLength >= 1) {
-				std::cout << "Received the server list!" << std::endl;
-
-				// Disconnect from the master server
-				enet_peer_disconnect_now(this->host, 0);
-				enet_host_destroy(this->connection);
-				this->connection = nullptr;
-
-				this->connectionState = Game::ConnectionState::NOT_CONNECTED;
+				this->addMessage("Server list: [TODO]");
+				// TODO: Show the server list
+				this->disconnectMasterServer();
 			}
 
 			break;
@@ -993,15 +1017,17 @@ void Game::sendChat(std::string text) {
 	delete input;
 	this->input = nullptr;
 
-	if (this->connectionState == Game::ConnectionState::CONNECTED && text.length() > 0) {
+	if (text.length() > 0) {
 		if (text.at(0) == '/') {
 			this->chatCommand(text.substr(1));
-		} else {
+		} else if (this->connectionState == Game::ConnectionState::CONNECTED) {
 			std::string data;
 			data.push_back(net::PACKET_CHAT);
 			data.append(text);
 
 			net::sendCommand(this->connection, data.c_str(), data.length());
+		} else {
+			this->addMessage("Error: You are not connected to a server!");
 		}
 
 		if (this->sentMessages.size() == 0 || text != this->sentMessages.at(this->sentMessages.size() - 1)) {
@@ -1021,7 +1047,33 @@ size_t Game::getSentMessageCount() {
 void Game::chatCommand(std::string commandstr) {
 	std::vector<std::string> parameters = utils::splitString(commandstr, ' ');
 
-	if (parameters.at(0) == "load") {
+	if (parameters.at(0) == "quit") {
+		this->quit();
+	} else if (parameters.at(0) == "connect") {
+		if (parameters.size() == 1) {
+			this->addMessage("Usage: /" + parameters.at(0) + " host [port]");
+			return;
+		}
+
+		unsigned int port;		
+
+		if (parameters.size() == 3) {
+			std::istringstream stream(parameters[2]);
+			stream >> port;
+		} else {
+			port = net::DEFAULT_PORT;
+		}
+
+		this->connect(parameters[1], port);
+	} else if (parameters.at(0) == "disconnect") {
+		this->disconnect();
+	} else if (parameters.at(0) == "servers") {
+		if (this->connectionState == Game::ConnectionState::NOT_CONNECTED) {
+			this->connectMasterServer(net::MASTER_SERVER, net::MASTER_SERVER_PORT);
+		} else {
+			this->addMessage("You are already connected to a server. Please disconnect first.");
+		}
+	} else if (parameters.at(0) == "load") {
 		if (parameters.size() == 2) {
 			this->loadScript(parameters.at(1));
 		} else {
@@ -1091,7 +1143,7 @@ void Game::chatCommand(std::string commandstr) {
 			this->addMessage("Usage: /" + parameters.at(0) + " [max value]");
 		}
 	} else {
-		this->addMessage(parameters.at(0) + ": command not found!");
+		this->addMessage("Error: " + parameters.at(0) + ": command not found!");
 	}
 }
 
@@ -1120,7 +1172,7 @@ void Game::loadScript(std::string script) {
 
 		file.close();
 	} else {
-		this->addMessage("Could not run script '" + script + "'.");
+		this->addMessage("Error: Could not run script '" + script + "'.");
 	}
 }
 

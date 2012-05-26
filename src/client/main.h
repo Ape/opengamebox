@@ -132,6 +132,8 @@ private:
 
 	void mainLoop(void);
 	void quit(void);
+	void disconnect(void);
+	void disconnectMasterServer(void);
 	void dispose(void);
 
 	void localEvents(void);

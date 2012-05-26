@@ -5,6 +5,8 @@ General:
 	- use member initialization lists
 	- add README.txt
 	- fix segmentation fault on fallback texture disposal
+	- modifiable master server address
+		- command line parameter, config file
 
 Mechanics:
 	- fix shuffle
