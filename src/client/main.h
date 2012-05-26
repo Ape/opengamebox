@@ -60,8 +60,12 @@ const float MESSAGE_TIME = 20.0f;
 class Game {
 public:
 	Game(void);
+	bool init(void);
 
-	int run(std::string address, int port);
+	bool connect(std::string address, int port);
+	bool connectMasterServer(std::string address, int port);
+
+	int run(void);
 
 	void sendChat(std::string text);
 	std::string getSentMessage(size_t index);
@@ -78,8 +82,9 @@ private:
 
 	Renderer *renderer;
 
+	enum class ConnectionState {NOT_CONNECTED, CONNECTING, CONNECTED, DISCONNECTING, CONNECTING_MASTER_SERVER, CONNECTED_MASTER_SERVER};
+	ConnectionState connectionState;
 	bool exiting;
-	bool disconnecting;
 	bool nextFrame;
 	double previousTime;
 	double deltaTime;
@@ -139,6 +144,7 @@ private:
 	void checkObjectOrder(void);
 
 	void askNick(void);
+	void queryMasterServer(void);
 
 	void update(void);
 	void render(void);

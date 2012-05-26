@@ -24,6 +24,19 @@ int main(int argc, char **argv) {
 	std::string address;
 	int port;
 
+	Game game;
+	if (!game.init()) {
+		return EXIT_FAILURE;
+	}
+
+	if (argc == 1) {
+		if (game.connectMasterServer(net::MASTER_SERVER, net::MASTER_SERVER_PORT)) {
+			return game.run();
+		} else {
+			return EXIT_FAILURE;
+		}
+	}
+
 	if (argc >= 2) {
 		address = std::string(argv[1]);
 	} else {
@@ -37,15 +50,18 @@ int main(int argc, char **argv) {
 		port = net::DEFAULT_PORT;
 	}
 
-	Game game;
-	return game.run(address, port);
+	if (game.connect(address, port)) {
+		return game.run();
+	} else {
+		return EXIT_FAILURE;
+	}
 }
 
 Game::Game(void) {
+	this->connectionState = Game::ConnectionState::NOT_CONNECTED;
 	this->exiting = false;
 	this->nextFrame = true;
 	this->deltaTime = 0.0f;
-	this->disconnecting = false;
 	this->input = nullptr;
 	this->localClient = net::MAX_CLIENTS;
 
@@ -53,34 +69,11 @@ Game::Game(void) {
 	this->keyStatus = KeyStatus();
 }
 
-int Game::run(std::string address, int port) {
-	// Initialize enet
-	if (enet_initialize() != 0) {
-		std::cerr << "Failed to initialize the network components!" << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	this->connection = enet_host_create (NULL,          // Create a client host
-	                                     1,             // Only allow 1 outgoing connection
-	                                     net::CHANNELS, // Number of channels
-	                                     0,             // Unlimited downstream bandwidth
-	                                     0);            // Unlimited upstream bandwidth
-
-	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
-		std::cerr << "Unknown host!" << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	if (port == 0) {
-		std::cerr << "Illegal port number!" << std::endl;
-		return EXIT_FAILURE;
-	}
-	this->hostAddress.port = port;
-
+bool Game::init() {
 	// Initialize Allegro
 	if (! al_init()) {
 		std::cerr << "Failed to initialize Allegro!" << std::endl;
-		return EXIT_FAILURE;
+		return false;
 	}
 
 	// Reset frame timestamp
@@ -89,7 +82,7 @@ int Game::run(std::string address, int port) {
 	// Initialize input
 	if (! al_install_keyboard() || ! al_install_mouse()) {
 		std::cerr << "Failed to initialize the input components!" << std::endl;
-		return EXIT_FAILURE;
+		return false;
 	}
 
 	// Set the window mode
@@ -109,14 +102,14 @@ int Game::run(std::string address, int port) {
 	this->timer = al_create_timer(1.0f / FPS_LIMIT);
 	if (! this->timer) {
 		std::cerr << "Failed to create a timer!" << std::endl;
-		return EXIT_FAILURE;
+		return false;
 	}
 
 	// Create an event queue
 	this->event_queue = al_create_event_queue();
 	if (! this->event_queue) {
 		std::cerr << "Failed to create an event queue!" << std::endl;
-		return EXIT_FAILURE;
+		return false;
 	}
 
 	// Register event sources
@@ -127,9 +120,36 @@ int Game::run(std::string address, int port) {
 
 	al_start_timer(this->timer);
 
+	// Initialize enet
+	if (enet_initialize() != 0) {
+		std::cerr << "Failed to initialize the network components!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool Game::connect(std::string address, int port) {
+	this->connection = enet_host_create (NULL,          // Create a client host
+	                                     1,             // Only allow 1 outgoing connection
+	                                     net::CHANNELS, // Number of channels
+	                                     0,             // Unlimited downstream bandwidth
+	                                     0);            // Unlimited upstream bandwidth
+
+	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
+		std::cerr << "Unknown host!" << std::endl;
+		return false;
+	}
+
+	if (port == 0) {
+		std::cerr << "Illegal port number!" << std::endl;
+		return false;
+	}
+	this->hostAddress.port = port;
+
 	if (this->connection == NULL) {
-		std::cerr << "Could not create a network peer!" << std::endl;
-		return EXIT_FAILURE;
+		std::cerr << "Could not create a connection!" << std::endl;
+		return false;
 	}
 
 	// Initialize the connection
@@ -137,24 +157,54 @@ int Game::run(std::string address, int port) {
 	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
 	if (this->host == NULL) {
-		std::cerr << "Could not connect to the server." << std::endl;
-		return EXIT_FAILURE;
+		std::cerr << "Could not connect to the server!" << std::endl;
+		return false;
 	}
 
+	this->connectionState = Game::ConnectionState::CONNECTING;
+
+	return true;
+}
+
+bool Game::connectMasterServer(std::string address, int port) {
+	// Create a connection to the master server
+	this->connection = enet_host_create (NULL, 1, 1, 0, 0);
+
+	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
+		std::cerr << "Unknown master server host!" << std::endl;
+		return false;
+	}
+
+	if (port == 0) {
+		std::cerr << "Illegal master server port number!" << std::endl;
+		return false;
+	}
+	this->hostAddress.port = port;
+
+	if (this->connection == NULL) {
+		std::cerr << "Could not create a connection to the master server!" << std::endl;
+		return false;
+	}
+
+	// Initialize the connection
+	this->addMessage("Connecting to " + net::AddressToString(this->hostAddress) + " (master server)...");
+	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
+
+	if (this->host == NULL) {
+		std::cerr << "Could not connect to the master server!" << std::endl;
+		return false;
+	}
+
+	this->connectionState = Game::ConnectionState::CONNECTING_MASTER_SERVER;
+
+	return true;
+}
+
+int Game::run() {
 	// Enter the main loop
 	this->mainLoop();
 
-	// Dispose client information
-	for (auto& client : this->clients) {
-		delete client.second;
-	}
-
-	// Dispose all objects
-	for (auto& object : this->objects) {
-		delete object.second;
-	}
-
-	// Exit the application
+	// Exit the application when returned from the main loop
 	this->dispose();
 	return EXIT_SUCCESS;
 }
@@ -177,27 +227,47 @@ void Game::mainLoop() {
 }
 
 void Game::quit() {
-	if (! this->disconnecting) {
+	if (this->connectionState == Game::ConnectionState::CONNECTED) {
 		this->addMessage("Disconnecting...");
-		this->disconnecting = true;
 		enet_peer_disconnect(this->host, 0);
+
+		this->connectionState = Game::ConnectionState::DISCONNECTING;
 	} else {
 		this->exiting = true;
 	}
 }
 
 void Game::dispose() {
-	enet_host_destroy(this->connection);
+	// Dispose client information
+	for (auto& client : this->clients) {
+		delete client.second;
+	}
+
+	// Dispose all objects
+	for (auto& object : this->objects) {
+		delete object.second;
+	}
+
+	// Dispose enet
+	if (this->connection != nullptr) {
+		enet_host_destroy(this->connection);
+		this->connection = nullptr;
+	}
+	
 	enet_deinitialize();
 
+	// Dispose the renderer
 	delete this->renderer;
 
+	// Dispose events
 	al_destroy_timer(this->timer);
 	al_destroy_event_queue(this->event_queue);
 
+	// Dispose input
 	al_uninstall_mouse();
 	al_uninstall_keyboard();
 
+	// Dispose Allegro
 	al_uninstall_system();
 }
 
@@ -510,30 +580,44 @@ void Game::localEvents() {
 void Game::networkEvents() {
 	ENetEvent event;
 
-	while (enet_host_service(this->connection, &event, 0) > 0) {
+	while (this->connectionState != Game::ConnectionState::NOT_CONNECTED && enet_host_service(this->connection, &event, 0) > 0) {
 		switch (event.type) {
 			case ENET_EVENT_TYPE_CONNECT: {
-				this->addMessage("Connected! Please enter your nick.");
+				if (this->connectionState == Game::ConnectionState::CONNECTING) {
+					this->addMessage("Connected! Please enter your nick.");
 
-				this->askNick();
+					this->connectionState = Game::ConnectionState::CONNECTED;
+					this->askNick();
+				} else if (this->connectionState == Game::ConnectionState::CONNECTING_MASTER_SERVER) {
+					this->addMessage("Connected to the master server.");
+
+					this->connectionState = Game::ConnectionState::CONNECTED_MASTER_SERVER;
+					this->queryMasterServer();
+				}
+
 				break;
 
 			}
 
 			case ENET_EVENT_TYPE_RECEIVE: {
-				if (! this->disconnecting && (this->localClient != net::MAX_CLIENTS
-				    || event.packet->data[0] == net::PACKET_HANDSHAKE || event.packet->data[0] == net::PACKET_NICK_TAKEN)) {
+				if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER) {
 					this->receivePacket(event);
+				} else if (this->connectionState == Game::ConnectionState::CONNECTED) {
+					if (this->localClient != net::MAX_CLIENTS || event.packet->data[0] == net::PACKET_HANDSHAKE ||
+					    event.packet->data[0] == net::PACKET_NICK_TAKEN) {
+						this->receivePacket(event);
+					}
 				}
 
 				enet_packet_destroy(event.packet);
+
 				break;
 			}
 
 			case ENET_EVENT_TYPE_DISCONNECT: {
 				this->addMessage("Disconnected from the server.");
+				this->connectionState = Game::ConnectionState::NOT_CONNECTED;
 
-				this->exiting = true;
 				break;
 			}
 
@@ -541,7 +625,6 @@ void Game::networkEvents() {
 				break;
 			}
 		}
-
 	}
 }
 
@@ -850,6 +933,14 @@ void Game::receivePacket(ENetEvent event) {
 			break;
 		}
 
+		case net::PACKET_ROTATE: {
+			unsigned short objId = net::bytesToShort(event.packet->data + 1);
+			char rotation = event.packet->data[3];
+			this->objects[objId]->rotate(rotation * utils::PI / 8);
+
+			break;
+		}
+
 		case net::PACKET_PINGS: {
 			if (event.packet->dataLength >= 4) {
 				size_t i = 1;
@@ -864,10 +955,20 @@ void Game::receivePacket(ENetEvent event) {
 
 			break;
 		}
-		case net::PACKET_ROTATE: {
-			unsigned short objId = net::bytesToShort(event.packet->data + 1);
-			char rotation = event.packet->data[3];
-			this->objects[objId]->rotate(rotation * utils::PI / 8);
+
+		case net::PACKET_MS_QUERY: {
+			if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER && event.packet->dataLength >= 1) {
+				std::cout << "Received the server list!" << std::endl;
+
+				// Disconnect from the master server
+				enet_peer_disconnect_now(this->host, 0);
+				enet_host_destroy(this->connection);
+				this->connection = nullptr;
+
+				this->connectionState = Game::ConnectionState::NOT_CONNECTED;
+			}
+
+			break;
 		}
 	}
 }
@@ -885,7 +986,7 @@ void Game::sendChat(std::string text) {
 	delete input;
 	this->input = nullptr;
 
-	if (text.length() > 0) {
+	if (this->connectionState == Game::ConnectionState::CONNECTED && text.length() > 0) {
 		if (text.at(0) == '/') {
 			this->chatCommand(text.substr(1));
 		} else {
@@ -1066,6 +1167,12 @@ void Game::identifyToServer(std::string nick) {
 	} else {
 		this->askNick();
 	}
+}
+
+void Game::queryMasterServer() {
+	std::string data;
+	data.push_back(net::PACKET_MS_QUERY);
+	net::sendCommand(this->connection, data.c_str(), data.length());
 }
 
 void Game::update() {

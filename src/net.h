@@ -39,6 +39,10 @@ namespace net {
 	const float MAX_FLOAT           = 10000.0f;
 	const double STREAM_INTERVAL    = 5000.0f;
 
+	// Master server details
+	const std::string MASTER_SERVER = "localhost";
+	const unsigned int MASTER_SERVER_PORT = 13354;
+
 	// Client control packets
 	const unsigned char PACKET_HANDSHAKE  = 0x01; // Initialize connection
 	const unsigned char PACKET_NICK_TAKEN = 0x02; // Inform about a reserved nick name
@@ -58,6 +62,11 @@ namespace net {
 	// Other command packets
 	const unsigned char PACKET_CHAT = 0x40; // Send a chat message
 	const unsigned char PACKET_ROLL = 0x41; // Roll a die on the server
+
+	// Master server communication
+	const unsigned char PACKET_MS_QUERY    = 0xC0; // Request the server list
+	const unsigned char PACKET_MS_REGISTER = 0xC1; // Register to the server list
+	const unsigned char PACKET_MS_UPDATE   = 0xC2; // Update registered information
 
 	// Stream packets
 	const unsigned char PACKET_PINGS = 0xE0; // Broadcast ping information

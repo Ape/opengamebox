@@ -9,3 +9,4 @@ target_link_libraries(${executableName} ${commonLinkLibs})
 
 add_subdirectory(client)
 add_subdirectory(server)
+add_subdirectory(master-server)
