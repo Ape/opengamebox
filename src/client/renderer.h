@@ -1,4 +1,6 @@
 // Copyright 2012 Lauri Niskanen
+// Copyright 2012 Antti Aalto
+// Copyright 2012 Markus Mattinen
 //
 // This file is part of OpenGamebox.
 //
