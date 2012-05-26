@@ -45,6 +45,26 @@ MasterServer::MasterServer(unsigned int port) {
 	this->address.port = port;
 
 	this->exiting = false;
+
+	// Add two test servers
+	{
+		ServerRecord *test = new ServerRecord;
+		test->address = "1.1.1.1";
+		test->port = net::DEFAULT_PORT;
+		test->name = "Test server";
+		test->players = 54;
+		test->lastUpdate = 0.0;
+		this->servers.push_back(test);
+	}
+	{
+		ServerRecord *test = new ServerRecord;
+		test->address = "example.com";
+		test->port = 12345;
+		test->name = "Card game";
+		test->players = 0;
+		test->lastUpdate = 0.0;
+		this->servers.push_back(test);
+	}
 }
 
 int MasterServer::run() {
@@ -102,7 +122,7 @@ void MasterServer::networkEvents() {
 	while (enet_host_service(this->connection, &event, 100) > 0) {
 		switch (event.type) {
 			case ENET_EVENT_TYPE_CONNECT: {
-				std::cout << "A new client connected from " << net::AddressToString(event.peer->address) << "." << std::endl;
+				std::cout << "A new connection from " << net::AddressToString(event.peer->address) << "." << std::endl;
 
 				break;
 			}
@@ -131,11 +151,28 @@ void MasterServer::networkEvents() {
 void MasterServer::receivePacket(ENetEvent event) {
         switch (event.packet->data[0]) {
                 case net::PACKET_MS_QUERY: {
-			std::cout << "A client wants the server list!" << std::endl;
+			std::cout << "Sending the server list!" << std::endl;
 
-			// TODO: Send a real server list
 			std::string data;
 			data += net::PACKET_MS_QUERY;
+			net::dataAppendShort(data, this->servers.size());
+
+			for (auto& server : this->servers) {
+				// Address
+				data.push_back(static_cast<char>(server->address.length()));
+				data.append(server->address);
+
+				// Port
+				net::dataAppendShort(data, server->port);
+
+				// Name
+				data.push_back(static_cast<char>(server->name.length()));
+				data.append(server->name);
+
+				// Players
+				net::dataAppendShort(data, server->players);
+			}
+
 			net::sendCommand(event.peer, data.c_str(), data.length());
 
 			break;

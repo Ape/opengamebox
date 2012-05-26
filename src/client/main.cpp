@@ -996,9 +996,40 @@ void Game::receivePacket(ENetEvent event) {
 		}
 
 		case net::PACKET_MS_QUERY: {
-			if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER && event.packet->dataLength >= 1) {
-				this->addMessage("Server list: [TODO]");
-				// TODO: Show the server list
+			if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER && event.packet->dataLength >= 2) {
+				this->addMessage("Server list:");
+
+				size_t i = 3;
+				while (i < event.packet->dataLength) {
+					std::string address;
+					unsigned short port;
+					std::string name;
+					unsigned short players;
+
+					// Address
+					unsigned char length = static_cast<unsigned char>(event.packet->data[i]);
+					++i;
+					address = std::string(reinterpret_cast<char*>(event.packet->data + i), length);
+					i += length;
+
+					// Port
+					port = net::bytesToShort(event.packet->data + i);
+					i += 2;
+
+					// Name
+					length = static_cast<unsigned char>(event.packet->data[i]);
+					++i;
+					name = std::string(reinterpret_cast<char*>(event.packet->data + i), length);
+					i += length;
+
+					// Players
+					players = net::bytesToShort(event.packet->data + i);
+					i += 2;
+
+					std::ostringstream server;
+					server << "\"" << name << "\" @ " << address << ":" << port << " (" << players << " players)";
+					this->addMessage(server.str());
+				}
 
 				this->disconnectMasterServer();
 			}

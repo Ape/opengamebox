@@ -23,11 +23,13 @@ Graphics:
 	- animations for rotations
 		- screen and objects
 	- background image
+	- graphical server browser
 
 Network:
 	- merge move and flip packets
 	- game list
 		- master server for internet games
+			- ability to register and update a server
 		- lan broadcast
 	- downloading objects from the server
 	- uploading objects to the server
