@@ -82,9 +82,12 @@ private:
 
 	Renderer *renderer;
 
+	enum class State {INITIALIZING, RUNNING, EXITING, TERMINATED};
+	State state;
+
 	enum class ConnectionState {NOT_CONNECTED, CONNECTING, CONNECTED, DISCONNECTING, CONNECTING_MASTER_SERVER, CONNECTED_MASTER_SERVER};
 	ConnectionState connectionState;
-	bool exiting;
+
 	bool nextFrame;
 	double previousTime;
 	double deltaTime;

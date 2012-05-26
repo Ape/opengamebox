@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
 }
 
 Game::Game(void) {
+	this->state = Game::State::INITIALIZING;
 	this->connectionState = Game::ConnectionState::NOT_CONNECTED;
-	this->exiting = false;
 	this->nextFrame = true;
 	this->deltaTime = 0.0f;
 	this->input = nullptr;
@@ -201,6 +201,8 @@ bool Game::connectMasterServer(std::string address, int port) {
 }
 
 int Game::run() {
+	this->state = Game::State::RUNNING;
+
 	// Enter the main loop
 	this->mainLoop();
 
@@ -210,7 +212,7 @@ int Game::run() {
 }
 
 void Game::mainLoop() {
-	while (! this->exiting) {
+	while (this->state != Game::State::TERMINATED) {
 		// Process network events
 		this->networkEvents();
 
@@ -231,9 +233,10 @@ void Game::quit() {
 		this->addMessage("Disconnecting...");
 		enet_peer_disconnect(this->host, 0);
 
+		this->state = Game::State::EXITING;
 		this->connectionState = Game::ConnectionState::DISCONNECTING;
 	} else {
-		this->exiting = true;
+		this->state = Game::State::TERMINATED;
 	}
 }
 
@@ -617,6 +620,10 @@ void Game::networkEvents() {
 			case ENET_EVENT_TYPE_DISCONNECT: {
 				this->addMessage("Disconnected from the server.");
 				this->connectionState = Game::ConnectionState::NOT_CONNECTED;
+
+				if (this->state == Game::State::EXITING) {
+					this->state = Game::State::TERMINATED;
+				}
 
 				break;
 			}
