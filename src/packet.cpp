@@ -17,9 +17,9 @@
 
 #include "packet.h"
 
-Packet::Packet(unsigned char *data)
+Packet::Packet(ENetPacket *packet)
 : readCursor(0) {
-	this->data = std::string(reinterpret_cast<char*>(data));
+	this->data.assign(reinterpret_cast<char*>(packet->data), packet->dataLength);
 }
 
 void Packet::setReliable(bool isReliable) {
@@ -76,39 +76,57 @@ Packet::Header Packet::readHeader() {
 }
 
 unsigned char Packet::readByte() {
+	if (this->eof()) {
+		throw PacketException("Not enough data for reading a byte.");
+	}
+
 	unsigned char value = this->data.at(this->readCursor);
 	++this->readCursor;
 	return value;
 }
 
-unsigned short Packet::readShort(void) {
+unsigned short Packet::readShort() {
 	return this->readByte()
 	       + (this->readByte() << 8);
 }
 
-unsigned int Packet::readInt(void) {
+unsigned int Packet::readInt() {
 	return this->readByte()
 	       + (this->readByte() << 8)
 	       + (this->readByte() << 16)
 	       + (this->readByte() << 24);
 }
 
-std::string Packet::readString(void) {
+std::string Packet::readString() {
 	size_t length = this->readShort();
+
+	if (this->remainingBytes() < length) {
+		std::ostringstream error;
+		error << "Not enough data for reading a " << length << "-byte string.";
+		throw PacketException(error.str());
+	}
 
 	std::string value = this->data.substr(this->readCursor, length);
 	this->readCursor += length;
 	return value;
 }
 
-float Packet::readFloat(void) {
+float Packet::readFloat() {
 	// TODO
 	std::cerr << "Error: Unimplemented function 'Packet::readFloat'!" << std::endl;
 	return 0.0f;
 }
 
-Vector2 Packet::readVector2(void) {
+Vector2 Packet::readVector2() {
 	return Vector2(this->readFloat(), this->readFloat());
+}
+
+unsigned int Packet::remainingBytes() const {
+	return this->data.length() - this->readCursor;
+}
+
+bool Packet::eof() const {
+	return this->remainingBytes() == 0;
 }
 
 void Packet::send(){
@@ -118,11 +136,13 @@ void Packet::send(){
 		flags |= ENET_PACKET_FLAG_RELIABLE;
 	}
 
-	ENetPacket *packet = enet_packet_create(this->data.c_str(), this->data.size(), flags);
+	ENetPacket *packet = enet_packet_create(this->data.data(), this->data.length(), flags);
 
 	if (this->connection != nullptr) {
 		enet_host_broadcast(this->connection, 0, packet);
 	} else if (this->peer != nullptr) {
 		enet_peer_send(this->peer, 0, packet);
+	} else {
+		throw PacketException("send: Can't send a read-only packet.");
 	}
 }

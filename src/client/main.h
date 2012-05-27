@@ -142,7 +142,8 @@ private:
 	void networkEvents(void);
 	void receivePacket(ENetEvent event);
 
-	void addMessage(std::string message);
+	enum class MessageType {NORMAL, ERROR, WARNING, DEBUG};
+	void addMessage(std::string message, MessageType type = MessageType::NORMAL);
 	void chatCommand(std::string commandstr);
 	void loadScript(std::string script);
 	void saveScript(std::string name);

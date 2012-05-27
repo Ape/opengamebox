@@ -19,10 +19,18 @@
 #define PACKET_H
 
 #include <string>
+#include <sstream>
+#include <stdexcept>
 
 #include <enet/enet.h>
 
 #include "vector2.h"
+
+class PacketException : public std::runtime_error {
+public:
+	PacketException(std::string message)
+	: std::runtime_error(message) {}
+};
 
 class Packet {
 public:
@@ -60,15 +68,17 @@ public:
 	// Broadcast
 	Packet(ENetHost *connection, bool isReliable = true)
 	: connection(connection),
-	  isReliable(isReliable) {};
+	  peer(nullptr),
+	  isReliable(isReliable) {}
 
 	// Unicast
 	Packet(ENetPeer *peer, bool isReliable = true)
-	: peer(peer),
-	  isReliable(isReliable) {};
+	: connection(nullptr),
+	  peer(peer),
+	  isReliable(isReliable) {}
 
 	// Received packet
-	Packet(unsigned char *data);
+	Packet(ENetPacket *packet);
 
 	void setReliable(bool isReliable);
 
@@ -87,6 +97,9 @@ public:
 	std::string readString(void);
 	float readFloat(void);
 	Vector2 readVector2(void);
+
+	unsigned int remainingBytes(void) const;
+	bool eof(void) const;
 
 	void send(void);
 

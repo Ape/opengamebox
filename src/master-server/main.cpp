@@ -149,33 +149,23 @@ void MasterServer::networkEvents() {
 }
 
 void MasterServer::receivePacket(ENetEvent event) {
-	Packet packet(event.packet->data);
+	Packet packet(event.packet);
 
         switch (packet.readHeader()) {
                 case Packet::Header::MS_QUERY: {
 			std::cout << "Sending the server list!" << std::endl;
 
-			std::string data;
-			data += net::PACKET_MS_QUERY;
-			net::dataAppendShort(data, this->servers.size());
+			Packet reply(event.peer);
+			reply.writeHeader(Packet::Header::MS_QUERY);
 
 			for (auto& server : this->servers) {
-				// Address
-				data.push_back(static_cast<char>(server->address.length()));
-				data.append(server->address);
-
-				// Port
-				net::dataAppendShort(data, server->port);
-
-				// Name
-				data.push_back(static_cast<char>(server->name.length()));
-				data.append(server->name);
-
-				// Players
-				net::dataAppendShort(data, server->players);
+				reply.writeString(server->address);
+				reply.writeShort(server->port);
+				reply.writeString(server->name);
+				reply.writeShort(server->players);
 			}
 
-			net::sendCommand(event.peer, data.c_str(), data.length());
+			reply.send();
 
 			break;
 		}
@@ -199,9 +189,9 @@ void MasterServer::receivePacket(ENetEvent event) {
                 case Packet::Header::HANDSHAKE: {
 			// This is not a game server
 
-			std::string data;
-			data += net::PACKET_MS_QUERY;
-			net::sendCommand(event.peer, data.c_str(), data.length());
+			Packet reply(event.peer);
+			reply.writeHeader(Packet::Header::MS_QUERY);
+			reply.send();
 
 			break;
 		}

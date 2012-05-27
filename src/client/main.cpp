@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
 }
 
 Game::Game(void) {
-	this->state = Game::State::INITIALIZING;
-	this->connectionState = Game::ConnectionState::NOT_CONNECTED;
+	this->state = State::INITIALIZING;
+	this->connectionState = ConnectionState::NOT_CONNECTED;
 	this->nextFrame = true;
 	this->deltaTime = 0.0f;
 	this->input = nullptr;
@@ -130,11 +130,11 @@ bool Game::init() {
 }
 
 bool Game::connect(std::string address, int port) {
-	if (this->connectionState == Game::ConnectionState::CONNECTED) {
-		this->addMessage("Error: You are already connected!");
+	if (this->connectionState == ConnectionState::CONNECTED) {
+		this->addMessage("You are already connected!", MessageType::ERROR);
 		return false;
-	} else if (this->connectionState == Game::ConnectionState::CONNECTING_MASTER_SERVER
-	           || this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER) {
+	} else if (this->connectionState == ConnectionState::CONNECTING_MASTER_SERVER
+	           || this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER) {
 		this->disconnectMasterServer();
 	}
 
@@ -145,18 +145,18 @@ bool Game::connect(std::string address, int port) {
 	                                     0);            // Unlimited upstream bandwidth
 
 	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
-		this->addMessage("Error: Unknown host!");
+		this->addMessage("Unknown host!", MessageType::ERROR);
 		return false;
 	}
 
 	if (port == 0) {
-		this->addMessage("Error: Illegal port number!");
+		this->addMessage("Illegal port number!", MessageType::ERROR);
 		return false;
 	}
 	this->hostAddress.port = port;
 
 	if (this->connection == NULL) {
-		std::cerr << "Error: Could not create a connection!" << std::endl;
+		this->addMessage("Could not create a connection!", MessageType::ERROR);
 		return false;
 	}
 
@@ -165,11 +165,11 @@ bool Game::connect(std::string address, int port) {
 	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
 	if (this->host == NULL) {
-		std::cerr << "Error: Could not connect to the server!" << std::endl;
+		this->addMessage("Could not connect to the server!", MessageType::ERROR);
 		return false;
 	}
 
-	this->connectionState = Game::ConnectionState::CONNECTING;
+	this->connectionState = ConnectionState::CONNECTING;
 
 	return true;
 }
@@ -179,18 +179,18 @@ bool Game::connectMasterServer(std::string address, int port) {
 	this->connection = enet_host_create (NULL, 1, 1, 0, 0);
 
 	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
-		std::cerr << "Error: Unknown master server host!" << std::endl;
+		this->addMessage("Unknown master server host!", MessageType::ERROR);
 		return false;
 	}
 
 	if (port == 0) {
-		std::cerr << "Error: Illegal master server port number!" << std::endl;
+		this->addMessage("Illegal master server port number!", MessageType::ERROR);
 		return false;
 	}
 	this->hostAddress.port = port;
 
 	if (this->connection == NULL) {
-		std::cerr << "Error: Could not create a connection to the master server!" << std::endl;
+		this->addMessage("Could not create a connection to the master server!", MessageType::ERROR);
 		return false;
 	}
 
@@ -199,17 +199,17 @@ bool Game::connectMasterServer(std::string address, int port) {
 	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
 	if (this->host == NULL) {
-		std::cerr << "Error: Could not connect to the master server!" << std::endl;
+		this->addMessage("Could not connect to the master server!", MessageType::ERROR);
 		return false;
 	}
 
-	this->connectionState = Game::ConnectionState::CONNECTING_MASTER_SERVER;
+	this->connectionState = ConnectionState::CONNECTING_MASTER_SERVER;
 
 	return true;
 }
 
 int Game::run() {
-	this->state = Game::State::RUNNING;
+	this->state = State::RUNNING;
 
 	// Enter the main loop
 	this->mainLoop();
@@ -220,7 +220,7 @@ int Game::run() {
 }
 
 void Game::mainLoop() {
-	while (this->state != Game::State::TERMINATED) {
+	while (this->state != State::TERMINATED) {
 		// Process network events
 		this->networkEvents();
 
@@ -237,27 +237,27 @@ void Game::mainLoop() {
 }
 
 void Game::quit() {
-	if (this->connectionState == Game::ConnectionState::CONNECTED) {
-		this->state = Game::State::EXITING;
+	if (this->connectionState == ConnectionState::CONNECTED) {
+		this->state = State::EXITING;
 		this->disconnect();
 	} else {
-		this->state = Game::State::TERMINATED;
+		this->state = State::TERMINATED;
 	}
 }
 
 void Game::disconnect() {
-	if (this->connectionState == Game::ConnectionState::CONNECTED
-	    || this->connectionState == Game::ConnectionState::CONNECTING) {
+	if (this->connectionState == ConnectionState::CONNECTED
+	    || this->connectionState == ConnectionState::CONNECTING) {
 		this->addMessage("Disconnecting...");
 		enet_peer_disconnect(this->host, 0);
 
-		this->connectionState = Game::ConnectionState::DISCONNECTING;
-	} else if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER
-	           || this->connectionState == Game::ConnectionState::CONNECTING_MASTER_SERVER) {
+		this->connectionState = ConnectionState::DISCONNECTING;
+	} else if (this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER
+	           || this->connectionState == ConnectionState::CONNECTING_MASTER_SERVER) {
 		this->addMessage("Disconnected from the master server.");
 		this->disconnectMasterServer();
 	} else {
-		this->addMessage("Error: You are not connected!");
+		this->addMessage("You are not connected!", MessageType::ERROR);
 	}
 }
 
@@ -266,7 +266,7 @@ void Game::disconnectMasterServer() {
 	enet_host_destroy(this->connection);
 	this->connection = nullptr;
 
-	this->connectionState = Game::ConnectionState::NOT_CONNECTED;
+	this->connectionState = ConnectionState::NOT_CONNECTED;
 }
 
 void Game::dispose() {
@@ -612,18 +612,18 @@ void Game::localEvents() {
 void Game::networkEvents() {
 	ENetEvent event;
 
-	while (this->connectionState != Game::ConnectionState::NOT_CONNECTED && enet_host_service(this->connection, &event, 0) > 0) {
+	while (this->connectionState != ConnectionState::NOT_CONNECTED && enet_host_service(this->connection, &event, 0) > 0) {
 		switch (event.type) {
 			case ENET_EVENT_TYPE_CONNECT: {
-				if (this->connectionState == Game::ConnectionState::CONNECTING) {
+				if (this->connectionState == ConnectionState::CONNECTING) {
 					this->addMessage("Connected! Please enter your nick.");
 
-					this->connectionState = Game::ConnectionState::CONNECTED;
+					this->connectionState = ConnectionState::CONNECTED;
 					this->askNick();
-				} else if (this->connectionState == Game::ConnectionState::CONNECTING_MASTER_SERVER) {
+				} else if (this->connectionState == ConnectionState::CONNECTING_MASTER_SERVER) {
 					this->addMessage("Connected to the master server.");
 
-					this->connectionState = Game::ConnectionState::CONNECTED_MASTER_SERVER;
+					this->connectionState = ConnectionState::CONNECTED_MASTER_SERVER;
 					this->queryMasterServer();
 				}
 
@@ -632,14 +632,14 @@ void Game::networkEvents() {
 			}
 
 			case ENET_EVENT_TYPE_RECEIVE: {
-				if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER) {
+				if (this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER) {
 					this->receivePacket(event);
-				} else if (this->connectionState == Game::ConnectionState::CONNECTED) {
+				} else if (this->connectionState == ConnectionState::CONNECTED) {
 					if (this->localClient != net::MAX_CLIENTS || event.packet->data[0] == net::PACKET_HANDSHAKE ||
 					    event.packet->data[0] == net::PACKET_NICK_TAKEN) {
 						this->receivePacket(event);
 					} else if (event.packet->data[0] == net::PACKET_MS_QUERY) {
-						this->addMessage("Error: Can't use a master server as a game server!");
+						this->addMessage("Can't use a master server as a game server!", MessageType::ERROR);
 						this->disconnectMasterServer();
 					}
 				}
@@ -651,10 +651,10 @@ void Game::networkEvents() {
 
 			case ENET_EVENT_TYPE_DISCONNECT: {
 				this->addMessage("Disconnected from the server.");
-				this->connectionState = Game::ConnectionState::NOT_CONNECTED;
+				this->connectionState = ConnectionState::NOT_CONNECTED;
 
-				if (this->state == Game::State::EXITING) {
-					this->state = Game::State::TERMINATED;
+				if (this->state == State::EXITING) {
+					this->state = State::TERMINATED;
 				}
 
 				break;
@@ -668,382 +668,386 @@ void Game::networkEvents() {
 }
 
 void Game::receivePacket(ENetEvent event) {
-	switch (event.packet->data[0]) {
-		case net::PACKET_HANDSHAKE: {
-			if (event.packet->dataLength >= 2 && event.packet->dataLength <= 2 + 34*(net::MAX_CLIENTS - 1)) {
-				// Store the received client id
-				this->localClient = event.packet->data[1];
+	Packet packet(event.packet);
+	packet.readHeader();
 
-				// Update the local client list
-				size_t i = 2;
-				while (i < event.packet->dataLength) {
-					Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]),
-												Color(this->renderer, event.packet->data[i]), event.packet->data[i]);
+	try {
+		switch (event.packet->data[0]) {
+			case net::PACKET_HANDSHAKE: {
+				if (event.packet->dataLength >= 2 && event.packet->dataLength <= 2 + 34*(net::MAX_CLIENTS - 1)) {
+					// Store the received client id
+					this->localClient = event.packet->data[1];
+
+					// Update the local client list
+					size_t i = 2;
+					while (i < event.packet->dataLength) {
+						Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]),
+													Color(this->renderer, event.packet->data[i]), event.packet->data[i]);
+						client->ping = 65535;
+						this->clients[event.packet->data[i]] = client;
+
+						i += 2 + event.packet->data[i + 1];
+					}
+				}
+
+				break;
+			}
+
+			case net::PACKET_NICK_TAKEN: {
+				if (event.packet->dataLength == 1) {
+					this->addMessage("That nick is already reserved!");
+
+					this->askNick();
+				}
+
+				break;
+			}
+
+			case net::PACKET_JOIN: {
+				if (event.packet->dataLength >= 3 && event.packet->dataLength <= 35) {
+					// Store the client information
+					Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2),
+												Color(this->renderer, event.packet->data[1]), event.packet->data[1]);
 					client->ping = 65535;
-					this->clients[event.packet->data[i]] = client;
+					this->clients[event.packet->data[1]] = client;
 
-					i += 2 + event.packet->data[i + 1];
+					this->addMessage(client->getColoredNick() + " has joined the server!");
 				}
+
+				break;
 			}
 
-			break;
-		}
+			case net::PACKET_LEAVE: {
+				if (event.packet->dataLength == 2) {
+					this->addMessage(this->clients[event.packet->data[1]]->getColoredNick() + " has left the server!");
 
-		case net::PACKET_NICK_TAKEN: {
-			if (event.packet->dataLength == 1) {
-				this->addMessage("That nick is already reserved!");
+					// Release selected and owned objects
+					for (auto& object : this->objects) {
+						if (object.second->isSelectedBy(this->clients[event.packet->data[1]])) {
+							object.second->select(nullptr);
+						}
 
-				this->askNick();
-			}
-
-			break;
-		}
-
-		case net::PACKET_JOIN: {
-			if (event.packet->dataLength >= 3 && event.packet->dataLength <= 35) {
-				// Store the client information
-				Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2),
-											Color(this->renderer, event.packet->data[1]), event.packet->data[1]);
-				client->ping = 65535;
-				this->clients[event.packet->data[1]] = client;
-
-				this->addMessage(client->getColoredNick() + " has joined the server!");
-			}
-
-			break;
-		}
-
-		case net::PACKET_LEAVE: {
-			if (event.packet->dataLength == 2) {
-				this->addMessage(this->clients[event.packet->data[1]]->getColoredNick() + " has left the server!");
-
-				// Release selected and owned objects
-				for (auto& object : this->objects) {
-					if (object.second->isSelectedBy(this->clients[event.packet->data[1]])) {
-						object.second->select(nullptr);
+						if (object.second->isOwnedBy(this->clients[event.packet->data[1]])) {
+							object.second->own(nullptr);
+						}
 					}
 
-					if (object.second->isOwnedBy(this->clients[event.packet->data[1]])) {
-						object.second->own(nullptr);
+					// Clear the client information
+					delete this->clients.find(event.packet->data[1])->second;
+					this->clients.erase(event.packet->data[1]);
+				}
+
+				break;
+			}
+
+			case net::PACKET_CHAT: {
+				if (event.packet->dataLength >= 1 + 1 + 1 && event.packet->dataLength <= 1 + 1 + 1 + 255) {
+					if (event.packet->data[1] == 255) {
+						this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
+					} else {
+						this->addMessage(net::clientIdToClient(this->clients, event.packet->data[1])->getColoredNick() + ": " +
+											std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
+					}
+				}
+				break;
+			}
+
+			case net::PACKET_CREATE: {
+				if (event.packet->dataLength >= 1 + 6 + 8 + 1) {
+					Client *client;
+					if (event.packet->data[1] != 255) {
+						client = this->clients.find(event.packet->data[1])->second;
+					}
+
+					int amount = 0;
+					unsigned int i = 1;
+
+					while (i < event.packet->dataLength - 1) {
+						unsigned short objId = net::bytesToShort(event.packet->data + i + 1);
+						Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 3]);
+						Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 4]);
+						bool flipped = event.packet->data[i + 5];
+						Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
+						float rotation = event.packet->data[i + 14] * utils::PI / 8;
+						unsigned char length = event.packet->data[i + 15];
+						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
+																				static_cast<int>(length)), '.');
+						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
+
+						Object *object = new Object(objectClass, objectData.at(2), objId, location);
+						object->initForClient(this->renderer);
+						object->select(selected);
+						object->own(owner);
+						object->setFlipped(flipped);
+						object->rotate(rotation);
+
+						this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
+						this->objectOrder.push_back(object);
+
+						amount++;
+						this->checkObjectOrder();
+
+						i += 15 + length;
+					}
+					if(event.packet->data[1] != 255) {
+						this->addMessage(client->getColoredNick() + " created " + utils::toString(amount) + " objects.");
+					}
+				}
+				break;
+			}
+
+			case net::PACKET_MOVE: {
+				if (event.packet->dataLength >= 2 + 10) {
+					Client *client = this->clients.find(event.packet->data[1])->second;
+
+					unsigned int numberObjects = 0;
+					Object *lastObject;
+
+					size_t i = 2;
+					while (i < event.packet->dataLength) {
+						++numberObjects;
+
+						unsigned short objId = net::bytesToShort(event.packet->data + i);
+						Vector2 location = net::bytesToVector2(event.packet->data + i + 2);
+
+						Object *object = this->objects.find(objId)->second;
+
+						if (ANIMATION_TIME == 0) {
+							object->setLocation(location);
+						} else {
+							object->setAnimation(location, ANIMATION_TIME);
+						}
+
+						net::removeObject(this->objectOrder, object);
+						this->objectOrder.push_back(object);
+
+						lastObject = object;
+						i += 10;
+					}
+
+					if (lastObject->isOwnedBy(nullptr)) {
+						if (numberObjects == 1) {
+							this->addMessage(client->getColoredNick() + " moved " + lastObject->getName() + ".");
+						} else if (numberObjects >= 2) {
+							this->addMessage(client->getColoredNick() + " moved " + utils::toString(numberObjects) + " objects.");
+						}
+					}
+
+					this->checkObjectOrder();
+				}
+
+				break;
+			}
+
+			case net::PACKET_SELECT: {
+				if (event.packet->dataLength >= 2) {
+					Client *client = this->clients.find(event.packet->data[1])->second;
+
+					for (auto& object : this->objects) {
+						if (object.second->isSelectedBy(client)) {
+							object.second->select(nullptr);
+						}
+					}
+
+					size_t i = 2;
+					while (i < event.packet->dataLength) {
+						unsigned short objId = net::bytesToShort(event.packet->data + i);
+
+						this->objects.find(objId)->second->select(client);
+
+						i += 2;
 					}
 				}
 
-				// Clear the client information
-				delete this->clients.find(event.packet->data[1])->second;
-				this->clients.erase(event.packet->data[1]);
+				break;
 			}
 
-			break;
-		}
+			case net::PACKET_REMOVE: {
+				if (event.packet->dataLength >= 2) {
+					Client *client = this->clients.find(event.packet->data[1])->second;
 
-		case net::PACKET_CHAT: {
-			if (event.packet->dataLength >= 1 + 1 + 1 && event.packet->dataLength <= 1 + 1 + 1 + 255) {
-				if (event.packet->data[1] == 255) {
-					this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
-				} else {
-					this->addMessage(net::clientIdToClient(this->clients, event.packet->data[1])->getColoredNick() + ": " +
-										std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
-				}
-			}
-			break;
-		}
+					unsigned int numberObjects = 0;
+					std::string lastObject;
 
-		case net::PACKET_CREATE: {
-			if (event.packet->dataLength >= 1 + 6 + 8 + 1) {
-				Client *client;
-				if (event.packet->data[1] != 255) {
-					client = this->clients.find(event.packet->data[1])->second;
-				}
+					size_t i = 2;
+					while (i < event.packet->dataLength) {
+						++numberObjects;
 
-				int amount = 0;
-				unsigned int i = 1;
+						unsigned short objId = net::bytesToShort(event.packet->data + i);
 
-				while (i < event.packet->dataLength - 1) {
-					unsigned short objId = net::bytesToShort(event.packet->data + i + 1);
-					Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 3]);
-					Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 4]);
-					bool flipped = event.packet->data[i + 5];
-					Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
-					float rotation = event.packet->data[i + 14] * utils::PI / 8;
-					unsigned char length = event.packet->data[i + 15];
-					std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
-																			static_cast<int>(length)), '.');
-					ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
+						Object *object = this->objects.find(objId)->second;
+						net::removeObject(this->objectOrder, object);
+						this->objects.erase(objId);
 
-					Object *object = new Object(objectClass, objectData.at(2), objId, location);
-					object->initForClient(this->renderer);
-					object->select(selected);
-					object->own(owner);
-					object->setFlipped(flipped);
-					object->rotate(rotation);
+						lastObject = object->getName();
+						delete object;
 
-					this->objects.insert(std::pair<unsigned int, Object*>(objId, object));
-					this->objectOrder.push_back(object);
+						i += 2;
+					}
 
-					amount++;
 					this->checkObjectOrder();
 
-					i += 15 + length;
-				}
-				if(event.packet->data[1] != 255) {
-					this->addMessage(client->getColoredNick() + " created " + utils::toString(amount) + " objects.");
-				}
-			}
-			break;
-		}
-
-		case net::PACKET_MOVE: {
-			if (event.packet->dataLength >= 2 + 10) {
-				Client *client = this->clients.find(event.packet->data[1])->second;
-
-				unsigned int numberObjects = 0;
-				Object *lastObject;
-
-				size_t i = 2;
-				while (i < event.packet->dataLength) {
-					++numberObjects;
-
-					unsigned short objId = net::bytesToShort(event.packet->data + i);
-					Vector2 location = net::bytesToVector2(event.packet->data + i + 2);
-
-					Object *object = this->objects.find(objId)->second;
-
-					if (ANIMATION_TIME == 0) {
-						object->setLocation(location);
-					} else {
-						object->setAnimation(location, ANIMATION_TIME);
-					}
-
-					net::removeObject(this->objectOrder, object);
-					this->objectOrder.push_back(object);
-
-					lastObject = object;
-					i += 10;
-				}
-
-				if (lastObject->isOwnedBy(nullptr)) {
 					if (numberObjects == 1) {
-						this->addMessage(client->getColoredNick() + " moved " + lastObject->getName() + ".");
+						this->addMessage(client->getColoredNick() + " removed " + lastObject + ".");
 					} else if (numberObjects >= 2) {
-						this->addMessage(client->getColoredNick() + " moved " + utils::toString(numberObjects) + " objects.");
+						this->addMessage(client->getColoredNick() + " removed " + utils::toString(numberObjects) + " objects.");
 					}
 				}
 
-				this->checkObjectOrder();
+				break;
 			}
 
-			break;
-		}
+			case net::PACKET_FLIP: {
+				if (event.packet->dataLength >= 2) {
+					Client *client = this->clients.find(event.packet->data[1])->second;
 
-		case net::PACKET_SELECT: {
-			if (event.packet->dataLength >= 2) {
-				Client *client = this->clients.find(event.packet->data[1])->second;
+					unsigned int numberObjects = 0;
+					Object *lastObject;
 
-				for (auto& object : this->objects) {
-					if (object.second->isSelectedBy(client)) {
-						object.second->select(nullptr);
+					bool flipped = event.packet->data[2];
+
+					size_t i = 3;
+					while (i < event.packet->dataLength) {
+						++numberObjects;
+
+						unsigned short objId = net::bytesToShort(event.packet->data + i);
+
+						Object *object = this->objects.find(objId)->second;
+						object->setFlipped(flipped);
+
+						lastObject = object;
+						i += 2;
+					}
+
+					if (lastObject->isOwnedBy(nullptr)) {
+						if (numberObjects == 1) {
+							this->addMessage(client->getColoredNick() + " flipped " + lastObject->getName() + ".");
+						} else if (numberObjects >= 2) {
+							this->addMessage(client->getColoredNick() + " flipped " + utils::toString(numberObjects) + " objects.");
+						}
 					}
 				}
 
-				size_t i = 2;
-				while (i < event.packet->dataLength) {
-					unsigned short objId = net::bytesToShort(event.packet->data + i);
-
-					this->objects.find(objId)->second->select(client);
-
-					i += 2;
-				}
+				break;
 			}
 
-			break;
-		}
+			case net::PACKET_OWN: {
+				if (event.packet->dataLength >= 2) {
+					Client *client = this->clients.find(event.packet->data[1])->second;
 
-		case net::PACKET_REMOVE: {
-			if (event.packet->dataLength >= 2) {
-				Client *client = this->clients.find(event.packet->data[1])->second;
+					unsigned int numberObjects = 0;
+					Object *lastObject;
 
-				unsigned int numberObjects = 0;
-				std::string lastObject;
+					bool owned = event.packet->data[2];
 
-				size_t i = 2;
-				while (i < event.packet->dataLength) {
-					++numberObjects;
+					size_t i = 3;
+					while (i < event.packet->dataLength) {
+						++numberObjects;
 
-					unsigned short objId = net::bytesToShort(event.packet->data + i);
+						unsigned short objId = net::bytesToShort(event.packet->data + i);
 
-					Object *object = this->objects.find(objId)->second;
-					net::removeObject(this->objectOrder, object);
-					this->objects.erase(objId);
+						Object *object = this->objects.find(objId)->second;
+						if (owned) {
+							object->own(client);
+						} else {
+							object->own(nullptr);
+						}
 
-					lastObject = object->getName();
-					delete object;
-
-					i += 2;
-				}
-
-				this->checkObjectOrder();
-
-				if (numberObjects == 1) {
-					this->addMessage(client->getColoredNick() + " removed " + lastObject + ".");
-				} else if (numberObjects >= 2) {
-					this->addMessage(client->getColoredNick() + " removed " + utils::toString(numberObjects) + " objects.");
-				}
-			}
-
-			break;
-		}
-
-		case net::PACKET_FLIP: {
-			if (event.packet->dataLength >= 2) {
-				Client *client = this->clients.find(event.packet->data[1])->second;
-
-				unsigned int numberObjects = 0;
-				Object *lastObject;
-
-				bool flipped = event.packet->data[2];
-
-				size_t i = 3;
-				while (i < event.packet->dataLength) {
-					++numberObjects;
-
-					unsigned short objId = net::bytesToShort(event.packet->data + i);
-
-					Object *object = this->objects.find(objId)->second;
-					object->setFlipped(flipped);
-
-					lastObject = object;
-					i += 2;
-				}
-
-				if (lastObject->isOwnedBy(nullptr)) {
-					if (numberObjects == 1) {
-						this->addMessage(client->getColoredNick() + " flipped " + lastObject->getName() + ".");
-					} else if (numberObjects >= 2) {
-						this->addMessage(client->getColoredNick() + " flipped " + utils::toString(numberObjects) + " objects.");
+						lastObject = object;
+						i += 2;
 					}
-				}
-			}
 
-			break;
-		}
-
-		case net::PACKET_OWN: {
-			if (event.packet->dataLength >= 2) {
-				Client *client = this->clients.find(event.packet->data[1])->second;
-
-				unsigned int numberObjects = 0;
-				Object *lastObject;
-
-				bool owned = event.packet->data[2];
-
-				size_t i = 3;
-				while (i < event.packet->dataLength) {
-					++numberObjects;
-
-					unsigned short objId = net::bytesToShort(event.packet->data + i);
-
-					Object *object = this->objects.find(objId)->second;
+					std::string verb;
 					if (owned) {
-						object->own(client);
+						verb = "owned";
 					} else {
-						object->own(nullptr);
+						verb = "disowned";
 					}
 
-					lastObject = object;
-					i += 2;
-				}
-
-				std::string verb;
-				if (owned) {
-					verb = "owned";
-				} else {
-					verb = "disowned";
-				}
-
-				if (numberObjects == 1) {
-					this->addMessage(client->getColoredNick() + " " + verb + " " + lastObject->getName() + ".");
-				} else if (numberObjects >= 2) {
-					this->addMessage(client->getColoredNick() + " " + verb + " " + utils::toString(numberObjects) + " objects.");
-				}
-
-				this->checkObjectOrder();
-			}
-
-			break;
-		}
-
-		case net::PACKET_ROTATE: {
-			unsigned short objId = net::bytesToShort(event.packet->data + 1);
-			char rotation = event.packet->data[3];
-			this->objects[objId]->rotate(rotation * utils::PI / 8);
-
-			break;
-		}
-
-		case net::PACKET_PINGS: {
-			if (event.packet->dataLength >= 4) {
-				size_t i = 1;
-				while (i < event.packet->dataLength) {
-					if (this->clients.count(event.packet->data[i]) > 0) {
-						this->clients[event.packet->data[i]]->ping = net::bytesToShort(event.packet->data + i + 1);
+					if (numberObjects == 1) {
+						this->addMessage(client->getColoredNick() + " " + verb + " " + lastObject->getName() + ".");
+					} else if (numberObjects >= 2) {
+						this->addMessage(client->getColoredNick() + " " + verb + " " + utils::toString(numberObjects) + " objects.");
 					}
 
-					i += 3;
+					this->checkObjectOrder();
 				}
+
+				break;
 			}
 
-			break;
+			case net::PACKET_ROTATE: {
+				unsigned short objId = net::bytesToShort(event.packet->data + 1);
+				char rotation = event.packet->data[3];
+				this->objects[objId]->rotate(rotation * utils::PI / 8);
+
+				break;
+			}
+
+			case net::PACKET_PINGS: {
+				if (event.packet->dataLength >= 4) {
+					size_t i = 1;
+					while (i < event.packet->dataLength) {
+						if (this->clients.count(event.packet->data[i]) > 0) {
+							this->clients[event.packet->data[i]]->ping = net::bytesToShort(event.packet->data + i + 1);
+						}
+
+						i += 3;
+					}
+				}
+
+				break;
+			}
+
+			case net::PACKET_MS_QUERY: {
+				if (this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER) {
+					this->addMessage("Server list:");
+
+					while (!packet.eof()) {
+						std::string address = packet.readString();
+						unsigned short port = packet.readShort();
+						std::string name = packet.readString();
+						unsigned short players = packet.readShort();
+
+						std::ostringstream server;
+						server << "\"" << name << "\" @ " << address << ":" << port << " (" << players << " players)";
+						this->addMessage(server.str());
+					}
+
+					this->disconnectMasterServer();
+				}
+
+				break;
+			}
+
+			default: {
+				throw PacketException("Invalid packet header.");
+			}
 		}
+	} catch (PacketException &e) {
+		this->addMessage("Received an invalid packet from "
+		                 + net::AddressToString(event.peer->address)
+		                 + ": \"" + e.what() + "\"", MessageType::DEBUG);
 
-		case net::PACKET_MS_QUERY: {
-			if (this->connectionState == Game::ConnectionState::CONNECTED_MASTER_SERVER && event.packet->dataLength >= 2) {
-				this->addMessage("Server list:");
-
-				size_t i = 3;
-				while (i < event.packet->dataLength) {
-					std::string address;
-					unsigned short port;
-					std::string name;
-					unsigned short players;
-
-					// Address
-					unsigned char length = static_cast<unsigned char>(event.packet->data[i]);
-					++i;
-					address = std::string(reinterpret_cast<char*>(event.packet->data + i), length);
-					i += length;
-
-					// Port
-					port = net::bytesToShort(event.packet->data + i);
-					i += 2;
-
-					// Name
-					length = static_cast<unsigned char>(event.packet->data[i]);
-					++i;
-					name = std::string(reinterpret_cast<char*>(event.packet->data + i), length);
-					i += length;
-
-					// Players
-					players = net::bytesToShort(event.packet->data + i);
-					i += 2;
-
-					std::ostringstream server;
-					server << "\"" << name << "\" @ " << address << ":" << port << " (" << players << " players)";
-					this->addMessage(server.str());
-				}
-
-				this->disconnectMasterServer();
-			}
-
-			break;
+		if (this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER) {
+			this->disconnectMasterServer();
 		}
 	}
 }
 
-void Game::addMessage(std::string text) {
+void Game::addMessage(std::string text, MessageType type) {
+	if (type == MessageType::WARNING) {
+		text = std::string("^ff0Warning: ") + text;
+	} else if (type == MessageType::ERROR) {
+		text = std::string("^f00Error: ") + text;
+	} else if (type == MessageType::DEBUG) {
+		text = std::string("^0ffDebug: ") + text;
+	}
+
 	Message message;
 	message.message = text;
 	message.time = previousTime;
-	std::cout << message.message << std::endl; //Todo: colors
+	std::cout << message.message << std::endl; // TODO: Remove colors
 	this->messages.push_back(message);
 }
 
@@ -1055,14 +1059,14 @@ void Game::sendChat(std::string text) {
 	if (text.length() > 0) {
 		if (text.at(0) == '/') {
 			this->chatCommand(text.substr(1));
-		} else if (this->connectionState == Game::ConnectionState::CONNECTED) {
+		} else if (this->connectionState == ConnectionState::CONNECTED) {
 			std::string data;
 			data.push_back(net::PACKET_CHAT);
 			data.append(text);
 
 			net::sendCommand(this->connection, data.c_str(), data.length());
 		} else {
-			this->addMessage("Error: You are not connected to a server!");
+			this->addMessage("You are not connected to a server!", MessageType::ERROR);
 		}
 
 		if (this->sentMessages.size() == 0 || text != this->sentMessages.at(this->sentMessages.size() - 1)) {
@@ -1103,7 +1107,7 @@ void Game::chatCommand(std::string commandstr) {
 	} else if (parameters.at(0) == "disconnect") {
 		this->disconnect();
 	} else if (parameters.at(0) == "servers") {
-		if (this->connectionState == Game::ConnectionState::NOT_CONNECTED) {
+		if (this->connectionState == ConnectionState::NOT_CONNECTED) {
 			this->connectMasterServer(net::MASTER_SERVER, net::MASTER_SERVER_PORT);
 		} else {
 			this->addMessage("You are already connected to a server. Please disconnect first.");
@@ -1178,7 +1182,7 @@ void Game::chatCommand(std::string commandstr) {
 			this->addMessage("Usage: /" + parameters.at(0) + " [max value]");
 		}
 	} else {
-		this->addMessage("Error: " + parameters.at(0) + ": command not found!");
+		this->addMessage(parameters.at(0) + ": command not found!", MessageType::ERROR);
 	}
 }
 
@@ -1207,7 +1211,7 @@ void Game::loadScript(std::string script) {
 
 		file.close();
 	} else {
-		this->addMessage("Error: Could not run script '" + script + "'.");
+		this->addMessage("Could not run script '" + script + "'.", MessageType::ERROR);
 	}
 }
 

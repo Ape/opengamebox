@@ -39,6 +39,7 @@ namespace net {
 	const float MAX_FLOAT           = 10000.0f;
 	const double STREAM_INTERVAL    = 5000.0f;
 
+	// >>> DEPRECATED: Use Packet instead
 	// Master server details
 	const std::string MASTER_SERVER = "localhost";
 	const unsigned int MASTER_SERVER_PORT = 13354;
@@ -70,9 +71,11 @@ namespace net {
 
 	// Stream packets
 	const unsigned char PACKET_PINGS = 0xE0; // Broadcast ping information
+	// <<< DEPRECATED
 
 	bool isNickTaken(std::map<unsigned char, Client*> clients, std::string nick);
 
+	// >>> DEPRECATED: Use Packet instead
 	void sendCommand(ENetHost *connection, const char *data, size_t length, bool isReliable=true);
 	void sendCommand(ENetPeer *peer, const char *data, size_t length);
 
@@ -89,6 +92,7 @@ namespace net {
 	void dataAppendInt(std::string &data, unsigned int value);
 	void dataAppendShort(std::string &data, unsigned short value);
 	void dataAppendVector2(std::string &data, Vector2 value);
+	// <<< DEPRECATED
 
 	Client* clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId);
 	unsigned char clientToClientId(Client *client);
