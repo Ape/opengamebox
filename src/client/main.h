@@ -38,6 +38,7 @@
 #include <enet/enet.h>
 
 #include "../net.h"
+#include "../packet.h"
 #include "../utils.h"
 #include "../objectClassManager.h"
 #include "../objectClass.h"

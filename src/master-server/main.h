@@ -31,6 +31,7 @@
 #include <enet/enet.h>
 
 #include "../utils.h"
+#include "../packet.h"
 #include "../net.h"
 
 const unsigned int MAX_CONNECTIONS = 255;

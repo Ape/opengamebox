@@ -7,6 +7,8 @@ General:
 	- fix segmentation fault on fallback texture disposal
 	- modifiable master server address
 		- command line parameter, config file
+	- support for receiving and parsing packets to Packet
+	- use Packet everywhere instead of old net.h functions
 
 Mechanics:
 	- fix shuffle
@@ -33,14 +35,3 @@ Network:
 		- lan broadcast
 	- downloading objects from the server
 	- uploading objects to the server
-
-Implementation:
-	- Packet class for creating and parsing network packets
-		- send usage:
-			Packet packet(Packet::PACKET_CHAT);
-			packet.writeString("This is a string.");
-			packet.send();
-		- receive usage:
-			Packet packet(enet.data);
-			if (packet.getType() == Packet::PACKET_CHAT)
-				message = packet.readString();

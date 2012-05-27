@@ -1264,9 +1264,9 @@ void Game::identifyToServer(std::string nick) {
 }
 
 void Game::queryMasterServer() {
-	std::string data;
-	data.push_back(net::PACKET_MS_QUERY);
-	net::sendCommand(this->connection, data.c_str(), data.length());
+	Packet packet(this->connection);
+	packet.writeHeader(Packet::Header::MS_QUERY);
+	packet.send();
 }
 
 void Game::update() {

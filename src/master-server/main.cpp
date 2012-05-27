@@ -149,8 +149,10 @@ void MasterServer::networkEvents() {
 }
 
 void MasterServer::receivePacket(ENetEvent event) {
-        switch (event.packet->data[0]) {
-                case net::PACKET_MS_QUERY: {
+	Packet packet(event.packet->data);
+
+        switch (packet.readHeader()) {
+                case Packet::Header::MS_QUERY: {
 			std::cout << "Sending the server list!" << std::endl;
 
 			std::string data;
@@ -178,7 +180,7 @@ void MasterServer::receivePacket(ENetEvent event) {
 			break;
 		}
 
-                case net::PACKET_MS_REGISTER: {
+                case Packet::Header::MS_REGISTER: {
 			std::cout << "A server wants to appear on the list!" << std::endl;
 
 			// TODO: Register the server
@@ -186,7 +188,7 @@ void MasterServer::receivePacket(ENetEvent event) {
 			break;
 		}
 
-                case net::PACKET_MS_UPDATE: {
+                case Packet::Header::MS_UPDATE: {
 			std::cout << "A server wants to refresh its information!" << std::endl;
 
 			// TODO: Update the server information
@@ -194,7 +196,7 @@ void MasterServer::receivePacket(ENetEvent event) {
 			break;
 		}
 
-		case net::PACKET_HANDSHAKE: {
+                case Packet::Header::HANDSHAKE: {
 			// This is not a game server
 
 			std::string data;
@@ -203,5 +205,7 @@ void MasterServer::receivePacket(ENetEvent event) {
 
 			break;
 		}
+
+		default : {}
 	}
 }
