@@ -35,23 +35,40 @@ void Packet::writeByte(unsigned char value) {
 }
 
 void Packet::writeShort(unsigned short value) {
-	
+	this->writeByte(value & 0xFF);
+	this->writeByte((value >> 8) & 0xFF);
 }
 
 void Packet::writeInt(unsigned int value) {
-	
+	this->writeByte(value & 0xFF);
+	this->writeByte((value >> 8) & 0xFF);
+	this->writeByte((value >> 16) & 0xFF);
+	this->writeByte((value >> 24) & 0xFF);
 }
 
 void Packet::writeString(std::string value) {
-	
+	if (value.length() > 65535) {
+		// The string is too long
+		std::cerr << "Error: Can't send string with length of " << value.length()
+		          << "!" << std::endl;
+		return;
+	}
+
+	// Write the length as a short
+	this->writeShort(value.length());
+
+	// Write the string
+	this->data.append(value);
 }
 
 void Packet::writeFloat(float value) {
-	
+	// TODO
+	std::cerr << "Error: Unimplemented function 'Packet::writeFloat'!" << std::endl;
 }
 
 void Packet::writeVector2(Vector2 value) {
-	
+	this->writeFloat(value.x);
+	this->writeFloat(value.y);
 }
 
 Packet::Header Packet::readHeader() {
@@ -62,6 +79,36 @@ unsigned char Packet::readByte() {
 	unsigned char value = this->data.at(this->readCursor);
 	++this->readCursor;
 	return value;
+}
+
+unsigned short Packet::readShort(void) {
+	return this->readByte()
+	       + (this->readByte() << 8);
+}
+
+unsigned int Packet::readInt(void) {
+	return this->readByte()
+	       + (this->readByte() << 8)
+	       + (this->readByte() << 16)
+	       + (this->readByte() << 24);
+}
+
+std::string Packet::readString(void) {
+	size_t length = this->readShort();
+
+	std::string value = this->data.substr(this->readCursor, length);
+	this->readCursor += length;
+	return value;
+}
+
+float Packet::readFloat(void) {
+	// TODO
+	std::cerr << "Error: Unimplemented function 'Packet::readFloat'!" << std::endl;
+	return 0.0f;
+}
+
+Vector2 Packet::readVector2(void) {
+	return Vector2(this->readFloat(), this->readFloat());
 }
 
 void Packet::send(){

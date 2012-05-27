@@ -7,7 +7,7 @@ General:
 	- fix segmentation fault on fallback texture disposal
 	- modifiable master server address
 		- command line parameter, config file
-	- support for receiving and parsing packets to Packet
+	- float support for Packet
 	- use Packet everywhere instead of old net.h functions
 
 Mechanics:

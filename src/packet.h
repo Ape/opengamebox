@@ -82,9 +82,13 @@ public:
 
 	Header readHeader(void);
 	unsigned char readByte(void);
-	// TODO: Other read methods
+	unsigned short readShort(void);
+	unsigned int readInt(void);
+	std::string readString(void);
+	float readFloat(void);
+	Vector2 readVector2(void);
 
-	void send();
+	void send(void);
 
 private:
 	std::string data;
