@@ -669,11 +669,10 @@ void Game::networkEvents() {
 
 void Game::receivePacket(ENetEvent event) {
 	Packet packet(event.packet);
-	packet.readHeader();
 
 	try {
-		switch (event.packet->data[0]) {
-			case net::PACKET_HANDSHAKE: {
+		switch (packet.readHeader()) {
+			case Packet::Header::HANDSHAKE: {
 				if (event.packet->dataLength >= 2 && event.packet->dataLength <= 2 + 34*(net::MAX_CLIENTS - 1)) {
 					// Store the received client id
 					this->localClient = event.packet->data[1];
@@ -693,7 +692,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_NICK_TAKEN: {
+			case Packet::Header::NICK_TAKEN: {
 				if (event.packet->dataLength == 1) {
 					this->addMessage("That nick is already reserved!");
 
@@ -703,7 +702,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_JOIN: {
+			case Packet::Header::JOIN: {
 				if (event.packet->dataLength >= 3 && event.packet->dataLength <= 35) {
 					// Store the client information
 					Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2),
@@ -717,7 +716,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_LEAVE: {
+			case Packet::Header::LEAVE: {
 				if (event.packet->dataLength == 2) {
 					this->addMessage(this->clients[event.packet->data[1]]->getColoredNick() + " has left the server!");
 
@@ -740,7 +739,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_CHAT: {
+			case Packet::Header::CHAT: {
 				if (event.packet->dataLength >= 1 + 1 + 1 && event.packet->dataLength <= 1 + 1 + 1 + 255) {
 					if (event.packet->data[1] == 255) {
 						this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
@@ -752,7 +751,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_CREATE: {
+			case Packet::Header::CREATE: {
 				if (event.packet->dataLength >= 1 + 6 + 8 + 1) {
 					Client *client;
 					if (event.packet->data[1] != 255) {
@@ -796,7 +795,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_MOVE: {
+			case Packet::Header::MOVE: {
 				if (event.packet->dataLength >= 2 + 10) {
 					Client *client = this->clients.find(event.packet->data[1])->second;
 
@@ -839,7 +838,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_SELECT: {
+			case Packet::Header::SELECT: {
 				if (event.packet->dataLength >= 2) {
 					Client *client = this->clients.find(event.packet->data[1])->second;
 
@@ -862,7 +861,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_REMOVE: {
+			case Packet::Header::REMOVE: {
 				if (event.packet->dataLength >= 2) {
 					Client *client = this->clients.find(event.packet->data[1])->second;
 
@@ -897,7 +896,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_FLIP: {
+			case Packet::Header::FLIP: {
 				if (event.packet->dataLength >= 2) {
 					Client *client = this->clients.find(event.packet->data[1])->second;
 
@@ -931,7 +930,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_OWN: {
+			case Packet::Header::OWN: {
 				if (event.packet->dataLength >= 2) {
 					Client *client = this->clients.find(event.packet->data[1])->second;
 
@@ -976,7 +975,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_ROTATE: {
+			case Packet::Header::ROTATE: {
 				unsigned short objId = net::bytesToShort(event.packet->data + 1);
 				char rotation = event.packet->data[3];
 				this->objects[objId]->rotate(rotation * utils::PI / 8);
@@ -984,7 +983,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_PINGS: {
+			case Packet::Header::PINGS: {
 				if (event.packet->dataLength >= 4) {
 					size_t i = 1;
 					while (i < event.packet->dataLength) {
@@ -999,7 +998,7 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
-			case net::PACKET_MS_QUERY: {
+			case Packet::Header::MS_QUERY: {
 				if (this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER) {
 					this->addMessage("Server list:");
 

@@ -31,6 +31,7 @@
 #include <enet/enet.h>
 
 #include "../net.h"
+#include "../packet.h"
 #include "../utils.h"
 #include "../vector2.h"
 #include "../objectClassManager.h"

@@ -151,51 +151,59 @@ void MasterServer::networkEvents() {
 void MasterServer::receivePacket(ENetEvent event) {
 	Packet packet(event.packet);
 
-        switch (packet.readHeader()) {
-                case Packet::Header::MS_QUERY: {
-			std::cout << "Sending the server list!" << std::endl;
+	try {
+		switch (packet.readHeader()) {
+			case Packet::Header::MS_QUERY: {
+				std::cout << "Sending the server list!" << std::endl;
 
-			Packet reply(event.peer);
-			reply.writeHeader(Packet::Header::MS_QUERY);
+				Packet reply(event.peer);
+				reply.writeHeader(Packet::Header::MS_QUERY);
 
-			for (auto& server : this->servers) {
-				reply.writeString(server->address);
-				reply.writeShort(server->port);
-				reply.writeString(server->name);
-				reply.writeShort(server->players);
+				for (auto& server : this->servers) {
+					reply.writeString(server->address);
+					reply.writeShort(server->port);
+					reply.writeString(server->name);
+					reply.writeShort(server->players);
+				}
+
+				reply.send();
+
+				break;
 			}
 
-			reply.send();
+			case Packet::Header::MS_REGISTER: {
+				std::cout << "A server wants to appear on the list!" << std::endl;
 
-			break;
-		}
+				// TODO: Register the server
 
-                case Packet::Header::MS_REGISTER: {
-			std::cout << "A server wants to appear on the list!" << std::endl;
+				break;
+			}
 
-			// TODO: Register the server
+			case Packet::Header::MS_UPDATE: {
+				std::cout << "A server wants to refresh its information!" << std::endl;
 
-			break;
-		}
+				// TODO: Update the server information
 
-                case Packet::Header::MS_UPDATE: {
-			std::cout << "A server wants to refresh its information!" << std::endl;
+				break;
+			}
 
-			// TODO: Update the server information
+			case Packet::Header::HANDSHAKE: {
+				// This is not a game server
 
-			break;
-		}
+				Packet reply(event.peer);
+				reply.writeHeader(Packet::Header::MS_QUERY);
+				reply.send();
 
-                case Packet::Header::HANDSHAKE: {
-			// This is not a game server
+				break;
+			}
 
-			Packet reply(event.peer);
-			reply.writeHeader(Packet::Header::MS_QUERY);
-			reply.send();
-
-			break;
-		}
-
-		default : {}
-	}
+                        default: {
+                                throw PacketException("Invalid packet header.");
+                        }
+                }
+        } catch (PacketException &e) {
+                std::cout << "Debug: Received an invalid packet from" 
+                          << net::AddressToString(event.peer->address)
+                          << ": \"" << e.what() << "\"" << std::endl;
+        }
 }
