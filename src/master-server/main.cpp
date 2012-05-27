@@ -154,8 +154,6 @@ void MasterServer::receivePacket(ENetEvent event) {
 	try {
 		switch (packet.readHeader()) {
 			case Packet::Header::MS_QUERY: {
-				std::cout << "Sending the server list!" << std::endl;
-
 				Packet reply(event.peer);
 				reply.writeHeader(Packet::Header::MS_QUERY);
 
@@ -168,13 +166,26 @@ void MasterServer::receivePacket(ENetEvent event) {
 
 				reply.send();
 
+				std::cout << "Sent the server list." << std::endl;
+
 				break;
 			}
 
 			case Packet::Header::MS_REGISTER: {
-				std::cout << "A server wants to appear on the list!" << std::endl;
+				ServerRecord *server = new ServerRecord;
+				server->address = net::IPIntegerToString(event.peer->address.host);
+				server->port = packet.readShort();
+				server->name = packet.readString();
+				server->players = packet.readShort();
+				server->lastUpdate = enet_time_get();
+				server->passkey = "pass"; // TODO: Generate a proper passkey
+				this->servers.push_back(server);
 
-				// TODO: Register the server
+				Packet reply(event.peer);
+				reply.writeHeader(Packet::Header::MS_REGISTER);
+				reply.writeString(server->passkey);
+
+				std::cout << "Added a new server to the list." << std::endl;
 
 				break;
 			}

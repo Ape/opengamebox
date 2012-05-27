@@ -55,11 +55,12 @@ private:
 	ENetHost *connection;
 
 	struct ServerRecord {
-		std::string address;  // Hostname or IP-address
+		std::string address;    // Hostname or IP-address
 		unsigned short port;    // The connection port
-		std::string name;     // The name of the server
+		std::string name;       // The name of the server
 		unsigned short players; // The amount of players on the server
-		double lastUpdate;    // Timestamp for the last update
+		double lastUpdate;      // Timestamp for the last update
+		std::string passkey;    // Passphrase that is needed when updating the information
 	};
 
 	std::vector<ServerRecord*> servers;
