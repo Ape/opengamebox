@@ -1,0 +1,12 @@
+# Create 10 black pieces
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dcreate core.piece.black
+dflush

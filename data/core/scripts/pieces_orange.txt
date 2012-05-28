@@ -1,0 +1,12 @@
+# Create 10 orange pieces
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dcreate core.piece.orange
+dflush

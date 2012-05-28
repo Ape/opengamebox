@@ -25,7 +25,7 @@ Graphics:
 	- graphical server browser
 
 Network:
-	- merge move and flip packets
+	- (?) merge move and flip packets
 	- game list
 		- master server for internet games
 			- ability to register and update a server
