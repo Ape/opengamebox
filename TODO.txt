@@ -1,6 +1,6 @@
 General:
 	- ability to scroll received chat messages
-	- loading settings from a file
+	- move all settings to .cfg files
 	- loading chat / command history from a file
 	- use member initialization lists
 	- add README.txt

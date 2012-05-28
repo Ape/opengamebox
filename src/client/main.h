@@ -50,12 +50,9 @@
 #include "widget.h"
 #include "widgets/inputBox.h"
 #include "../client.h"
+#include "../settings.h"
 
 // Default screen configuration
-const int SCREEN_W = 1024;
-const int SCREEN_H = 768;
-const float FPS_LIMIT = 60.0f;
-const bool FULLSCREEN = false;
 const int MULTISAMPLING_SAMPLES = 2;
 const float ANIMATION_TIME = 0.5f;
 const float MESSAGE_TIME = 20.0f;
@@ -84,6 +81,8 @@ private:
 	ENetPeer *host;
 
 	Renderer *renderer;
+
+	Settings *settings;
 
 	enum class State {INITIALIZING, RUNNING, EXITING, TERMINATED};
 	State state;

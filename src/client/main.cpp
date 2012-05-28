@@ -58,6 +58,7 @@ int main(int argc, char **argv) {
 }
 
 Game::Game(void) {
+    this->settings = new Settings("opengamebox.cfg");
 	this->state = State::INITIALIZING;
 	this->connectionState = ConnectionState::NOT_CONNECTED;
 	this->nextFrame = true;
@@ -86,20 +87,21 @@ bool Game::init() {
 	}
 
 	// Set the window mode
-	if (FULLSCREEN) {
+	if (this->settings->getValue<bool>("display.fullscreen")) {
 		al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 	} else {
 		al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);
 	}
 
 	// Initialize the renderer
-	this->renderer = new Renderer(Coordinates(SCREEN_W, SCREEN_H), MULTISAMPLING_SAMPLES);
+	this->renderer = new Renderer(Coordinates(this->settings->getValue<int>("display.width"),
+                                this->settings->getValue<int>("display.height")), MULTISAMPLING_SAMPLES);
 
 	// Set window title
 	this->renderer->setWindowTitle("OpenGamebox", "gfx/icon");
 
 	// Create a timer for the main loop
-	this->timer = al_create_timer(1.0f / FPS_LIMIT);
+	this->timer = al_create_timer(1.0f / this->settings->getValue<float>("display.fpslimit"));
 	if (! this->timer) {
 		std::cerr << "Error: Failed to create a timer!" << std::endl;
 		return false;
@@ -285,7 +287,7 @@ void Game::dispose() {
 		enet_host_destroy(this->connection);
 		this->connection = nullptr;
 	}
-	
+
 	enet_deinitialize();
 
 	// Dispose the renderer
@@ -1093,7 +1095,7 @@ void Game::chatCommand(std::string commandstr) {
 			return;
 		}
 
-		unsigned int port;		
+		unsigned int port;
 
 		if (parameters.size() == 3) {
 			std::istringstream stream(parameters[2]);
