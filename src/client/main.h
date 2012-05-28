@@ -31,6 +31,8 @@
 #include <iterator>
 
 #include <allegro5/allegro.h>
+// Workaround an issue with Windows specific preprocessor definitions
+#undef ERROR
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
