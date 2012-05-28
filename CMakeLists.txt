@@ -7,9 +7,9 @@ cmake_minimum_required(VERSION 2.6)
 add_definitions(-std=c++0x)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
-IF(WIN32 AND MINGW)
+if(WIN32 AND MINGW)
 	add_definitions(-DWIN32)
-ENDIF(WIN32 AND MINGW)
+endif(WIN32 AND MINGW)
 
 ### User selectable options ###
 option(DEBUG "Show all warnings, include debug symbols, and disable optimizations" ON)

@@ -1,12 +1,9 @@
 General:
 	- ability to scroll received chat messages
-	- move all settings to .cfg files
 	- loading chat / command history from a file
 	- use member initialization lists
 	- add README.txt
 	- fix segmentation fault on fallback texture disposal
-	- modifiable master server address
-		- command line parameter, config file
 	- float support for Packet
 	- use Packet everywhere instead of old net.h functions
 

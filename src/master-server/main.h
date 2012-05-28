@@ -21,18 +21,15 @@
 
 #include <cstdlib>
 #include <csignal>
-//#include <map>
 #include <string>
 #include <iostream>
-//#include <algorithm>
-//#include <random>
-//#include <functional>
 
 #include <enet/enet.h>
 
 #include "../utils.h"
 #include "../packet.h"
 #include "../net.h"
+#include "../settings.h"
 
 const unsigned int MAX_CONNECTIONS = 255;
 
@@ -46,6 +43,7 @@ void catchSignal(int signal);
 class MasterServer {
 public:
 	MasterServer(unsigned int port);
+	~MasterServer(void);
 
 	int run(void);
 	void exit(void);
@@ -54,13 +52,14 @@ private:
 	ENetAddress address;
 	ENetHost *connection;
 
+	Settings *settings;
+
 	struct ServerRecord {
 		std::string address;    // Hostname or IP-address
 		unsigned short port;    // The connection port
 		std::string name;       // The name of the server
 		unsigned short players; // The amount of players on the server
-		double lastUpdate;      // Timestamp for the last update
-		std::string passkey;    // Passphrase that is needed when updating the information
+		ENetPeer *peer;         // The connected server
 	};
 
 	std::vector<ServerRecord*> servers;

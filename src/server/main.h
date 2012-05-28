@@ -36,6 +36,7 @@
 #include "../vector2.h"
 #include "../objectClassManager.h"
 #include "../object.h"
+#include "../settings.h"
 
 class Server;
 
@@ -47,6 +48,7 @@ void catchSignal(int signal);
 class Server {
 public:
 	Server(unsigned int port);
+	~Server(void);
 
 	int run(void);
 	void exit(void);
@@ -54,6 +56,8 @@ public:
 private:
 	ENetAddress address;
 	ENetHost *connection;
+
+	Settings *settings;
 
 	ObjectClassManager objectClassManager;
 

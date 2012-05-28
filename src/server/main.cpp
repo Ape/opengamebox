@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 		std::istringstream portString(argv[1]);
 		portString >> port;
 	} else {
-		port = net::DEFAULT_PORT;
+		port = 0;
 	}
 
 	Server server = Server(port);
@@ -44,17 +44,22 @@ Server::Server(unsigned int port) {
 	this->address.host = ENET_HOST_ANY;
 	this->address.port = port;
 
+	this->settings = new Settings("server.cfg");
+
 	this->exiting = false;
 	this->lastStreamTime = 0.0;
 
 	this->randomGenerator.seed(enet_time_get());
 }
 
+Server::~Server() {
+	delete this->settings;
+}
+
 int Server::run() {
 	// Check the port
 	if (this->address.port == 0) {
-		std::cerr << "Illegal port number!" << std::endl;
-		return EXIT_FAILURE;
+		this->address.port = this->settings->getValue<int>("network.port");
 	}
 
 	// Catch SIGINT

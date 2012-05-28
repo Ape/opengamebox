@@ -56,9 +56,11 @@
 class Game {
 public:
 	Game(void);
+	~Game(void);
 	bool init(void);
 
 	bool connect(std::string address, int port);
+	bool connectMasterServer(void);
 	bool connectMasterServer(std::string address, int port);
 
 	int run(void);

@@ -33,17 +33,12 @@ class Object;
 
 namespace net {
 	// Define basic connection parameters
-	const unsigned int DEFAULT_PORT = 13355;
 	const unsigned int CHANNELS     = 2;
 	const unsigned char MAX_CLIENTS = 32;
 	const float MAX_FLOAT           = 10000.0f;
 	const double STREAM_INTERVAL    = 5000.0f;
 
 	// >>> DEPRECATED: Use Packet instead
-	// Master server details
-	const std::string MASTER_SERVER = "localhost";
-	const unsigned int MASTER_SERVER_PORT = 13354;
-
 	// Client control packets
 	const unsigned char PACKET_HANDSHAKE  = 0x01; // Initialize connection
 	const unsigned char PACKET_NICK_TAKEN = 0x02; // Inform about a reserved nick name

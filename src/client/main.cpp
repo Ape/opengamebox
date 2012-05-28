@@ -30,24 +30,20 @@ int main(int argc, char **argv) {
 	}
 
 	if (argc == 1) {
-		if (game.connectMasterServer(net::MASTER_SERVER, net::MASTER_SERVER_PORT)) {
+		if (game.connectMasterServer()) {
 			return game.run();
 		} else {
 			return EXIT_FAILURE;
 		}
 	}
 
-	if (argc >= 2) {
-		address = std::string(argv[1]);
-	} else {
-		address = "localhost";
-	}
+	address = std::string(argv[1]);
 
 	if (argc >= 3) {
 		std::istringstream stream(argv[2]);
 		stream >> port;
 	} else {
-		port = net::DEFAULT_PORT;
+		port = 0;
 	}
 
 	if (game.connect(address, port)) {
@@ -57,7 +53,7 @@ int main(int argc, char **argv) {
 	}
 }
 
-Game::Game(void) {
+Game::Game() {
 	this->settings = new Settings("opengamebox.cfg");
 	this->state = State::INITIALIZING;
 	this->connectionState = ConnectionState::NOT_CONNECTED;
@@ -68,6 +64,10 @@ Game::Game(void) {
 
 	this->dragging = false;
 	this->keyStatus = KeyStatus();
+}
+
+Game::~Game() {
+	delete this->settings;
 }
 
 bool Game::init() {
@@ -141,7 +141,7 @@ bool Game::connect(std::string address, int port) {
 		this->disconnectMasterServer();
 	}
 
-	this->connection = enet_host_create (NULL,          // Create a client host
+	this->connection = enet_host_create (nullptr,          // Create a client host
 	                                     1,             // Only allow 1 outgoing connection
 	                                     net::CHANNELS, // Number of channels
 	                                     0,             // Unlimited downstream bandwidth
@@ -153,12 +153,12 @@ bool Game::connect(std::string address, int port) {
 	}
 
 	if (port == 0) {
-		this->addMessage("Illegal port number!", MessageType::ERROR);
-		return false;
+		port = this->settings->getValue<int>("network.port");
 	}
+
 	this->hostAddress.port = port;
 
-	if (this->connection == NULL) {
+	if (this->connection == nullptr) {
 		this->addMessage("Could not create a connection!", MessageType::ERROR);
 		return false;
 	}
@@ -167,7 +167,7 @@ bool Game::connect(std::string address, int port) {
 	this->addMessage("Connecting to " + net::AddressToString(this->hostAddress) + "...");
 	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
-	if (this->host == NULL) {
+	if (this->host == nullptr) {
 		this->addMessage("Could not connect to the server!", MessageType::ERROR);
 		return false;
 	}
@@ -177,9 +177,14 @@ bool Game::connect(std::string address, int port) {
 	return true;
 }
 
+bool Game::connectMasterServer() {
+	return this->connectMasterServer(this->settings->getValue<std::string>("network.masterserver"),
+	                                 this->settings->getValue<int>("network.masterserverport"));
+}
+
 bool Game::connectMasterServer(std::string address, int port) {
 	// Create a connection to the master server
-	this->connection = enet_host_create (NULL, 1, 1, 0, 0);
+	this->connection = enet_host_create (nullptr, 1, 1, 0, 0);
 
 	if (enet_address_set_host(&(this->hostAddress), address.c_str()) < 0) {
 		this->addMessage("Unknown master server host!", MessageType::ERROR);
@@ -192,7 +197,7 @@ bool Game::connectMasterServer(std::string address, int port) {
 	}
 	this->hostAddress.port = port;
 
-	if (this->connection == NULL) {
+	if (this->connection == nullptr) {
 		this->addMessage("Could not create a connection to the master server!", MessageType::ERROR);
 		return false;
 	}
@@ -201,7 +206,7 @@ bool Game::connectMasterServer(std::string address, int port) {
 	this->addMessage("Connecting to " + net::AddressToString(this->hostAddress) + " (master server)...");
 	host = enet_host_connect(this->connection, &this->hostAddress, 1, 0);
 
-	if (this->host == NULL) {
+	if (this->host == nullptr) {
 		this->addMessage("Could not connect to the master server!", MessageType::ERROR);
 		return false;
 	}
@@ -1102,7 +1107,7 @@ void Game::chatCommand(std::string commandstr) {
 			std::istringstream stream(parameters[2]);
 			stream >> port;
 		} else {
-			port = net::DEFAULT_PORT;
+			port = this->settings->getValue<int>("network.port");
 		}
 
 		this->connect(parameters[1], port);
@@ -1110,7 +1115,7 @@ void Game::chatCommand(std::string commandstr) {
 		this->disconnect();
 	} else if (parameters.at(0) == "servers") {
 		if (this->connectionState == ConnectionState::NOT_CONNECTED) {
-			this->connectMasterServer(net::MASTER_SERVER, net::MASTER_SERVER_PORT);
+			this->connectMasterServer();
 		} else {
 			this->addMessage("You are already connected to a server. Please disconnect first.");
 		}

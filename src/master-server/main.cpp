@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 		std::istringstream portString(argv[1]);
 		portString >> port;
 	} else {
-		port = net::MASTER_SERVER_PORT;
+		port = 0;
 	}
 
 	MasterServer server = MasterServer(port);
@@ -44,16 +44,17 @@ MasterServer::MasterServer(unsigned int port) {
 	this->address.host = ENET_HOST_ANY;
 	this->address.port = port;
 
+	this->settings = new Settings("master-server.cfg");
+
 	this->exiting = false;
 
 	// Add two test servers
 	{
 		ServerRecord *test = new ServerRecord;
 		test->address = "1.1.1.1";
-		test->port = net::DEFAULT_PORT;
+		test->port = 13355;
 		test->name = "Test server";
 		test->players = 54;
-		test->lastUpdate = 0.0;
 		this->servers.push_back(test);
 	}
 	{
@@ -62,16 +63,18 @@ MasterServer::MasterServer(unsigned int port) {
 		test->port = 12345;
 		test->name = "Card game";
 		test->players = 0;
-		test->lastUpdate = 0.0;
 		this->servers.push_back(test);
 	}
+}
+
+MasterServer::~MasterServer() {
+	delete this->settings;
 }
 
 int MasterServer::run() {
 	// Check the port
 	if (this->address.port == 0) {
-		std::cerr << "Illegal port number!" << std::endl;
-		return EXIT_FAILURE;
+		this->address.port = this->settings->getValue<int>("network.port");
 	}
 
 	// Catch SIGINT
@@ -177,13 +180,8 @@ void MasterServer::receivePacket(ENetEvent event) {
 				server->port = packet.readShort();
 				server->name = packet.readString();
 				server->players = packet.readShort();
-				server->lastUpdate = enet_time_get();
-				server->passkey = "pass"; // TODO: Generate a proper passkey
+				server->peer = event.peer;
 				this->servers.push_back(server);
-
-				Packet reply(event.peer);
-				reply.writeHeader(Packet::Header::MS_REGISTER);
-				reply.writeString(server->passkey);
 
 				std::cout << "Added a new server to the list." << std::endl;
 
