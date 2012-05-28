@@ -18,19 +18,15 @@
 
 #include "settings.h"
 
-Settings::Settings(std::string file)
-{
+Settings::Settings(std::string file) {
 	// Read the file. If there is an error, report it.
-	try
-	{
-		this->cfg.readFile(file.c_str());
-	}
-	catch(const libconfig::FileIOException &fioex)
-	{
-		std::cout << "I/O error while reading file." << std::endl;
-	}
-	catch(const libconfig::ParseException &pex)
-	{
-		std::cout << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError() << std::endl;
+	try {
+		this->config.readFile(file.c_str());
+	} catch (const libconfig::FileIOException &e) {
+		std::cout << "Error: Couldn't read the config file!" << std::endl;
+		throw e;
+	} catch (const libconfig::ParseException &e) {
+		std::cout << "Error: Couldn't parse the config file at " << e.getFile() << ":" << e.getLine() << " - " << e.getError() << std::endl;
+		throw e;
 	}
 }

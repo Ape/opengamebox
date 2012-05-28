@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 }
 
 Game::Game(void) {
-    this->settings = new Settings("opengamebox.cfg");
+	this->settings = new Settings("opengamebox.cfg");
 	this->state = State::INITIALIZING;
 	this->connectionState = ConnectionState::NOT_CONNECTED;
 	this->nextFrame = true;
@@ -95,7 +95,8 @@ bool Game::init() {
 
 	// Initialize the renderer
 	this->renderer = new Renderer(Coordinates(this->settings->getValue<int>("display.width"),
-                                this->settings->getValue<int>("display.height")), MULTISAMPLING_SAMPLES);
+	                              this->settings->getValue<int>("display.height")),
+	                              this->settings->getValue<int>("display.multisamples"));
 
 	// Set window title
 	this->renderer->setWindowTitle("OpenGamebox", "gfx/icon");
@@ -389,7 +390,7 @@ void Game::localEvents() {
 						net::dataAppendShort(data, object->getId());
 						net::dataAppendVector2(data, nextLocation);
 
-						object->setAnimation(nextLocation, ANIMATION_TIME);
+						object->setAnimation(nextLocation, this->settings->getValue<float>("game.animationtime"));
 						nextLocation += object->getStackDelta();
 					}
 
@@ -813,10 +814,10 @@ void Game::receivePacket(ENetEvent event) {
 
 						Object *object = this->objects.find(objId)->second;
 
-						if (ANIMATION_TIME == 0) {
+						if (this->settings->getValue<float>("game.animationtime") == 0) {
 							object->setLocation(location);
 						} else {
-							object->setAnimation(location, ANIMATION_TIME);
+							object->setAnimation(location, this->settings->getValue<float>("game.animationtime"));
 						}
 
 						net::removeObject(this->objectOrder, object);
@@ -1362,7 +1363,7 @@ void Game::renderUI() {
 	}
 
 	for (std::vector<Message>::size_type i = this->messages.size(); i > 0; --i) {
-		if (this->input != nullptr || al_get_time() < this->messages[i-1].time + MESSAGE_TIME) {
+		if (this->input != nullptr || al_get_time() < this->messages[i-1].time + this->settings->getValue<float>("game.messagetime")) {
 			this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
 		}
 	}

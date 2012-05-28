@@ -31,8 +31,6 @@
 #include <iterator>
 
 #include <allegro5/allegro.h>
-// Workaround an issue with Windows specific preprocessor definitions
-#undef ERROR
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
@@ -52,10 +50,8 @@
 #include "../client.h"
 #include "../settings.h"
 
-// Default screen configuration
-const int MULTISAMPLING_SAMPLES = 2;
-const float ANIMATION_TIME = 0.5f;
-const float MESSAGE_TIME = 20.0f;
+// Workaround an issue with Windows specific preprocessor definitions
+#undef ERROR
 
 class Game {
 public:

@@ -19,57 +19,62 @@
 #include <libconfig.h++>
 
 #include <string>
-#include <vector>
-#include <iostream>
 #include <sstream>
+#include <vector>
+#include <stdexcept>
+#include <iostream>
 
-class Settings
-{
+class SettingsException : public std::runtime_error {
+public:
+	SettingsException(std::string message)
+	: std::runtime_error(message) {}
+};
+
+// TODO: Meaningful default values
+
+class Settings {
 public:
 	Settings(std::string file);
 
 	template<class T>
-	T getValue(std::string path) const
-	{
+	T getValue(std::string path) const {
 		T value;
-		if(!this->cfg.lookupValue(path, value))
-		{
-			std::cout<<"Getting value failed."<<std::endl;
+
+		if (!this->config.lookupValue(path, value)) {
+			throw SettingsException(std::string("Couldn't get a value for ") + path);
 		}
+
 		return value;
 	}
 
-	template<class T>
-	void setValue(std::string path, T value)
-	{
-		libconfig::Setting &setting = this->cfg.lookup(path, value);
+	template<class T> void setValue(std::string path, T value) {
+		libconfig::Setting &setting = this->config.lookup(path, value);
         setting = value;
 	}
 
-	template<class T>
-	std::vector<T> getList(std::string path) const
-	{
-		libconfig::Setting &setting = cfg.lookup(path);
-		std::vector<T> tempVector;
-		if(!setting.isList())
-		{
-			std::cout<<"Setting is not a list."<<std::endl;
+	template<class T> std::vector<T> getList(std::string path) const {
+		libconfig::Setting &setting = this->config.lookup(path);
+		std::vector<T> list;
+
+		if (!setting.isList()) {
+			throw SettingsException(std::string("Setting ") + path + " is not a list.");
 		}
-		for(int i = 0; setting.getLength(); i++)
-		{
-			T tempValue;
-			std::stringstream ss;
-			ss<<path<<"["<<i<<"]";
-			if(!this->cfg.lookupValue(ss.str(),tempValue))
-			{
-				std::cout<<"Getting list failed."<<std::endl;
-				break;
+
+		for (int i = 0; setting.getLength(); ++i) {
+			T value;
+			std::ostringstream key;
+			key << path << "[" << i << "]";
+
+			if (!this->config.lookupValue(key.str(), value)) {
+				throw SettingsException(std::string("Couldn't get a list for ") + path);
 			}
-			tempVector.push_back(tempValue);
+
+			list.push_back(value);
 		}
-		return tempVector;
+
+		return list;
 	}
 
 private:
-	libconfig::Config cfg;
+	libconfig::Config config;
 };
