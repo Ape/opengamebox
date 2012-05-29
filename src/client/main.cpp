@@ -172,6 +172,11 @@ bool Game::connect(std::string address, int port) {
 		return false;
 	}
 
+	// Set ping interval for the connection, this is only supported in ENet >= 1.3.4
+	#if ENET_VERSION >= ENET_VERSION_CREATE(1, 3, 4)
+	enet_peer_ping_interval(this->host, net::PING_INTERVAL);
+	#endif
+
 	this->connectionState = ConnectionState::CONNECTING;
 
 	return true;

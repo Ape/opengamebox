@@ -127,6 +127,11 @@ void MasterServer::networkEvents() {
 			case ENET_EVENT_TYPE_CONNECT: {
 				std::cout << "A new connection from " << net::AddressToString(event.peer->address) << "." << std::endl;
 
+				// Set ping interval for the connection, this is only supported in ENet >= 1.3.4
+				#if ENET_VERSION >= ENET_VERSION_CREATE(1, 3, 4)
+				enet_peer_ping_interval(event.peer, net::MASTER_SERVER_PING_INTERVAL);
+				#endif
+
 				break;
 			}
 

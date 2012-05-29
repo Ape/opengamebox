@@ -33,10 +33,14 @@ class Object;
 
 namespace net {
 	// Define basic connection parameters
-	const unsigned int CHANNELS     = 2;
-	const unsigned char MAX_CLIENTS = 32;
-	const float MAX_FLOAT           = 10000.0f;
-	const double STREAM_INTERVAL    = 5000.0f;
+	const unsigned int CHANNELS      = 2;
+	const unsigned char MAX_CLIENTS  = 32;
+	const float MAX_FLOAT            = 10000.0f;
+	const double STREAM_INTERVAL     = 5000.0f;
+	const unsigned int PING_INTERVAL = 1000;
+
+	// Master server options
+	const unsigned int MASTER_SERVER_PING_INTERVAL = 60000;
 
 	// >>> DEPRECATED: Use Packet instead
 	// Client control packets
