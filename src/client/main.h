@@ -112,6 +112,8 @@ private:
 	std::vector<std::string> dCreateBuffer;
 	std::list<Object*> selectedObjects;
 	bool dragging;
+	bool selecting;
+	Vector2 selectingStart;
 	Vector2 draggingStart;
 
 	struct KeyStatus {

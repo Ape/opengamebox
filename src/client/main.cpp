@@ -518,6 +518,13 @@ void Game::localEvents() {
 					break;
 				}
 			}
+		} else { //Boxselect
+			for (auto& object : this->selectedObjects) {
+				object->select(nullptr);
+			}
+			this->selectedObjects.clear();
+			this->selecting = true;
+			this->selectingStart = location;
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 2) {
 		if (this->dragging) {
@@ -549,9 +556,10 @@ void Game::localEvents() {
 		this->keyStatus.moveScreen = true;
 		this->moveScreenStart = Vector2(event.mouse.x, event.mouse.y);
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1) {
+		Vector2 location(event.mouse.x, event.mouse.y);
+		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 		if (this->dragging) {
-			Vector2 location(event.mouse.x, event.mouse.y);
-			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
+
 
 			std::string data;
 			data.push_back(net::PACKET_MOVE);
@@ -566,6 +574,24 @@ void Game::localEvents() {
 			net::sendCommand(this->connection, data.c_str(), data.length());
 
 			this->dragging = false;
+		} else if (this->selecting) {
+			this->selectedObjects.clear();
+			this->selecting = false;
+			for (auto& object : this->objects)
+			{
+				Vector2 objLocation = object.second->getLocation();
+				if (((this->selectingStart.x > objLocation.x && objLocation.x > location.x)
+					&&  (this->selectingStart.y > objLocation.y && objLocation.y > location.y))
+					|| ((this->selectingStart.x < objLocation.x && objLocation.x < location.x)
+					&&  (this->selectingStart.y > objLocation.y && objLocation.y > location.y))
+					|| ((this->selectingStart.x > objLocation.x && objLocation.x > location.x)
+					&&  (this->selectingStart.y < objLocation.y && objLocation.y < location.y))
+					|| ((this->selectingStart.x > objLocation.x && objLocation.x > location.x)
+					&&  (this->selectingStart.y > objLocation.y && objLocation.y > location.y))) {
+					object.second->select(this->clients.find(localClient)->second);
+					this->selectedObjects.push_back(object.second);
+				}
+			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
 		this->keyStatus.moveScreen = false;
