@@ -577,17 +577,26 @@ void Game::localEvents() {
 		} else if (this->selecting) {
 			this->selectedObjects.clear();
 			this->selecting = false;
+			Vector2 lower;
+			Vector2 higher;
+			if (this->selectingStart.x > location.x) {
+				lower.x = location.x;
+				higher.x = this->selectingStart.x;
+			} else {
+				lower.x = this->selectingStart.x;
+				higher.x = location.x;
+			}
+			if (this->selectingStart.y > location.y) {
+				lower.y = location.y;
+				higher.y = this->selectingStart.y;
+			} else {
+				lower.y = this->selectingStart.y;
+				higher.y = location.y;
+			}
 			for (auto& object : this->objects)
 			{
 				Vector2 objLocation = object.second->getLocation();
-				if (((this->selectingStart.x > objLocation.x && objLocation.x > location.x)
-					&&  (this->selectingStart.y > objLocation.y && objLocation.y > location.y))
-					|| ((this->selectingStart.x < objLocation.x && objLocation.x < location.x)
-					&&  (this->selectingStart.y > objLocation.y && objLocation.y > location.y))
-					|| ((this->selectingStart.x > objLocation.x && objLocation.x > location.x)
-					&&  (this->selectingStart.y < objLocation.y && objLocation.y < location.y))
-					|| ((this->selectingStart.x > objLocation.x && objLocation.x > location.x)
-					&&  (this->selectingStart.y > objLocation.y && objLocation.y > location.y))) {
+				if (lower.x < objLocation.x && objLocation.x < higher.x && lower.y < objLocation.y && objLocation.y < higher.y) {
 					object.second->select(this->clients.find(localClient)->second);
 					this->selectedObjects.push_back(object.second);
 				}
