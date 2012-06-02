@@ -16,7 +16,6 @@ Mechanics:
 		- flip status, private cards as flipped, multiobject commands
 
 Graphics:
-	- draw box select
 	- rotate screen with 90 degree steps
 	- (?) rotate temporary mouse coordinates when dragging an object
 	- animations for rotations

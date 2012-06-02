@@ -63,6 +63,7 @@ Game::Game() {
 	this->localClient = net::MAX_CLIENTS;
 
 	this->dragging = false;
+	this->selecting = false;
 	this->keyStatus = KeyStatus();
 }
 
@@ -1391,6 +1392,14 @@ void Game::renderGame() {
 
 void Game::renderUI() {
 	this->renderer->useTransformation(IRenderer::UI);
+
+	if (this->selecting) {
+		Vector2 location = this->selectingStart;
+		ALLEGRO_MOUSE_STATE mouse;
+		al_get_mouse_state(&mouse);
+		this->renderer->transformLocation(IRenderer::CAMERA, location);
+		this->renderer->drawRectangle(location, Vector2(mouse.x, mouse.y), Color(1.0f, 1.0f, 1.0f), 1.0f);
+	}
 
 	int i = 0;
 	for (auto& client : this->clients) {
