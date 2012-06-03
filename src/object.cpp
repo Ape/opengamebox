@@ -268,7 +268,15 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 	renderer->drawBitmapTinted(image, this->location, this->getSize(), tint, this->rotation);
 }
 
-void Object::rotate(float angle)
-{
+void Object::rotate(float angle) {
 	this->rotation += angle;
+}
+
+std::list<Vector2> Object::getCorners(void) {
+	std::list<Vector2> corners;
+	corners.push_back(this->getLocation() + (Vector2(this->size.x, this->size.y)/2).rotate(this->rotation));
+	corners.push_back(this->getLocation() + (Vector2(this->size.x, -this->size.y)/2).rotate(this->rotation));
+	corners.push_back(this->getLocation() + (Vector2(-this->size.x, -this->size.y)/2).rotate(this->rotation));
+	corners.push_back(this->getLocation() + (Vector2(-this->size.x, this->size.y)/2).rotate(this->rotation));
+	return corners;
 }

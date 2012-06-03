@@ -596,10 +596,14 @@ void Game::localEvents() {
 			}
 			for (auto& object : this->objects)
 			{
-				Vector2 objLocation = object.second->getLocation();
-				if (lower.x < objLocation.x && objLocation.x < higher.x && lower.y < objLocation.y && objLocation.y < higher.y) {
-					object.second->select(this->clients.find(localClient)->second);
-					this->selectedObjects.push_back(object.second);
+				std::list<Vector2> corners = object.second->getCorners();
+				for (auto corner : corners)
+				{
+					if (lower.x < corner.x && corner.x < higher.x && lower.y < corner.y && corner.y < higher.y) {
+						object.second->select(this->clients.find(localClient)->second);
+						this->selectedObjects.push_back(object.second);
+						break;
+					}
 				}
 			}
 		}
