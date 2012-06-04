@@ -16,6 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef SETTINGS_H
+#define SETTINGS_H
+
 #include <libconfig.h++>
 
 #include <string>
@@ -78,3 +81,5 @@ public:
 private:
 	libconfig::Config config;
 };
+
+#endif

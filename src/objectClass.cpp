@@ -21,9 +21,16 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass) {
 	// TODO: Load object information from a file
 
 	this->package = package;
+	this->settings = new Settings("data/" + package + "/package.txt");
+
 	this->objectClass = objectClass;
 	this->name = "Object";
 	this->gridSize = Vector2(0.0f, 0.0f);
+
+	std::vector<std::string> dependences = this->settings->getList<std::string>("package/dependences");
+	if (dependences.size() > 0){
+		this->checkDependency(dependences);
+	}
 
 	std::ifstream file;
 	file.open("data/" + this->package + "/objects/" + this->objectClass + ".txt", std::ios::in);
@@ -39,7 +46,11 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass) {
 		} else if (this->parseLine(line, "name", value)) {
 			this->name = value;
 		} else if (this->parseLine(line, "flipside", value)) {
-			this->flipsideImage = "data/" + this->package + "/objects/" + value;
+			if (value.at(0) == '/') {
+				this->flipsideImage = "data" + value;
+			} else {
+				this->flipsideImage = "data/" + this->package + "/objects/" + value;
+			}
 		} else if (this->parseLineFloat(line, "gridwidth", valueFloat)) {
 			this->gridSize.x = valueFloat;
 		} else if (this->parseLineFloat(line, "gridheight", valueFloat)) {
@@ -50,6 +61,10 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass) {
 	}
 
 	file.close();
+}
+
+ObjectClass::~ObjectClass() {
+	delete this->settings;
 }
 
 std::string ObjectClass::getObjectClass() const {
@@ -91,5 +106,30 @@ bool ObjectClass::parseLineFloat(std::string line, std::string field, float &val
 		return true;
 	} else {
 		return false;
+	}
+}
+
+void ObjectClass::checkDependency(std::vector<std::string> dependecies){
+	for (auto dependency : dependecies) {
+		std::vector<std::string> newDependencies;
+		try {
+			Settings *setting = new Settings("data/" + dependency + "/package.txt");
+			newDependencies = this->settings->getList<std::string>("package/dependences");
+			delete setting;
+		}
+		//package not found or invalid
+		//TODO: Download from server
+		catch(libconfig::FileIOException){
+			std::cout<<"Warning: Dependecy package "<<dependency<<" not found."<<std::endl;
+		}
+		catch(libconfig::ParseException &e) {
+			std::cout<<"Warning: Dependecy package "<<dependency<<" not invalid."<<std::endl;
+		}
+		catch(SettingsException &e) {
+			std::cout<<"Warning: Dependecy package "<<dependency<<" not invalid."<<std::endl;
+		}
+		if (newDependencies.size() > 0) {
+			this->checkDependency(newDependencies);
+		}
 	}
 }
