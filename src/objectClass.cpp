@@ -17,20 +17,31 @@
 
 #include "objectClass.h"
 
-ObjectClass::ObjectClass(std::string package, std::string objectClass) {
+ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list<std::string> *missingPackages) {
 	// TODO: Load object information from a file
 
 	this->package = package;
-	this->settings = new Settings("data/" + package + "/package.txt");
-
+	try{
+		this->settings = new Settings("data/" + package + "/package.txt");
+	}
+	catch(libconfig::FileIOException &e){
+		std::cout<<"Warning: Package "<<package<<" not found."<<std::endl;
+		missingPackages->push_back(package);
+	}
+	catch(libconfig::ParseException &e) {
+		std::cout<<"Warning: package "<<package<<"is invalid."<<std::endl;
+		missingPackages->push_back(package);
+	}
 	this->objectClass = objectClass;
 	this->name = "Object";
 	this->gridSize = Vector2(0.0f, 0.0f);
 
 	std::vector<std::string> dependences = this->settings->getList<std::string>("package/dependences");
 	if (dependences.size() > 0){
-		this->checkDependency(dependences);
+		this->checkDependency(dependences, missingPackages);
 	}
+	missingPackages->unique();
+	missingPackages->sort();
 
 	std::ifstream file;
 	file.open("data/" + this->package + "/objects/" + this->objectClass + ".txt", std::ios::in);
@@ -109,7 +120,7 @@ bool ObjectClass::parseLineFloat(std::string line, std::string field, float &val
 	}
 }
 
-void ObjectClass::checkDependency(std::vector<std::string> dependecies){
+void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::list<std::string> *missingPackages){
 	for (auto dependency : dependecies) {
 		std::vector<std::string> newDependencies;
 		try {
@@ -119,17 +130,20 @@ void ObjectClass::checkDependency(std::vector<std::string> dependecies){
 		}
 		//package not found or invalid
 		//TODO: Download from server
-		catch(libconfig::FileIOException){
+		catch(libconfig::FileIOException &e){
 			std::cout<<"Warning: Dependecy package "<<dependency<<" not found."<<std::endl;
+			missingPackages->push_back(dependency);
 		}
 		catch(libconfig::ParseException &e) {
-			std::cout<<"Warning: Dependecy package "<<dependency<<" not invalid."<<std::endl;
+			std::cout<<"Warning: Dependecy package "<<dependency<<" invalid."<<std::endl;
+			missingPackages->push_back(dependency);
 		}
 		catch(SettingsException &e) {
-			std::cout<<"Warning: Dependecy package "<<dependency<<" not invalid."<<std::endl;
+			std::cout<<"Warning: Dependecy package "<<dependency<<" invalid."<<std::endl;
+			missingPackages->push_back(dependency);
 		}
 		if (newDependencies.size() > 0) {
-			this->checkDependency(newDependencies);
+			this->checkDependency(newDependencies, missingPackages);
 		}
 	}
 }

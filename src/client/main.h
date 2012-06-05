@@ -94,6 +94,9 @@ private:
 
 	ObjectClassManager objectClassManager;
 
+	bool loadingPackage;
+	std::list<std::string> missingPackages;
+
 	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;
 	std::map<unsigned char, Client*> clients;

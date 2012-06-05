@@ -331,7 +331,7 @@ void Server::receivePacket(ENetEvent event) {
 						unsigned char length = event.packet->data[i + 13];
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 14), static_cast<int>(length)), '.');
 						if (objectData.size() == 3) {
-							ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
+							ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
 
 							unsigned short objId = utils::firstUnusedKey(this->objects);
 							Object *object = new Object(objectClass, objectData.at(2), objId, location);
@@ -615,12 +615,21 @@ void Server::receivePacket(ENetEvent event) {
 				break;
 			}
 
+			case Packet::Header::PACKAGE_MISSING: {
+				Packet packet(event.packet);
+				std::string package = packet.readString();
+				//Todo try to send it
+				std::cout<< this->clients.find(*id)->second->getNick() << " is missing package "<<package<<std::endl;
+
+				break;
+			}
+
 			default: {
 				throw PacketException("Invalid packet header.");
 			}
 		}
 	} catch (PacketException &e) {
-		std::cout << "Debug: Received an invalid packet from" 
+		std::cout << "Debug: Received an invalid packet from"
 		          << net::AddressToString(event.peer->address)
 		          << ": \"" << e.what() << "\"" << std::endl;
 	}

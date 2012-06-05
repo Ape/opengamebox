@@ -21,13 +21,14 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <list>
 
 #include "vector2.h"
 #include "settings.h"
 
 class ObjectClass {
 public:
-	ObjectClass(std::string package, std::string objectClass);
+	ObjectClass(std::string package, std::string objectClass, std::list<std::string> *missingPackages);
 	~ObjectClass(void);
 
 	std::string getObjectClass(void) const;
@@ -47,7 +48,7 @@ private:
 
 	bool parseLine(std::string line, std::string field, std::string &value);
 	bool parseLineFloat(std::string line, std::string field, float &value);
-	void checkDependency(std::vector<std::string> dependencies);
+	void checkDependency(std::vector<std::string> dependencies, std::list<std::string> *missingPackages);
 };
 
 #endif

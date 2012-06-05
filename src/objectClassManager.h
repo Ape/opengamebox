@@ -28,7 +28,7 @@ public:
 	ObjectClassManager(void);
 	~ObjectClassManager(void);
 
-	ObjectClass* getObjectClass(std::string package, std::string objectClass);
+	ObjectClass* getObjectClass(std::string package, std::string objectClass, std::list<std::string> *missingPackages);
 
 private:
 	std::map<std::string, std::map<std::string, ObjectClass*>*> packages;

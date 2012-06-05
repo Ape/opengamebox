@@ -1,0 +1,6 @@
+package = {
+	name = "core";
+	version = "1.0.0";
+	dependences = ();
+	info = "Basic package with deck playing cards, general game pieces and chessboard.";
+};

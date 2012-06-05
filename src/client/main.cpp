@@ -65,6 +65,8 @@ Game::Game() {
 	this->dragging = false;
 	this->selecting = false;
 	this->keyStatus = KeyStatus();
+
+	this->loadingPackage = false;
 }
 
 Game::~Game() {
@@ -824,7 +826,14 @@ void Game::receivePacket(ENetEvent event) {
 						unsigned char length = event.packet->data[i + 15];
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
 																				static_cast<int>(length)), '.');
-						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1));
+						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
+
+						if (!this->loadingPackage && this->missingPackages.empty()){
+							Packet packet(this->connection);
+							packet.writeHeader(Packet::Header::PACKAGE_MISSING);
+							packet.writeString(this->missingPackages.front());
+							packet.send();
+						}
 
 						Object *object = new Object(objectClass, objectData.at(2), objId, location);
 						object->initForClient(this->renderer);

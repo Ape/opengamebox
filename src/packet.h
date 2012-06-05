@@ -56,6 +56,10 @@ public:
 		CHAT = 0x40, // Send a chat message
 		ROLL = 0x41, // Roll a die on the server
 
+
+		//Files and packages
+		PACKAGE_MISSING = 0x60, // Package not found
+
 		// Master server communication
 		MS_QUERY    = 0xC0, // Request the server list
 		MS_REGISTER = 0xC1, // Register to the server list

@@ -31,7 +31,7 @@ ObjectClassManager::~ObjectClassManager() {
 	}
 }
 
-ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string objectClass) {
+ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string objectClass, std::list<std::string> *missingPackages) {
 	auto packageIterator = this->packages.find(package);
 	std::map<std::string, ObjectClass*> *selectedPackage;
 
@@ -49,7 +49,7 @@ ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string
 
 	// Add a new objectClass to the package if it was not already loaded
 	if (objectClassIterator == selectedPackage->end()) {
-		ObjectClass *newObjectClass = new ObjectClass(package, objectClass);
+		ObjectClass *newObjectClass = new ObjectClass(package, objectClass, missingPackages);
 		selectedPackage->insert(std::pair<std::string, ObjectClass*>(objectClass, newObjectClass));
 		selectedObjectClass = newObjectClass;
 	} else {
