@@ -40,15 +40,15 @@
 
 class Server;
 
-Server *serverPtr;
-
 int main(int argc, char **argv);
-void catchSignal(int signal);
 
 class Server {
 public:
 	Server(unsigned int port);
 	~Server(void);
+
+	static Server *serverPtr;
+	static void catchSignal(int signal);
 
 	int run(void);
 	void exit(void);

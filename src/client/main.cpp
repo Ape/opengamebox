@@ -19,21 +19,22 @@
 
 #include "main.h"
 
-Game *Game::gamePtr;
-
 int main(int argc, char **argv) {
 	// Get host address and port from command line arguments
 	std::string address;
 	int port;
 
-	//Unix-like systems such as Linux _need_ to pass argv[0] from main() in here.
+	// Unix-like systems such as Linux _need_ to pass argv[0] from main() in here.
 	if (PHYSFS_init(argv[0]) == 0) {
-		std::cout<<"Failed to initialize physfs"<<std::cout;
+		std::cout << "Failed to initialize physfs" << std::cout;
 		return EXIT_FAILURE;
 	}
+
 	PHYSFS_setWriteDir("data/");
 
 	Game game;
+	Game::gamePtr = &game;
+
 	if (!game.init()) {
 		return EXIT_FAILURE;
 	}
@@ -62,7 +63,9 @@ int main(int argc, char **argv) {
 	}
 }
 
-void catchSignal(int signal) {
+Game *Game::gamePtr;
+
+void Game::catchSignal(int signal) {
 	std::cout << std::endl << "Exiting.." << std::endl;
 
 	Game::gamePtr->quit();
@@ -83,7 +86,6 @@ Game::Game() {
 
 	this->loadingPackage = false;
 
-	Game::gamePtr = this;
 }
 
 Game::~Game() {

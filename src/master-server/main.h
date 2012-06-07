@@ -35,15 +35,15 @@ const unsigned int MAX_CONNECTIONS = 255;
 
 class MasterServer;
 
-MasterServer *serverPtr;
-
 int main(int argc, char **argv);
-void catchSignal(int signal);
 
 class MasterServer {
 public:
 	MasterServer(unsigned int port);
 	~MasterServer(void);
+
+	static MasterServer *serverPtr;
+	static void catchSignal(int signal);
 
 	int run(void);
 	void exit(void);

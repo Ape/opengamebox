@@ -29,15 +29,17 @@ int main(int argc, char **argv) {
 	}
 
 	MasterServer server = MasterServer(port);
-	serverPtr = &server;
+	MasterServer::serverPtr = &server;
 
 	return server.run();
 }
 
-void catchSignal(int signal) {
+MasterServer *MasterServer::serverPtr;
+
+void MasterServer::catchSignal(int signal) {
 	std::cout << std::endl << "Exiting.." << std::endl;
 
-	serverPtr->exit();
+	MasterServer::serverPtr->exit();
 }
 
 MasterServer::MasterServer(unsigned int port) {

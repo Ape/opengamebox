@@ -48,4 +48,6 @@ private:
 	size_t historyIndex;
 };
 
+#include "../main.h"
+
 #endif

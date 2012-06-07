@@ -28,24 +28,27 @@ int main(int argc, char **argv) {
 		port = 0;
 	}
 
-	//Unix-like systems such as Linux _need_ to pass argv[0] from main() in here.
+	// Unix-like systems such as Linux _need_ to pass argv[0] from main() in here.
 	if (PHYSFS_init(argv[0]) == 0) {
-		std::cout<<"Failed to initialize physfs"<<std::cout;
+		std::cout << "Failed to initialize physfs" << std::cout;
 		return EXIT_FAILURE;
 	}
+
 	PHYSFS_setWriteDir("data/");
 	PHYSFS_addToSearchPath(".", 1);
 
 	Server server = Server(port);
-	serverPtr = &server;
+	Server::serverPtr = &server;
 
 	return server.run();
 }
 
-void catchSignal(int signal) {
+Server *Server::serverPtr;
+
+void Server::catchSignal(int signal) {
 	std::cout << std::endl << "Exiting.." << std::endl;
 
-	serverPtr->exit();
+	Server::serverPtr->exit();
 }
 
 Server::Server(unsigned int port) {

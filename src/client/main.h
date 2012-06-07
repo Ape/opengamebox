@@ -56,14 +56,16 @@
 // Workaround an issue with Windows specific preprocessor definitions
 #undef ERROR
 
-void catchSignal(int signal);
+int main(int argc, char **argv);
 
 class Game {
 public:
-	static Game *gamePtr;
 	Game(void);
 	~Game(void);
 	bool init(void);
+
+	static Game *gamePtr;
+	static void catchSignal(int signal);
 
 	bool connect(std::string address, int port);
 	bool connectMasterServer(void);

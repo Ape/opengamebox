@@ -17,7 +17,6 @@
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "inputBox.h"
-#include "../main.h"
 
 InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen)
                   : Widget(location, Vector2(width, 20.0f)) {
