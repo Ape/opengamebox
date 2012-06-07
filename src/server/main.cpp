@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 	PHYSFS_setWriteDir("data/");
-	PHYSFS_addToSearchPath(".");
+	PHYSFS_addToSearchPath(".", 1);
 
 	Server server = Server(port);
 	serverPtr = &server;
@@ -629,9 +629,9 @@ void Server::receivePacket(ENetEvent event) {
 				//Todo try to send it
 				std::cout<< this->clients.find(*id)->second->getNick() << " is missing package "<<package<<std::endl;
 				if (PHYSFS_exists(("data/" + package + ".zip").c_str())) {
-					PHYSFS_file* file = PHYSFS_openRead(("data/" + package + ".zip").c_str()));
+					PHYSFS_file* file = PHYSFS_openRead(("data/" + package + ".zip").c_str());
 					Packet reply(event.peer);
-					reply.writeHeader(Packet::Header::FILET_TRANSFER);
+					reply.writeHeader(Packet::Header::FILE_TRANSFER);
 					reply.writeShort(0);
 					reply.writeInt(PHYSFS_fileLength(file));
 					reply.writeString(package);
@@ -642,17 +642,17 @@ void Server::receivePacket(ENetEvent event) {
 					int i = 0;
 					short number = 1;
 					while(i < PHYSFS_fileLength(file)) {
-						Packet piece(event.peer)
-						piece.writeHeader(Packet::Header::FILET_TRANSFER);
+						Packet piece(event.peer);
+						piece.writeHeader(Packet::Header::FILE_TRANSFER);
 						piece.writeShort(number);
 						piece.writeInt(i);
 						number++;
 						if (i + event.peer->mtu - 7 <= PHYSFS_fileLength(file)) {
 							piece.writeInt(event.peer->mtu - 7);
-							piece.writeString(str::string(buf + i, event.peer->mtu - 7));
+							piece.writeString(std::string(buf + i, event.peer->mtu - 7));
 						} else {
-							piece.writeInt(PHYSFS_fileLength(file) - i)
-							piece.writeString(str::string(buf + i, PHYSFS_fileLength(file) - i));
+							piece.writeInt(PHYSFS_fileLength(file) - i);
+							piece.writeString(std::string(buf + i, PHYSFS_fileLength(file) - i));
 						}
 						piece.send();
 						i += event.peer->mtu - 7;

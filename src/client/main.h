@@ -56,14 +56,11 @@
 // Workaround an issue with Windows specific preprocessor definitions
 #undef ERROR
 
-class Game;
-
-Game *GamePtr;
-
 void catchSignal(int signal);
 
 class Game {
 public:
+	static Game *gamePtr;
 	Game(void);
 	~Game(void);
 	bool init(void);

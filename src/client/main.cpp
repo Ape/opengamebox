@@ -19,6 +19,8 @@
 
 #include "main.h"
 
+Game *Game::gamePtr;
+
 int main(int argc, char **argv) {
 	// Get host address and port from command line arguments
 	std::string address;
@@ -63,7 +65,7 @@ int main(int argc, char **argv) {
 void catchSignal(int signal) {
 	std::cout << std::endl << "Exiting.." << std::endl;
 
-	GamePtr->quit();
+	Game::gamePtr->quit();
 }
 
 Game::Game() {
@@ -80,6 +82,8 @@ Game::Game() {
 	this->keyStatus = KeyStatus();
 
 	this->loadingPackage = false;
+
+	Game::gamePtr = this;
 }
 
 Game::~Game() {
