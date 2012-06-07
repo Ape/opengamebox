@@ -139,10 +139,10 @@ void Renderer::setScreenSize(Coordinates screenSize) {
 void Renderer::loadTexture(std::string texture) {
 	if (this->textures[texture] == nullptr) {
 		std::string path = texture + ".png";
-
 		ALLEGRO_FILE *file = al_fopen(path.c_str(), "r");
-		this->textures[texture] = al_load_bitmap_f(file, ".png");
-
+		if (file != nullptr) {
+			this->textures[texture] = al_load_bitmap_f(file, ".png");
+		}
 		if (this->textures[texture] == nullptr) {
 			std::string path = texture + ".jpg";
 			this->textures[texture] = al_load_bitmap(path.c_str());

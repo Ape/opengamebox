@@ -852,7 +852,7 @@ void Game::receivePacket(ENetEvent event) {
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
 																				static_cast<int>(length)), '.');
 						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
-
+						std::cout<<this->missingPackages.size()<<std::endl;;
 						if (!this->loadingPackage && !this->missingPackages.empty()){
 							Packet packet(this->connection);
 							packet.writeHeader(Packet::Header::PACKAGE_MISSING);
@@ -1107,6 +1107,7 @@ void Game::receivePacket(ENetEvent event) {
 			}
 
 			case Packet::Header::FILE_TRANSFER: {
+				std::cout<<"filetransfer"<<std::cout;
 				if (packet.readShort() == 0) {
 					this->loadingfile.size = packet.readInt();
 					this->loadingfile.data = new char[this->loadingfile.size];
@@ -1124,6 +1125,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (this->loadingfile.size == this->loadingfile.recieved) {
 					PHYSFS_File *file = PHYSFS_openWrite(this->loadingfile.name.c_str());
 					PHYSFS_write(file, this->loadingfile.data, sizeof(char), this->loadingfile.size);
+					PHYSFS_flush(file);
 				}
 				break;
 			}

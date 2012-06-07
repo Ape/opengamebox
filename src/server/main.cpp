@@ -627,7 +627,6 @@ void Server::receivePacket(ENetEvent event) {
 			}
 
 			case Packet::Header::PACKAGE_MISSING: {
-				Packet packet(event.packet);
 				std::string package = packet.readString();
 				//Todo try to send it
 				std::cout<< this->clients.find(*id)->second->getNick() << " is missing package "<<package<<std::endl;

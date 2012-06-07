@@ -21,25 +21,30 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list
 	// TODO: Load object information from a file
 
 	this->package = package;
+	bool exsist = false;
 	std::stringstream settingFile(utils::getTextFile(package, "package.txt"));
-	try{
-		this->settings = new Settings(&settingFile);
-	}
-	catch(libconfig::FileIOException &e) {
-		std::cout<<"Warning: Package "<<package<<" not found."<<std::endl;
-		missingPackages->push_back(package);
-	}
-	catch(libconfig::ParseException &e) {
-		std::cout<<"Warning: package "<<package<<"is invalid."<<std::endl;
-		missingPackages->push_back(package);
+	if (settingFile.str() != "") {
+		exsist = true;
+		try{
+			this->settings = new Settings(&settingFile);
+		}
+		catch(libconfig::ParseException &e) {
+			std::cout<<"Warning: package "<<package<<"is invalid."<<std::endl;
+			missingPackages->push_back(package);
+			exsist = false;
+		}
 	}
 	this->objectClass = objectClass;
 	this->name = "Object";
 	this->gridSize = Vector2(0.0f, 0.0f);
 
-	std::vector<std::string> dependences = this->settings->getList<std::string>("package/dependences");
-	if (dependences.size() > 0){
-		this->checkDependency(dependences, missingPackages);
+	if (exsist) {
+		std::vector<std::string> dependences = this->settings->getList<std::string>("package/dependences");
+		if (dependences.size() > 0){
+			this->checkDependency(dependences, missingPackages);
+		}
+	} else {
+		missingPackages->push_back(package);
 	}
 	missingPackages->unique();
 	missingPackages->sort();
