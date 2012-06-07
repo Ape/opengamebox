@@ -25,6 +25,7 @@
 
 #include "vector2.h"
 #include "settings.h"
+#include "utils.h"
 
 class ObjectClass {
 public:

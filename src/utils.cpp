@@ -41,3 +41,22 @@ unsigned int utils::hexStringToInt(std::string string) {
 	stream >> std::hex >> i;
 	return i;
 }
+
+std::string utils::getTextFile(std::string package, std::string path){
+	PHYSFS_addToSearchPath(("data/" + package + ".zip").c_str(), 1);
+	std::string str;
+	if (PHYSFS_exists((package + "/" + path).c_str())) {
+		PHYSFS_file* file = PHYSFS_openRead((package + "/" + path).c_str());
+		char *buf;
+		buf = new char[PHYSFS_fileLength(file) + 1];
+		buf[PHYSFS_fileLength(file)] = 0x00;
+		int readbytes = PHYSFS_read(file, buf, 1, PHYSFS_fileLength(file));
+		if (readbytes != PHYSFS_fileLength(file)) {
+			std::cout<< "failed to read data/" << package << ".zip/" << path<<std::endl;
+			return "";
+		}
+		str = std::string(buf);
+		PHYSFS_close(file);
+	}
+	return str;
+}

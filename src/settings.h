@@ -38,6 +38,7 @@ public:
 class Settings {
 public:
 	Settings(std::string file);
+	Settings(std::stringstream *stream);
 
 	template<class T>
 	T getValue(std::string path) const {

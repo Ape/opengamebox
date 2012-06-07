@@ -28,7 +28,7 @@ Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, 
 	this->owner       = nullptr;
 	this->rotation    = 0.0f;
 
-	this->image = "data/" + this->objectClass->getPackage() + "/objects/" + this->objectClass->getObjectClass() + "/" + this->objectId;
+	this->image = this->objectClass->getPackage() + "/objects/" + this->objectClass->getObjectClass() + "/" + this->objectId;
 	this->stackDelta = Vector2(4.0f, 0.0f);
 
 	this->animationTime = 0.0f;

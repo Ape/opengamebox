@@ -30,3 +30,12 @@ Settings::Settings(std::string file) {
 		throw e;
 	}
 }
+
+Settings::Settings(std::stringstream *stream) {
+	try {
+		this->config.readString(stream->str());
+	} catch (const libconfig::ParseException &e) {
+		std::cout << "Error: Couldn't parse the config file at " << e.getFile() << ":" << e.getLine() << " - " << e.getError() << std::endl;
+		throw e;
+	}
+}

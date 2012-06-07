@@ -24,6 +24,13 @@ int main(int argc, char **argv) {
 	std::string address;
 	int port;
 
+	//Unix-like systems such as Linux _need_ to pass argv[0] from main() in here.
+	if (PHYSFS_init(argv[0]) == 0) {
+		std::cout<<"Failed to initialize physfs"<<std::cout;
+		return EXIT_FAILURE;
+	}
+	PHYSFS_setWriteDir("data/");
+
 	Game game;
 	if (!game.init()) {
 		return EXIT_FAILURE;
@@ -74,11 +81,16 @@ Game::~Game() {
 }
 
 bool Game::init() {
+
+
 	// Initialize Allegro
 	if (! al_init()) {
 		std::cerr << "Error: Failed to initialize Allegro!" << std::endl;
 		return false;
 	}
+
+	al_set_physfs_file_interface();
+	PHYSFS_addToSearchPath(".", 1);
 
 	// Reset frame timestamp
 	this->previousTime = al_get_time();
@@ -828,7 +840,7 @@ void Game::receivePacket(ENetEvent event) {
 																				static_cast<int>(length)), '.');
 						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
 
-						if (!this->loadingPackage && this->missingPackages.empty()){
+						if (!this->loadingPackage && !this->missingPackages.empty()){
 							Packet packet(this->connection);
 							packet.writeHeader(Packet::Header::PACKAGE_MISSING);
 							packet.writeString(this->missingPackages.front());
@@ -1253,11 +1265,13 @@ void Game::loadScript(std::string script) {
 	if (scriptPath.size() == 1 || scriptPath.size() == 2) {
 		this->addMessage("Running script '" + script + "'.");
 
-		std::ifstream file;
+		std::istringstream file;
 		if (scriptPath.size() == 1) {
-			file.open("scripts/" + scriptPath.at(0) + ".txt");
+			std::ifstream scriptFile;
+			scriptFile.open("scripts/" + scriptPath.at(0) + ".txt");
+			file.str(std::string((std::istreambuf_iterator<char>(scriptFile)), std::istreambuf_iterator<char>()));
 		} else { // scriptPath.size() == 2
-			file.open("data/" + scriptPath.at(0) + "/scripts/" + scriptPath.at(1) + ".txt");
+			file.str(utils::getTextFile(scriptPath.at(0), "scripts/" + scriptPath.at(1) + ".txt"));
 		}
 
 		std::string line;
@@ -1270,7 +1284,6 @@ void Game::loadScript(std::string script) {
 			}
 		}
 
-		file.close();
 	} else {
 		this->addMessage("Could not run script '" + script + "'.", MessageType::ERROR);
 	}

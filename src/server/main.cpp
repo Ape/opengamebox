@@ -28,6 +28,13 @@ int main(int argc, char **argv) {
 		port = 0;
 	}
 
+	//Unix-like systems such as Linux _need_ to pass argv[0] from main() in here.
+	if (PHYSFS_init(argv[0]) == 0) {
+		std::cout<<"Failed to initialize physfs"<<std::cout;
+		return EXIT_FAILURE;
+	}
+	PHYSFS_setWriteDir("data/");
+
 	Server server = Server(port);
 	serverPtr = &server;
 

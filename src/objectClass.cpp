@@ -21,10 +21,11 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list
 	// TODO: Load object information from a file
 
 	this->package = package;
+	std::stringstream settingFile(utils::getTextFile(package, "package.txt"));
 	try{
-		this->settings = new Settings("data/" + package + "/package.txt");
+		this->settings = new Settings(&settingFile);
 	}
-	catch(libconfig::FileIOException &e){
+	catch(libconfig::FileIOException &e) {
 		std::cout<<"Warning: Package "<<package<<" not found."<<std::endl;
 		missingPackages->push_back(package);
 	}
@@ -43,8 +44,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list
 	missingPackages->unique();
 	missingPackages->sort();
 
-	std::ifstream file;
-	file.open("data/" + this->package + "/objects/" + this->objectClass + ".txt", std::ios::in);
+	std::ifstream file(utils::getTextFile(package, "objects/" + this->objectClass + ".txt"));
 
 	std::string line;
 	while (file.good()) {
@@ -60,7 +60,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list
 			if (value.at(0) == '/') {
 				this->flipsideImage = "data" + value;
 			} else {
-				this->flipsideImage = "data/" + this->package + "/objects/" + value;
+				this->flipsideImage = "" + this->package + "/objects/" + value;
 			}
 		} else if (this->parseLineFloat(line, "gridwidth", valueFloat)) {
 			this->gridSize.x = valueFloat;
@@ -123,8 +123,9 @@ bool ObjectClass::parseLineFloat(std::string line, std::string field, float &val
 void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::list<std::string> *missingPackages){
 	for (auto dependency : dependecies) {
 		std::vector<std::string> newDependencies;
+		std::stringstream settingFile(utils::getTextFile(dependency, "package.txt"));
 		try {
-			Settings *setting = new Settings("data/" + dependency + "/package.txt");
+			Settings *setting = new Settings(&settingFile);
 			newDependencies = this->settings->getList<std::string>("package/dependences");
 			delete setting;
 		}

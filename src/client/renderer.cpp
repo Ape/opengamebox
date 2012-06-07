@@ -40,7 +40,8 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
         std::cerr << "Failed to initialize fonts!" << std::endl;
     }
 
-    this->font = al_load_ttf_font("res/LiberationSans-Regular.ttf", 16, 0);
+	ALLEGRO_FILE *fontFile = al_fopen("res/LiberationSans-Regular.ttf", "r");
+    this->font = al_load_ttf_font_f(fontFile, "LiberationSans-Regular", 16, 0);
 
     // Initialize additional rendering libraries
     if (! al_init_image_addon()) {
@@ -138,7 +139,9 @@ void Renderer::setScreenSize(Coordinates screenSize) {
 void Renderer::loadTexture(std::string texture) {
 	if (this->textures[texture] == nullptr) {
 		std::string path = texture + ".png";
-		this->textures[texture] = al_load_bitmap(path.c_str());
+
+		ALLEGRO_FILE *file = al_fopen(path.c_str(), "r");
+		this->textures[texture] = al_load_bitmap_f(file, ".png");
 
 		if (this->textures[texture] == nullptr) {
 			std::string path = texture + ".jpg";

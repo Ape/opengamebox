@@ -24,8 +24,8 @@ else(DEBUG)
 endif(DEBUG)
 
 ### External libraries ###
-set(commonLinkLibs enet config++)
-set(clientLinkLibs allegro allegro_image allegro_font allegro_ttf allegro_primitives allegro_color)
+set(commonLinkLibs enet config++ physfs)
+set(clientLinkLibs allegro allegro_image allegro_font allegro_ttf allegro_primitives allegro_color allegro_physfs)
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 link_directories(${PROJECT_BINARY_DIR}/lib)
