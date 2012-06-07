@@ -29,6 +29,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <csignal>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -55,6 +56,12 @@
 // Workaround an issue with Windows specific preprocessor definitions
 #undef ERROR
 
+class Game;
+
+Game *GamePtr;
+
+void catchSignal(int signal);
+
 class Game {
 public:
 	Game(void);
@@ -66,6 +73,7 @@ public:
 	bool connectMasterServer(std::string address, int port);
 
 	int run(void);
+	void quit(void);
 
 	void sendChat(std::string text);
 	std::string getSentMessage(size_t index);
@@ -138,7 +146,7 @@ private:
 	Vector2 moveScreenStart;
 
 	void mainLoop(void);
-	void quit(void);
+
 	void disconnect(void);
 	void disconnectMasterServer(void);
 	void dispose(void);

@@ -60,6 +60,12 @@ int main(int argc, char **argv) {
 	}
 }
 
+void catchSignal(int signal) {
+	std::cout << std::endl << "Exiting.." << std::endl;
+
+	GamePtr->quit();
+}
+
 Game::Game() {
 	this->settings = new Settings("opengamebox.cfg");
 	this->state = State::INITIALIZING;
@@ -81,7 +87,8 @@ Game::~Game() {
 }
 
 bool Game::init() {
-
+	// Catch SIGINT
+	signal(SIGINT, catchSignal);
 
 	// Initialize Allegro
 	if (! al_init()) {
