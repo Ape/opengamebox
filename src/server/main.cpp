@@ -641,7 +641,7 @@ void Server::receivePacket(ENetEvent event) {
 
 					char *buf;
 					buf = new char[PHYSFS_fileLength(file)];
-					PHYSFS_read(file, buf, 1, PHYSFS_fileLength(file))
+					PHYSFS_read(file, buf, 1, PHYSFS_fileLength(file));
 					int i = 0;
 					short number = 1;
 					while(i < PHYSFS_fileLength(file)) {

@@ -1126,6 +1126,7 @@ void Game::receivePacket(ENetEvent event) {
 					file.open("data/" + this->loadingfile.name + ".zip", std::ios::out | std::ios::binary);
 					file << std::string(this->loadingfile.data, this->loadingfile.size);
 					file.close();
+					this->addMessage("Downloaded package " + this->loadingfile.name);
 				}
 				break;
 			}
