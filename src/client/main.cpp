@@ -1100,6 +1100,28 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
+			case Packet::Header::FILE_TRANSFER: {
+				if (packet.readShort() == 0) {
+					this->loadingfile.size = packet.readInt();
+					this->loadingfile.data = new char[this->loadingfile.size];
+					this->loadingfile.name = packet.readString();
+					this->loadingfile.recieved = 0;
+				} else {
+					int ofset = packet.readInt();
+					int size = packet.readInt();
+					std::string tmp = packet.readString();
+					for (unsigned int i = 0; i < tmp.size(); i++) {
+						this->loadingfile.data[ofset + i] = tmp.at(i);
+					}
+					this->loadingfile.recieved += size;
+				}
+				if (this->loadingfile.size == this->loadingfile.recieved) {
+					PHYSFS_File *file = PHYSFS_openWrite(this->loadingfile.name.c_str());
+					PHYSFS_write(file, this->loadingfile.data, sizeof(char), this->loadingfile.size);
+				}
+				break;
+			}
+
 			default: {
 				throw PacketException("Invalid packet header.");
 			}

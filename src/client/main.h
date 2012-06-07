@@ -106,6 +106,13 @@ private:
 
 	bool loadingPackage;
 	std::list<std::string> missingPackages;
+	struct File {
+		std::string name;
+		int size;
+		char* data;
+		int recieved;
+	};
+	File loadingfile;
 
 	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;

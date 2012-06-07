@@ -59,6 +59,7 @@ public:
 
 		//Files and packages
 		PACKAGE_MISSING = 0x60, // Package not found
+		FILE_TRANSFER   = 0x61, // Transfer missing file
 
 		// Master server communication
 		MS_QUERY    = 0xC0, // Request the server list
