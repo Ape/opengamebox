@@ -104,7 +104,7 @@ private:
 	ObjectClassManager objectClassManager;
 
 	bool loadingPackage;
-	std::list<std::string> missingPackages;
+	std::set<std::string> missingPackages;
 	struct File {
 		std::string name;
 		int size;

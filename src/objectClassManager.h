@@ -20,6 +20,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 
 #include "objectClass.h"
 
@@ -28,7 +29,7 @@ public:
 	ObjectClassManager(void);
 	~ObjectClassManager(void);
 
-	ObjectClass* getObjectClass(std::string package, std::string objectClass, std::list<std::string> *missingPackages);
+	ObjectClass* getObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages);
 
 private:
 	std::map<std::string, std::map<std::string, ObjectClass*>*> packages;

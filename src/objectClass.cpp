@@ -17,7 +17,7 @@
 
 #include "objectClass.h"
 
-ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list<std::string> *missingPackages) {
+ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages) {
 	// TODO: Load object information from a file
 
 	this->package = package;
@@ -30,7 +30,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list
 		}
 		catch(libconfig::ParseException &e) {
 			std::cout<<"Warning: package "<<package<<"is invalid."<<std::endl;
-			missingPackages->push_back(package);
+			missingPackages->insert(package);
 			exsist = false;
 		}
 	}
@@ -44,10 +44,8 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::list
 			this->checkDependency(dependences, missingPackages);
 		}
 	} else {
-		missingPackages->push_back(package);
+		missingPackages->insert(package);
 	}
-	missingPackages->unique();
-	missingPackages->sort();
 
 	std::ifstream file(utils::getTextFile(package, "objects/" + this->objectClass + ".txt"));
 
@@ -125,7 +123,7 @@ bool ObjectClass::parseLineFloat(std::string line, std::string field, float &val
 	}
 }
 
-void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::list<std::string> *missingPackages){
+void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::set<std::string> *missingPackages){
 	for (auto dependency : dependecies) {
 		std::vector<std::string> newDependencies;
 		std::stringstream settingFile(utils::getTextFile(dependency, "package.txt"));
@@ -138,15 +136,15 @@ void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::lis
 		//TODO: Download from server
 		catch(libconfig::FileIOException &e){
 			std::cout<<"Warning: Dependecy package "<<dependency<<" not found."<<std::endl;
-			missingPackages->push_back(dependency);
+			missingPackages->insert(dependency);
 		}
 		catch(libconfig::ParseException &e) {
 			std::cout<<"Warning: Dependecy package "<<dependency<<" invalid."<<std::endl;
-			missingPackages->push_back(dependency);
+			missingPackages->insert(dependency);
 		}
 		catch(SettingsException &e) {
 			std::cout<<"Warning: Dependecy package "<<dependency<<" invalid."<<std::endl;
-			missingPackages->push_back(dependency);
+			missingPackages->insert(dependency);
 		}
 		if (newDependencies.size() > 0) {
 			this->checkDependency(newDependencies, missingPackages);

@@ -852,12 +852,12 @@ void Game::receivePacket(ENetEvent event) {
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
 																				static_cast<int>(length)), '.');
 						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
-						std::cout<<this->missingPackages.size()<<std::endl;;
 						if (!this->loadingPackage && !this->missingPackages.empty()){
-							Packet packet(this->connection);
-							packet.writeHeader(Packet::Header::PACKAGE_MISSING);
-							packet.writeString(this->missingPackages.front());
-							packet.send();
+							this->loadingPackage = true;
+							Packet reply(this->connection);
+							reply.writeHeader(Packet::Header::PACKAGE_MISSING);
+							reply.writeString(*this->missingPackages.begin());
+							reply.send();
 						}
 
 						Object *object = new Object(objectClass, objectData.at(2), objId, location);
@@ -1127,6 +1127,21 @@ void Game::receivePacket(ENetEvent event) {
 					file << std::string(this->loadingfile.data, this->loadingfile.size);
 					file.close();
 					this->addMessage("Downloaded package " + this->loadingfile.name);
+
+					this->loadingPackage = false;
+					this->missingPackages.erase(this->loadingfile.name);
+					delete this->loadingfile.data;
+					this->loadingfile.name = "";
+					this->loadingfile.size = 0;
+					this->loadingfile.recieved = 0;
+
+					if (!this->missingPackages.empty()) {
+						this->loadingPackage = true;
+						Packet reply(this->connection);
+						reply.writeHeader(Packet::Header::PACKAGE_MISSING);
+						reply.writeString(*this->missingPackages.begin());
+						reply.send();
+					}
 				}
 				break;
 			}

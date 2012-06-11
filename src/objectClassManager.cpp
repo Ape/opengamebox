@@ -31,7 +31,7 @@ ObjectClassManager::~ObjectClassManager() {
 	}
 }
 
-ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string objectClass, std::list<std::string> *missingPackages) {
+ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages) {
 	auto packageIterator = this->packages.find(package);
 	std::map<std::string, ObjectClass*> *selectedPackage;
 
