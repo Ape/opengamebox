@@ -137,7 +137,7 @@ void Renderer::setScreenSize(Coordinates screenSize) {
 }
 
 void Renderer::loadTexture(std::string texture) {
-	if (this->textures[texture] == nullptr) {
+	if (this->textures[texture] == nullptr || (this->textures[texture] == this->textures["gfx/error"] && texture != "gfx/error")) {
 		std::string path = texture + ".png";
 		ALLEGRO_FILE *file = al_fopen(path.c_str(), "r");
 		if (file != nullptr) {
@@ -145,8 +145,11 @@ void Renderer::loadTexture(std::string texture) {
 		}
 		if (this->textures[texture] == nullptr) {
 			std::string path = texture + ".jpg";
+			ALLEGRO_FILE *file = al_fopen(path.c_str(), "r");
 			this->textures[texture] = al_load_bitmap(path.c_str());
-
+			if (file != nullptr) {
+				this->textures[texture] = al_load_bitmap_f(file, ".jpg");
+			}
 			if (this->textures[texture] == nullptr) {
 				if (texture != "gfx/error") {
 					std::cout << "Error: Texture " << texture << ".{png|jpg}" << " could not be loaded." << std::endl;

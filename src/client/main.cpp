@@ -1127,6 +1127,7 @@ void Game::receivePacket(ENetEvent event) {
 					file << std::string(this->loadingfile.data, this->loadingfile.size);
 					file.close();
 					this->addMessage("Downloaded package " + this->loadingfile.name);
+					PHYSFS_addToSearchPath(("data/" + this->loadingfile.name + ".zip").c_str(), 1);
 
 					this->loadingPackage = false;
 					this->missingPackages.erase(this->loadingfile.name);
