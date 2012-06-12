@@ -29,5 +29,4 @@ Network:
 		- master server for internet games
 			- ability to register and update a server
 		- lan broadcast
-	- downloading objects from the server
 	- uploading objects to the server

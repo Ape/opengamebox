@@ -1129,6 +1129,12 @@ void Game::receivePacket(ENetEvent event) {
 					this->addMessage("Downloaded package " + this->loadingfile.name);
 					PHYSFS_addToSearchPath(("data/" + this->loadingfile.name + ".zip").c_str(), 1);
 
+					for (auto object : this->objects) {
+						if (object.second->getObjectClass()->getPackage() == this->loadingfile.name) {
+							object.second->initForClient(this->renderer);
+						}
+					}
+
 					this->loadingPackage = false;
 					this->missingPackages.erase(this->loadingfile.name);
 					delete this->loadingfile.data;
