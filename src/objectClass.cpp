@@ -47,8 +47,8 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 		missingPackages->insert(package);
 	}
 
-	std::ifstream file(utils::getTextFile(package, "objects/" + this->objectClass + ".txt"));
-
+	std::stringstream file;
+	file.str(utils::getTextFile(package, "objects/" + this->objectClass + ".txt"));
 	std::string line;
 	while (file.good()) {
 		getline(file, line);
@@ -73,8 +73,6 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 			std::cout << "Warning: Could not parse '" << line << "' in " << this->objectClass << ".txt" << std::endl;
 		}
 	}
-
-	file.close();
 }
 
 ObjectClass::~ObjectClass() {
