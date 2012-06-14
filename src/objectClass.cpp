@@ -40,9 +40,9 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 	this->gridSize = Vector2(0.0f, 0.0f);
 
 	if (exsist) {
-		std::vector<std::string> dependences = this->settings->getList<std::string>("package/dependences");
-		if (dependences.size() > 0){
-			this->checkDependency(dependences, missingPackages);
+		std::vector<std::string> dependencies = this->settings->getList<std::string>("package/dependencies");
+		if (dependencies.size() > 0){
+			this->checkDependency(dependencies, missingPackages);
 		}
 	} else {
 		missingPackages->insert(package);
@@ -125,29 +125,30 @@ bool ObjectClass::parseLineFloat(std::string line, std::string field, float &val
 }
 
 void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::set<std::string> *missingPackages){
-	for (auto dependency : dependecies) {
+	for (auto &dependency : dependecies) {
 		std::vector<std::string> newDependencies;
 		std::stringstream settingFile(utils::getTextFile(dependency, "package.txt"));
+
 		try {
-			Settings *setting = new Settings(&settingFile);
-			newDependencies = this->settings->getList<std::string>("package/dependences");
-			delete setting;
-		}
-		//package not found or invalid
-		//TODO: Download from server
-		catch(libconfig::FileIOException &e){
-			std::cout<<"Warning: Dependecy package "<<dependency<<" not found."<<std::endl;
+			Settings newSettings(&settingFile);
+			newDependencies = newSettings.getList<std::string>("package/dependencies");
+		} catch (libconfig::FileIOException &e){
+			std::cout << "Warning: Dependecy package " << dependency << " not found." << std::endl;
+			missingPackages->insert(dependency);
+		} catch (libconfig::ParseException &e) {
+			std::cout << "Warning: Dependecy package " << dependency << " invalid." << std::endl;
+			missingPackages->insert(dependency);
+		} catch (SettingsException &e) {
+			std::cout << "Warning: Dependecy package " << dependency << " invalid." << std::endl;
 			missingPackages->insert(dependency);
 		}
-		catch(libconfig::ParseException &e) {
-			std::cout<<"Warning: Dependecy package "<<dependency<<" invalid."<<std::endl;
-			missingPackages->insert(dependency);
-		}
-		catch(SettingsException &e) {
-			std::cout<<"Warning: Dependecy package "<<dependency<<" invalid."<<std::endl;
-			missingPackages->insert(dependency);
-		}
+
 		if (newDependencies.size() > 0) {
+			std::cout << "###>" << std::endl;
+			for (auto &debugdency : newDependencies) {
+				std::cout << debugdency << std::endl;
+			}
+			std::cout << "###<" << std::endl;
 			this->checkDependency(newDependencies, missingPackages);
 		}
 	}

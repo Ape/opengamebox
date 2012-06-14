@@ -64,10 +64,10 @@ public:
 			throw SettingsException(std::string("Setting ") + path + " is not a list.");
 		}
 
-		for (int i = 0; setting.getLength(); ++i) {
+		for (int i = 0; i < setting.getLength(); ++i) {
 			T value;
 			std::ostringstream key;
-			key << path << "[" << i << "]";
+			key << path << ".[" << i << "]";
 
 			if (!this->config.lookupValue(key.str(), value)) {
 				throw SettingsException(std::string("Couldn't get a list for ") + path);
