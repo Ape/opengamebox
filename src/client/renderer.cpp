@@ -62,7 +62,7 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 }
 
 Renderer::~Renderer() {
-	for (auto& texture : this->textures) {
+	for (auto &texture : this->textures) {
 		if (texture.second != nullptr) {
 			al_destroy_bitmap(texture.second);
 			texture.second = nullptr;

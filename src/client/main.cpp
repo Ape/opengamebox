@@ -311,12 +311,12 @@ void Game::disconnectMasterServer() {
 
 void Game::dispose() {
 	// Dispose client information
-	for (auto& client : this->clients) {
+	for (auto &client : this->clients) {
 		delete client.second;
 	}
 
 	// Dispose all objects
-	for (auto& object : this->objects) {
+	for (auto &object : this->objects) {
 		delete object.second;
 	}
 
@@ -370,7 +370,7 @@ void Game::localEvents() {
 					std::string data;
 					data.push_back(net::PACKET_REMOVE);
 
-					for (auto& object : this->selectedObjects) {
+					for (auto &object : this->selectedObjects) {
 						net::dataAppendShort(data, object->getId());
 					}
 
@@ -386,7 +386,7 @@ void Game::localEvents() {
 					// If even one of the selected objects isn't owned by the player every selected object will be owned. If all of the
 					// objects are owned then all of the objects will be disowned.
 					bool owned = true;
- 					for (auto& object : this->selectedObjects) {
+ 					for (auto &object : this->selectedObjects) {
 						if (! object->isOwnedBy(this->clients.find(localClient)->second)) {
 							owned = false;
 
@@ -396,7 +396,7 @@ void Game::localEvents() {
 
 					data += ! owned;
 
-					for (auto& object : this->selectedObjects) {
+					for (auto &object : this->selectedObjects) {
 						if (owned) {
 							object->own(nullptr);
 						} else if (object->isOwnedBy(nullptr)) {
@@ -423,7 +423,7 @@ void Game::localEvents() {
 					data.push_back(net::PACKET_MOVE);
 
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
-					for (auto& object : this->selectedObjects) {
+					for (auto &object : this->selectedObjects) {
 						net::dataAppendShort(data, object->getId());
 						net::dataAppendVector2(data, nextLocation);
 
@@ -453,19 +453,18 @@ void Game::localEvents() {
 				this->keyStatus.screenRotateClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_E) {
 				if(this->selectedObjects.size() > 0) {
-					for(auto object : this->selectedObjects) {
+					for(auto &object : this->selectedObjects) {
 						std::string data;
 						data.push_back(net::PACKET_ROTATE);
 						net::dataAppendShort(data, object->getId());
 						data.push_back(0xfc); //-4 twos complement
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
-						//object->rotate(utils::PI / 2);
 					}
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_R) {
 				if(this->selectedObjects.size() > 0) {
-					for(auto object : this->selectedObjects) {
+					for(auto &object : this->selectedObjects) {
 						std::string data;
 						data.push_back(net::PACKET_ROTATE);
 						net::dataAppendShort(data, object->getId());
@@ -504,7 +503,7 @@ void Game::localEvents() {
 		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 		if (! this->dragging) {
-			for (auto& object : this->selectedObjects) {
+			for (auto &object : this->selectedObjects) {
 				object->select(nullptr);
 			}
 			this->selectedObjects.clear();
@@ -512,17 +511,19 @@ void Game::localEvents() {
 			std::string data;
 			data.push_back(net::PACKET_SELECT);
 
-			for (auto object = this->objectOrder.rbegin(); object != this->objectOrder.rend(); ++object) {
-				if ((*object)->isSelectedBy(nullptr) && ((*object)->isOwnedBy(nullptr) || (*object)->isOwnedBy(this->clients.find(localClient)->second))
-				    && (*object)->testLocation(location)) {
+			for (auto objectIterator = this->objectOrder.rbegin(); objectIterator != this->objectOrder.rend(); ++objectIterator) {
+				Object *object = *objectIterator;
+
+				if (object->isSelectedBy(nullptr) && (object->isOwnedBy(nullptr) || object->isOwnedBy(this->clients.find(localClient)->second))
+				    && object->testLocation(location)) {
 					std::set<Object*> visited;
-					this->selectedObjects = (*object)->getObjectsAbove(visited);
+					this->selectedObjects = object->getObjectsAbove(visited);
 
 					if (this->selectedObjects.size() == 1 && this->selectedObjects.front() == nullptr) {
 						this->selectedObjects.clear();
 					}
 
-					for (auto& objectA : this->selectedObjects) {
+					for (auto &objectA : this->selectedObjects) {
 						net::dataAppendShort(data, objectA->getId());
 
 						net::removeObject(this->objectOrder, objectA);
@@ -537,7 +538,7 @@ void Game::localEvents() {
 		}
 
 		if (!this->selectedObjects.empty()) {
-			for (auto& object : this->selectedObjects) {
+			for (auto &object : this->selectedObjects) {
 				if (object->testLocation(location)) {
 					this->dragging = true;
 					this->draggingStart = this->selectedObjects.front()->getLocation() - location;
@@ -546,7 +547,7 @@ void Game::localEvents() {
 				}
 			}
 		} else { //Boxselect
-			for (auto& object : this->selectedObjects) {
+			for (auto &object : this->selectedObjects) {
 				object->select(nullptr);
 			}
 			this->selectedObjects.clear();
@@ -561,7 +562,7 @@ void Game::localEvents() {
 			// If even one of the selected objects isn't flipped every selected object will be flipped. If all of the
 			// objects are flipped then all of the objects will be unflipped.
 			bool flipped = true;
-			for (auto& object : this->selectedObjects) {
+			for (auto &object : this->selectedObjects) {
 				if (! object->isFlipped()) {
 					flipped = false;
 
@@ -571,7 +572,7 @@ void Game::localEvents() {
 
 			data += ! flipped;
 
-			for (auto& object : this->selectedObjects) {
+			for (auto &object : this->selectedObjects) {
 				object->setFlipped(! flipped);
 
 				net::dataAppendShort(data, object->getId());
@@ -591,7 +592,7 @@ void Game::localEvents() {
 			std::string data;
 			data.push_back(net::PACKET_MOVE);
 
-			for (auto& object : this->selectedObjects) {
+			for (auto &object : this->selectedObjects) {
 				net::dataAppendShort(data, object->getId());
 				net::dataAppendVector2(data, object->getLocation());
 
@@ -623,7 +624,7 @@ void Game::localEvents() {
 				higher.y = location.y;
 			}
 
-			for (auto& object : this->objects) {
+			for (auto &object : this->objects) {
 				if ((object.second->isOwnedBy(this->clients.find(localClient)->second) || object.second->isSelectedBy(this->clients.find(localClient)->second))
 						|| (object.second->isOwnedBy(nullptr) && object.second->isSelectedBy(nullptr))) {
 					std::list<Vector2> corners = object.second->getCorners();
@@ -678,7 +679,7 @@ void Game::localEvents() {
 			}
 
 			Vector2 delta = location - this->selectedObjects.front()->getLocation();
-			for (auto& object : this->selectedObjects) {
+			for (auto &object : this->selectedObjects) {
 				Vector2 destination = object->getLocation() + delta;
 
 				if (destination.x > net::MAX_FLOAT) {
@@ -817,7 +818,7 @@ void Game::receivePacket(ENetEvent event) {
 					this->addMessage(this->clients[event.packet->data[1]]->getColoredNick() + " has left the server!");
 
 					// Release selected and owned objects
-					for (auto& object : this->objects) {
+					for (auto &object : this->objects) {
 						if (object.second->isSelectedBy(this->clients[event.packet->data[1]])) {
 							object.second->select(nullptr);
 						}
@@ -946,7 +947,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (event.packet->dataLength >= 2) {
 					Client *client = this->clients.find(event.packet->data[1])->second;
 
-					for (auto& object : this->objects) {
+					for (auto &object : this->objects) {
 						if (object.second->isSelectedBy(client)) {
 							object.second->select(nullptr);
 						}
@@ -1146,7 +1147,7 @@ void Game::receivePacket(ENetEvent event) {
 					this->addMessage("Downloaded package " + this->loadingfile.name);
 					PHYSFS_addToSearchPath(("data/" + this->loadingfile.name + ".zip").c_str(), 1);
 
-					for (auto object : this->objects) {
+					for (auto &object : this->objects) {
 						if (object.second->getObjectClass()->getPackage() == this->loadingfile.name) {
 							object.second->initForClient(this->renderer);
 						}
@@ -1197,7 +1198,7 @@ void Game::addMessage(std::string text, MessageType type) {
 	Message message;
 	message.message = text;
 	message.time = previousTime;
-	std::cout << message.message << std::endl; // TODO: Remove colors
+	std::cout << message.message << std::endl;
 	this->messages.push_back(message);
 }
 
@@ -1313,12 +1314,13 @@ void Game::chatCommand(std::string commandstr) {
 		float x = 0.0f;
 		std::string data;
 		data.push_back(net::PACKET_CREATE);
-		for(auto object : this->dCreateBuffer)
-		{
+
+		for(auto &object : this->dCreateBuffer) {
 			data += this->createObject(object, Vector2(x, 0.0f));
 
 			x += 4;
 		}
+
 		net::sendCommand(this->connection, data.c_str(), data.size());
 		this->dCreateBuffer.clear();
 	} else if (parameters.at(0) == "roll") {
@@ -1385,7 +1387,7 @@ void Game::saveScript(std::string name) {
 	std::ofstream file;
 	file.open("scripts/" + name + ".txt");
 
-	for (auto& object : this->objectOrder) {
+	for (auto &object : this->objectOrder) {
 		file << "create " << object->getFullId() << " " << object->getLocation().x << " " << object->getLocation().y << std::endl;
 	}
 
@@ -1406,7 +1408,7 @@ std::string Game::createObject(std::string objectId, Vector2 location) {
 }
 
 void Game::checkObjectOrder() {
-	for (auto& object : this->objectOrder) {
+	for (auto &object : this->objectOrder) {
 		object->checkIfUnder(this->objectOrder);
 	}
 }
@@ -1443,7 +1445,7 @@ void Game::update() {
 	this->previousTime = al_get_time();
 
 	// Animate objects
-	for (auto& object : this->objectOrder) {
+	for (auto &object : this->objectOrder) {
 		object->animate(this->deltaTime);
 	}
 
@@ -1501,7 +1503,7 @@ void Game::renderGame() {
 	// Draw the table area
 	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), Color(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
 
-	for (auto& object : this->objectOrder) {
+	for (auto &object : this->objectOrder) {
 		object->draw(this->renderer, this->clients.find(this->localClient)->second);
 	}
 }
@@ -1518,7 +1520,7 @@ void Game::renderUI() {
 	}
 
 	int i = 0;
-	for (auto& client : this->clients) {
+	for (auto &client : this->clients) {
 		std::string text;
 		if (client.second->getPing() != 65535) {
 			text = client.second->getColoredNick() + " (" + utils::toString(client.second->getPing()) + " ms)";
@@ -1540,7 +1542,7 @@ void Game::renderUI() {
 	this->renderer->drawText("FPS: " + utils::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
 	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f));
 
-	for (auto& widget : this->widgets) {
+	for (auto &widget : this->widgets) {
 		widget->draw(this->renderer);
 	}
 

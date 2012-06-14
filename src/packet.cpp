@@ -17,6 +17,19 @@
 
 #include "packet.h"
 
+PacketException::PacketException(std::string message)
+: std::runtime_error(message) {}
+
+Packet::Packet(ENetHost *connection, bool isReliable)
+: connection(connection),
+  peer(nullptr),
+  isReliable(isReliable) {}
+
+Packet::Packet(ENetPeer *peer, bool isReliable)
+: connection(nullptr),
+  peer(peer),
+  isReliable(isReliable) {}
+
 Packet::Packet(ENetPacket *packet)
 : readCursor(0) {
 	this->data.assign(reinterpret_cast<char*>(packet->data), packet->dataLength);

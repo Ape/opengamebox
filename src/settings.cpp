@@ -18,6 +18,9 @@
 
 #include "settings.h"
 
+SettingsException::SettingsException(std::string message)
+: std::runtime_error(message) {}
+
 Settings::Settings(std::string file) {
 	// Read the file. If there is an error, report it.
 	try {

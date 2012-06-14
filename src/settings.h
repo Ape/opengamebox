@@ -29,11 +29,8 @@
 
 class SettingsException : public std::runtime_error {
 public:
-	SettingsException(std::string message)
-	: std::runtime_error(message) {}
+	SettingsException(std::string message);
 };
-
-// TODO: Meaningful default values
 
 class Settings {
 public:

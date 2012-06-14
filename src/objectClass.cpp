@@ -19,8 +19,6 @@
 #include "objectClass.h"
 
 ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages) {
-	// TODO: Load object information from a file
-
 	this->package = package;
 	bool exsist = false;
 	std::stringstream settingFile(utils::getTextFile(package, "package.txt"));
@@ -144,11 +142,6 @@ void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::set
 		}
 
 		if (newDependencies.size() > 0) {
-			std::cout << "###>" << std::endl;
-			for (auto &debugdency : newDependencies) {
-				std::cout << debugdency << std::endl;
-			}
-			std::cout << "###<" << std::endl;
 			this->checkDependency(newDependencies, missingPackages);
 		}
 	}

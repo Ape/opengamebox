@@ -28,8 +28,7 @@
 
 class PacketException : public std::runtime_error {
 public:
-	PacketException(std::string message)
-	: std::runtime_error(message) {}
+	PacketException(std::string message);
 };
 
 class Packet {
@@ -72,16 +71,10 @@ public:
 	};
 
 	// Broadcast
-	Packet(ENetHost *connection, bool isReliable = true)
-	: connection(connection),
-	  peer(nullptr),
-	  isReliable(isReliable) {}
+	Packet(ENetHost *connection, bool isReliable = true);
 
 	// Unicast
-	Packet(ENetPeer *peer, bool isReliable = true)
-	: connection(nullptr),
-	  peer(peer),
-	  isReliable(isReliable) {}
+	Packet(ENetPeer *peer, bool isReliable = true);
 
 	// Received packet
 	Packet(ENetPacket *packet);

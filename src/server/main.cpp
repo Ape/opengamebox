@@ -95,14 +95,14 @@ int Server::run() {
 	this->mainLoop();
 
 	// Disconnect all remaining clients
-	for (auto& client : this->clients) {
+	for (auto &client : this->clients) {
 		enet_peer_disconnect_now(client.second->getPeer(), 0);
 		delete static_cast<unsigned char*>(client.second->getPeer()->data);
 		delete client.second;
 	}
 
 	// Dispose all objects
-	for (auto& object : this->objects) {
+	for (auto &object : this->objects) {
 		delete object.second;
 	}
 
@@ -182,7 +182,7 @@ void Server::networkEvents() {
 					net::sendCommand(this->connection, data, 2);
 
 					// Release selected and owned objects
-					for (auto& object : this->objects) {
+					for (auto &object : this->objects) {
 						if (object.second->isSelectedBy(this->clients[*id])) {
 							object.second->select(nullptr);
 						}
@@ -247,7 +247,7 @@ void Server::receivePacket(ENetEvent event) {
 						}
 
 						// Send the list of objects
-						for (auto& object : this->objects) {
+						for (auto &object : this->objects) {
 							std::string data;
 							data += net::PACKET_CREATE;
 							data += 255;
@@ -290,7 +290,7 @@ void Server::receivePacket(ENetEvent event) {
 			case Packet::Header::LOGIN: {
 				if (this->settings->getValue<bool>("network.allowadmin")
 						&& packet.readString() == this->settings->getValue<std::string>("network.adminpassword")) {
-					std::cout << this->clients[*id]->getNick() << " logged in as admin." << std::endl;
+					std::cout << this->clients[*id]->getNick() << " logged in as an admin." << std::endl;
 
 					// TODO: Make the logged user an admin.
 				}
@@ -437,7 +437,7 @@ void Server::receivePacket(ENetEvent event) {
 					data += *id;
 					data.append(reinterpret_cast<char*>(event.packet->data + 1), event.packet->dataLength - 1);
 
-					for (auto& object : this->objects) {
+					for (auto &object : this->objects) {
 						if (object.second->isSelectedBy(this->clients.find(*id)->second)) {
 							object.second->select(nullptr);
 						}
@@ -595,7 +595,7 @@ void Server::receivePacket(ENetEvent event) {
 
 						std::vector<Object*> objects;
 						std::vector<Vector2> locations;
-						for (auto& object : this->objects) {
+						for (auto &object : this->objects) {
 							if (object.second->isSelectedBy(this->clients[*id])) {
 								objects.push_back(object.second);
 								locations.push_back(object.second->getLocation());
@@ -605,7 +605,7 @@ void Server::receivePacket(ENetEvent event) {
 						std::random_shuffle(objects.begin(), objects.end());
 
 						std::vector<Vector2>::size_type location = 0;
-						for (auto& object : objects) {
+						for (auto &object : objects) {
 							object->setLocation(locations.at(location));
 							net::dataAppendShort(data, object->getId());
 							net::dataAppendVector2(data, object->getLocation());

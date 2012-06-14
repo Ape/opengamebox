@@ -1,13 +1,11 @@
-General:
+New features:
+	- add README.txt and documentation
 	- ability to scroll received chat messages
 	- loading chat / command history from a file
-	- use member initialization lists
-	- clean up and optimize #include directives
-	- add README.txt
-	- fix segmentation fault on fallback texture disposal
-	- float support for Packet
-	- use Packet everywhere instead of old net.h functions
 	- ask the player about downloading new packages
+	- make it possible to save package only temporarily
+	- save packages with a better name
+		- core-1.0.0-6609ee81.zip
 	- new package related commands
 		- /list for listing the available packages
 		- /verify for verifying the checksum of a package
@@ -19,32 +17,41 @@ General:
 		- button, textarea, dialog with text and buttons
 		- menu
 		- server list
+	- admin status for users on server
+		- password authentication (work in progress)
+		- ability to kick players
+		- uploading new packages to the server
+	- game server to connect to a master server
+	- animations for rotations
+		- screen and objects
+	- background image
 
-Mechanics:
+Improvements:
 	- rewrite object ordering
 		- server must know the order
 		- fix performance issues
-	- fix shuffle
 	- flip whole selection, not individual objects
 	- (dis)owning objects should also flip them
 	- owned objects should be flipped when the owner disconnects
 	- better script saving
 		- flip status, private cards as flipped, multiobject commands
-	- admin status for users on server
-		- password authentication (work in progress)
-		- ability to kick players
-		- uploading new packages to the server
-	- connecting to a server should clean up old objects on the client
-
-Graphics:
-	- rotate screen with 90 degree steps
-	- (?) rotate temporary mouse coordinates when dragging an object
-	- animations for rotations
-		- screen and objects
-	- background image
+	- (?) merge move and flip packets
 	- nicer indicator for private objects
 		- (?) dashed border
+	- rotate screen with 90 degree steps
+	- remove color codes from terminal output
+	- add meaningful default values for config files
 
-Network:
-	- (?) merge move and flip packets
-	- game server to connect to a master server
+Bug fixes:
+	- fix segmentation fault on fallback texture disposal
+	- fix shuffle
+	- connecting to a server should clean up old objects on the client
+	- (?) rotate temporary mouse coordinates when dragging an object
+
+Clean up:
+	- use member initialization lists
+	- clean up and optimize #include directives
+	- use Packet everywhere instead of old net.h functions
+		- float support for Packet
+	- separate input handling to a new class from client/main.cpp
+	- check const correctness

@@ -135,7 +135,7 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited) {
 	if (this->selected == nullptr) {
 		allAbove.push_back(this);
 
-		for (auto& object : this->objectsAbove) {
+		for (auto &object : this->objectsAbove) {
 			if (visited.count(object) == 0 && object->owner == this->owner) {
 				std::list<Object*> objects = object->getObjectsAbove(visited);
 
@@ -161,7 +161,7 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited) {
 bool Object::checkIfUnder(std::vector<Object*> objectOrder) {
 	this->objectsAbove.clear();
 	bool thisFound = false;
-	for (auto& object : objectOrder) {
+	for (auto &object : objectOrder) {
 		if (! thisFound) {
 			if (object->getId() == this->getId()) {
 				thisFound = true;

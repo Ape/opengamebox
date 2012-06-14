@@ -23,8 +23,8 @@ ObjectClassManager::ObjectClassManager() {
 }
 
 ObjectClassManager::~ObjectClassManager() {
-	for (auto& package : this->packages) {
-		for (auto& objectClass : *package.second) {
+	for (auto &package : this->packages) {
+		for (auto &objectClass : *package.second) {
 			delete objectClass.second;
 		}
 

@@ -167,7 +167,7 @@ void MasterServer::receivePacket(ENetEvent event) {
 				Packet reply(event.peer);
 				reply.writeHeader(Packet::Header::MS_QUERY);
 
-				for (auto& server : this->servers) {
+				for (auto &server : this->servers) {
 					reply.writeString(server->address);
 					reply.writeShort(server->port);
 					reply.writeString(server->name);
