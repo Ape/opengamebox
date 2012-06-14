@@ -2,18 +2,37 @@ General:
 	- ability to scroll received chat messages
 	- loading chat / command history from a file
 	- use member initialization lists
+	- clean up and optimize #include directives
 	- add README.txt
 	- fix segmentation fault on fallback texture disposal
 	- float support for Packet
 	- use Packet everywhere instead of old net.h functions
+	- ask the player about downloading new packages
+	- new package related commands
+		- /list for listing the available packages
+		- /verify for verifying the checksum of a package
+		- /download for downloading a package
+	- tab completion for chat commands
+	- /help for listing all the commands with brief descriptions
+	- widgets
+		- button, textarea, dialog with text and buttons
+		- menu
+		- server list
 
 Mechanics:
+	- rewrite object ordering
+		- server must know the order
+		- fix performance issues
 	- fix shuffle
 	- flip whole selection, not individual objects
-	- fix object ordering bug
-	- server to know object ordering
+	- (dis)owning objects should also flip them
+	- owned objects should be flipped when the owner disconnects
 	- better script saving
 		- flip status, private cards as flipped, multiobject commands
+	- admin status on server
+		- password authentication
+		- ability to kick players
+		- uploading new packages to the server
 
 Graphics:
 	- rotate screen with 90 degree steps
@@ -21,12 +40,9 @@ Graphics:
 	- animations for rotations
 		- screen and objects
 	- background image
-	- graphical server browser
+	- nicer indicator for private objects
+		- (?) dashed border
 
 Network:
 	- (?) merge move and flip packets
-	- game list
-		- master server for internet games
-			- ability to register and update a server
-		- lan broadcast
-	- uploading objects to the server
+	- game server to connect to a master server
