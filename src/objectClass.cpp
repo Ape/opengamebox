@@ -61,10 +61,12 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 		} else if (this->parseLine(line, "name", value)) {
 			this->name = value;
 		} else if (this->parseLine(line, "flipside", value)) {
-			if (value.at(0) == '/') {
-				this->flipsideImage = "data" + value;
+			if (value.find(".") != std::string::npos) {
+				std::vector<std::string> path = utils::splitString(value, '.');
+				PHYSFS_addToSearchPath((path[0] + ".zip").c_str(), 1);
+				this->flipsideImage = path[0] + "/objects/" + path[1];
 			} else {
-				this->flipsideImage = "" + this->package + "/objects/" + value;
+				this->flipsideImage = this->package + "/objects/" + value;
 			}
 		} else if (this->parseLineFloat(line, "gridwidth", valueFloat)) {
 			this->gridSize.x = valueFloat;
