@@ -19,7 +19,7 @@
 #include "inputBox.h"
 
 InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen)
-                  : Widget(location, Vector2(width, 20.0f)) {
+: Widget(location, Vector2(width, 20.0f)) {
 	this->game = game;
 	this->send = send;
 	this->caption = caption;
@@ -29,6 +29,7 @@ InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string capt
 	this->maxLength = maxLen;
 	this->historyIndex = 0;
 }
+
 InputBox::~InputBox() {
 	al_ustr_free(this->text);
 }

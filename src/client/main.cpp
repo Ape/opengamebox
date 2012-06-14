@@ -169,7 +169,7 @@ bool Game::connect(std::string address, int port) {
 		this->disconnectMasterServer();
 	}
 
-	this->connection = enet_host_create (nullptr,          // Create a client host
+	this->connection = enet_host_create (nullptr,       // Create a client host
 	                                     1,             // Only allow 1 outgoing connection
 	                                     net::CHANNELS, // Number of channels
 	                                     0,             // Unlimited downstream bandwidth
@@ -627,7 +627,7 @@ void Game::localEvents() {
 						|| (object.second->isOwnedBy(nullptr) && object.second->isSelectedBy(nullptr))) {
 					std::list<Vector2> corners = object.second->getCorners();
 					bool selected = true;
-					for (auto corner : corners)
+					for (auto &corner : corners)
 					{
 						if (!(lower.x < corner.x && corner.x < higher.x && lower.y < corner.y && corner.y < higher.y)) {
 							selected = false;

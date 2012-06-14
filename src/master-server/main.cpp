@@ -213,13 +213,13 @@ void MasterServer::receivePacket(ENetEvent event) {
 				break;
 			}
 
-                        default: {
-                                throw PacketException("Invalid packet header.");
-                        }
-                }
-        } catch (PacketException &e) {
-                std::cout << "Debug: Received an invalid packet from" 
-                          << net::AddressToString(event.peer->address)
-                          << ": \"" << e.what() << "\"" << std::endl;
-        }
+			default: {
+				throw PacketException("Invalid packet header.");
+			}
+		}
+	} catch (PacketException &e) {
+		std::cout << "Debug: Received an invalid packet from" 
+				  << net::AddressToString(event.peer->address)
+				  << ": \"" << e.what() << "\"" << std::endl;
+	}
 }

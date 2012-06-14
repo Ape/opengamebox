@@ -29,28 +29,28 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 
 	// Initialize display
 	this->display = al_create_display(this->screenSize.x, this->screenSize.y);
-    if (! this->display) {
-        std::cerr << "Failed to create a display!" << std::endl;
-    }
-    al_acknowledge_resize(this->display);
+	if (! this->display) {
+		std::cerr << "Failed to create a display!" << std::endl;
+	}
+	al_acknowledge_resize(this->display);
 
 	// Initialize fonts
-    al_init_font_addon();
-    if (! al_init_ttf_addon()) {
-        std::cerr << "Failed to initialize fonts!" << std::endl;
-    }
+	al_init_font_addon();
+	if (! al_init_ttf_addon()) {
+		std::cerr << "Failed to initialize fonts!" << std::endl;
+	}
 
 	ALLEGRO_FILE *fontFile = al_fopen("res/LiberationSans-Regular.ttf", "r");
-    this->font = al_load_ttf_font_f(fontFile, "LiberationSans-Regular", 16, 0);
+	this->font = al_load_ttf_font_f(fontFile, "LiberationSans-Regular", 16, 0);
 
-    // Initialize additional rendering libraries
-    if (! al_init_image_addon()) {
-        std::cerr << "Failed to initialize image libraries!" << std::endl;
-    }
+	// Initialize additional rendering libraries
+	if (! al_init_image_addon()) {
+		std::cerr << "Failed to initialize image libraries!" << std::endl;
+	}
 
-    if (!al_init_primitives_addon()) {
-        std::cerr << "Failed to initialize primitives addon!" << std::endl;
-    }
+	if (!al_init_primitives_addon()) {
+		std::cerr << "Failed to initialize primitives addon!" << std::endl;
+	}
 
 	this->screenZoom = 2.0f;
 	this->screenLocation = Vector2(0.0f, 0.0f);
@@ -89,7 +89,7 @@ void Renderer::resize() {
 	al_acknowledge_resize(this->display);
 
 	this->setScreenSize(Coordinates(al_get_display_width(this->display), al_get_display_height(this->display)));
-    this->updateTransformations();
+	this->updateTransformations();
 }
 
 void Renderer::setWindowTitle(std::string title, std::string icon) {
