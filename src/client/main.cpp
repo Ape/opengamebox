@@ -1256,6 +1256,12 @@ void Game::chatCommand(std::string commandstr) {
 		this->connect(parameters[1], port);
 	} else if (parameters.at(0) == "disconnect") {
 		this->disconnect();
+	} else if (parameters.at(0) == "login") {
+		if (parameters.size() == 2) {
+			this->login(parameters.at(1));
+		} else {
+			this->addMessage("Usage: /" + parameters.at(0) + " password");
+		}
 	} else if (parameters.at(0) == "servers") {
 		if (this->connectionState == ConnectionState::NOT_CONNECTED) {
 			this->connectMasterServer();
@@ -1334,6 +1340,13 @@ void Game::chatCommand(std::string commandstr) {
 	} else {
 		this->addMessage(parameters.at(0) + ": command not found!", MessageType::ERROR);
 	}
+}
+
+void Game::login(std::string password) {
+	Packet packet(this->connection);
+	packet.writeHeader(Packet::Header::LOGIN);
+	packet.writeString(password);
+	packet.send();
 }
 
 void Game::loadScript(std::string script) {

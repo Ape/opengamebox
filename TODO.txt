@@ -30,8 +30,8 @@ Mechanics:
 	- owned objects should be flipped when the owner disconnects
 	- better script saving
 		- flip status, private cards as flipped, multiobject commands
-	- admin status on server
-		- password authentication
+	- admin status for users on server
+		- password authentication (work in progress)
 		- ability to kick players
 		- uploading new packages to the server
 	- connecting to a server should clean up old objects on the client

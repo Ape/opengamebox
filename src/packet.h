@@ -41,6 +41,7 @@ public:
 		NICK_TAKEN = 0x02, // Inform about a reserved nick name
 		JOIN       = 0x03, // Inform about a joining client
 		LEAVE      = 0x04, // Inform about a leaving client
+		LOGIN      = 0x05, // Login as an admin
 
 		// Object commands
 		CREATE  = 0x20, // Create new objects

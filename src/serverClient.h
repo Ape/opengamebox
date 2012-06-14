@@ -36,6 +36,7 @@ public:
 private:
 	ENetPeer *peer;
 	bool joined;
+	bool admin;
 };
 
 #endif

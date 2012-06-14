@@ -287,6 +287,17 @@ void Server::receivePacket(ENetEvent event) {
 				break;
 			}
 
+			case Packet::Header::LOGIN: {
+				if (this->settings->getValue<bool>("network.allowadmin")
+						&& packet.readString() == this->settings->getValue<std::string>("network.adminpassword")) {
+					std::cout << this->clients[*id]->getNick() << " logged in as admin." << std::endl;
+
+					// TODO: Make the logged user an admin.
+				}
+
+				break;
+			}
+
 			case Packet::Header::CHAT: {
 				if (event.packet->dataLength >= 1 + 1 && event.packet->dataLength <= 1 + 1 + 255) {
 					std::string data;
