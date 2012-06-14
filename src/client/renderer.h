@@ -37,7 +37,7 @@
 #include "../vector2.h"
 #include "../color.h"
 
-class Renderer : public IRenderer{
+class Renderer : public IRenderer {
 public:
 	Renderer(Coordinates screenSize, const int multisamplingSamples);
 	virtual ~Renderer(void);

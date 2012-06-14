@@ -85,7 +85,6 @@ Game::Game() {
 	this->keyStatus = KeyStatus();
 
 	this->loadingPackage = false;
-
 }
 
 Game::~Game() {
@@ -607,6 +606,7 @@ void Game::localEvents() {
 			this->selecting = false;
 			Vector2 lower;
 			Vector2 higher;
+
 			if (this->selectingStart.x > location.x) {
 				lower.x = location.x;
 				higher.x = this->selectingStart.x;
@@ -614,6 +614,7 @@ void Game::localEvents() {
 				lower.x = this->selectingStart.x;
 				higher.x = location.x;
 			}
+
 			if (this->selectingStart.y > location.y) {
 				lower.y = location.y;
 				higher.y = this->selectingStart.y;
@@ -621,30 +622,34 @@ void Game::localEvents() {
 				lower.y = this->selectingStart.y;
 				higher.y = location.y;
 			}
-			for (auto& object : this->objects)
-			{
+
+			for (auto& object : this->objects) {
 				if ((object.second->isOwnedBy(this->clients.find(localClient)->second) || object.second->isSelectedBy(this->clients.find(localClient)->second))
 						|| (object.second->isOwnedBy(nullptr) && object.second->isSelectedBy(nullptr))) {
 					std::list<Vector2> corners = object.second->getCorners();
 					bool selected = true;
-					for (auto &corner : corners)
-					{
+
+					for (auto &corner : corners) {
 						if (!(lower.x < corner.x && corner.x < higher.x && lower.y < corner.y && corner.y < higher.y)) {
 							selected = false;
 							break;
 						}
 					}
+
 					if (selected) {
 						object.second->select(this->clients.find(localClient)->second);
 						this->selectedObjects.push_back(object.second);
 					}
 				}
 			}
+
 			Packet packet(this->connection);
 			packet.writeHeader(Packet::Header::SELECT);
+
 			for (auto &object : this->selectedObjects) {
 				packet.writeShort(object->getId());
 			}
+
 			packet.send();
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
@@ -775,7 +780,6 @@ void Game::receivePacket(ENetEvent event) {
 					while (i < event.packet->dataLength) {
 						Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + i + 2), event.packet->data[i + 1]),
 													Color(this->renderer, event.packet->data[i]), event.packet->data[i]);
-						client->ping = 65535;
 						this->clients[event.packet->data[i]] = client;
 
 						i += 2 + event.packet->data[i + 1];
@@ -800,7 +804,6 @@ void Game::receivePacket(ENetEvent event) {
 					// Store the client information
 					Client *client = new Client(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2),
 												Color(this->renderer, event.packet->data[1]), event.packet->data[1]);
-					client->ping = 65535;
 					this->clients[event.packet->data[1]] = client;
 
 					this->addMessage(client->getColoredNick() + " has joined the server!");
@@ -837,7 +840,7 @@ void Game::receivePacket(ENetEvent event) {
 					if (event.packet->data[1] == 255) {
 						this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 					} else {
-						this->addMessage(net::clientIdToClient(this->clients, event.packet->data[1])->getColoredNick() + ": " +
+						this->addMessage(Client::getClientFromMap(this->clients, event.packet->data[1])->getColoredNick() + ": " +
 											std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 					}
 				}
@@ -856,8 +859,8 @@ void Game::receivePacket(ENetEvent event) {
 
 					while (i < event.packet->dataLength - 1) {
 						unsigned short objId = net::bytesToShort(event.packet->data + i + 1);
-						Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 3]);
-						Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 4]);
+						Client *selected = Client::getClientFromMap(this->clients, event.packet->data[i + 3]);
+						Client *owner = Client::getClientFromMap(this->clients, event.packet->data[i + 4]);
 						bool flipped = event.packet->data[i + 5];
 						Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
 						float rotation = event.packet->data[i + 14] * utils::PI / 8;
@@ -888,6 +891,7 @@ void Game::receivePacket(ENetEvent event) {
 
 						i += 15 + length;
 					}
+
 					if(event.packet->data[1] != 255) {
 						this->addMessage(client->getColoredNick() + " created " + utils::toString(amount) + " objects.");
 					}
@@ -1088,7 +1092,7 @@ void Game::receivePacket(ENetEvent event) {
 					size_t i = 1;
 					while (i < event.packet->dataLength) {
 						if (this->clients.count(event.packet->data[i]) > 0) {
-							this->clients[event.packet->data[i]]->ping = net::bytesToShort(event.packet->data + i + 1);
+							this->clients[event.packet->data[i]]->setPing(net::bytesToShort(event.packet->data + i + 1));
 						}
 
 						i += 3;
@@ -1502,16 +1506,15 @@ void Game::renderUI() {
 
 	int i = 0;
 	for (auto& client : this->clients) {
-		if (client.second->isJoined()) {
-			std::string text;
-			if (client.second->ping != 65535) {
-				text = client.second->getColoredNick() + " (" + utils::toString(client.second->ping) + " ms)";
-			} else {
-				text = client.second->getColoredNick();
-			}
-
-			this->renderer->drawText(text, Vector2(0.0f, i * 20.0f));
+		std::string text;
+		if (client.second->getPing() != 65535) {
+			text = client.second->getColoredNick() + " (" + utils::toString(client.second->getPing()) + " ms)";
+		} else {
+			text = client.second->getColoredNick();
 		}
+
+		this->renderer->drawText(text, Vector2(0.0f, i * 20.0f));
+
 		++i;
 	}
 

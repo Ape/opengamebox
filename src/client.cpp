@@ -18,55 +18,65 @@
 
 #include "client.h"
 
-Client::Client(ENetPeer *peer, unsigned char id) {
-	this->peer = peer;
-	this->joined = false;
-	this->id = id;
+#include <sstream>
+#include <iomanip>
+
+Client::Client(unsigned char id)
+: id(id) {}
+
+Client::Client(std::string nick, Color color, unsigned char id)
+: nick(nick),
+  color(color),
+  id(id),
+  ping(static_cast<unsigned short>(66535)) {}
+
+Client* Client::getClientFromMap(std::map<unsigned char, Client*> clients, unsigned char clientId) {
+	if (clients.count(clientId) != 0) {
+		return clients.find(clientId)->second;
+	} else {
+		return nullptr;
+	}
 }
 
-Client::Client(std::string nick, Color color, unsigned char id) {
-	this->joined = true;
-	this->nick = nick;
-	this->color = color;
-	this->peer = nullptr;
-	this->id = id;
+unsigned char Client::getIdStatic(Client *client) {
+	if (client == nullptr) {
+		return 255;
+	} else {
+		return client->getId();
+	}
 }
 
-unsigned char Client::getId(){
+unsigned char Client::getId() const {
 	return this->id;
 }
 
-std::string Client::getNick() {
+std::string Client::getNick() const {
 	return this->nick;
 }
 
-Color Client::getColor() {
+Color Client::getColor() const {
 	return this->color;
 }
 
-std::string Client::getColorCode() {
+std::string Client::getColorCode() const {
 	std::ostringstream colorCode;
 	colorCode << "^#" << std::setw(2) << std::setfill('0') << std::hex << static_cast<unsigned int>(this->id);
 
 	return colorCode.str();
 }
 
-std::string Client::getColoredNick() {
+std::string Client::getColoredNick() const {
 	return this->getColorCode() + this->getNick() + "^fff";
 }
 
-bool Client::isJoined() {
-	return this->joined;
-}
-
-void Client::join() {
-	this->joined = true;
+unsigned short Client::getPing() const {
+	return this->ping;
 }
 
 void Client::setNick(std::string nick) {
 	this->nick = nick;
 }
 
-ENetPeer* Client::getPeer() {
-	return this->peer;
+void Client::setPing(unsigned short ping) {
+	this->ping = ping;
 }

@@ -139,7 +139,7 @@ void Server::networkEvents() {
 
 				unsigned char *id = new unsigned char;
 				*id = utils::firstUnusedKey(this->clients);
-				Client *client = new Client(event.peer, *id);
+				ServerClient *client = new ServerClient(event.peer, *id);
 				this->clients[*id] = client;
 				event.peer->data = id;
 
@@ -234,7 +234,7 @@ void Server::receivePacket(ENetEvent event) {
 							data += net::PACKET_HANDSHAKE;
 							data += *id;
 
-							for (std::map<unsigned char, Client*>::iterator client = this->clients.begin(); client != this->clients.end(); ++client) {
+							for (std::map<unsigned char, ServerClient*>::iterator client = this->clients.begin(); client != this->clients.end(); ++client) {
 								if (client->second->isJoined() && client->first != *id)
 								{
 									data += client->first;
@@ -252,8 +252,8 @@ void Server::receivePacket(ENetEvent event) {
 							data += net::PACKET_CREATE;
 							data += 255;
 							net::dataAppendShort(data, object.second->getId());
-							data += net::clientToClientId(object.second->getSelected());
-							data += net::clientToClientId(object.second->getOwner());
+							data += Client::getIdStatic(object.second->getSelected());
+							data += Client::getIdStatic(object.second->getOwner());
 							data += object.second->isFlipped();
 							net::dataAppendVector2(data, object.second->getLocation());
 							data.push_back(floor(object.second->getRotation() / (utils::PI / 8.0f) + 0.5f));
@@ -334,8 +334,8 @@ void Server::receivePacket(ENetEvent event) {
 				data += *id;
 				if (event.packet->dataLength >= 1 + 9 + 1) {
 					while (i < event.packet->dataLength - 1) {
-						Client *selected = net::clientIdToClient(this->clients, event.packet->data[i + 1]);
-						Client *owner = net::clientIdToClient(this->clients, event.packet->data[i + 2]);
+						ServerClient *selected = ServerClient::getClientFromMap(this->clients, event.packet->data[i + 1]);
+						ServerClient *owner = ServerClient::getClientFromMap(this->clients, event.packet->data[i + 2]);
 						bool flipped = event.packet->data[i + 3];
 						Vector2 location = net::bytesToVector2(event.packet->data + i + 4);
 						float rotation = event.packet->data[i + 12] * utils::PI / 8.0f;

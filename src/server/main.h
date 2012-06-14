@@ -61,7 +61,7 @@ private:
 
 	ObjectClassManager objectClassManager;
 
-	std::map<unsigned char, Client*> clients;
+	std::map<unsigned char, ServerClient*> clients;
 	std::map<unsigned short, Object*> objects;
 	std::set<std::string> missingPackages;
 

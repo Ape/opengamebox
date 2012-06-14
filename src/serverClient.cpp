@@ -16,37 +16,29 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CLIENT_H
-#define CLIENT_H
+#include "serverClient.h"
 
-#include <enet/enet.h>
-#include <map>
+ServerClient::ServerClient(ENetPeer *peer, unsigned char id)
+: Client(id),
+  peer(peer),
+  joined(joined) {}
 
-#include "color.h"
+ServerClient* ServerClient::getClientFromMap(std::map<unsigned char, ServerClient*> clients, unsigned char clientId) {
+	if (clients.count(clientId) != 0) {
+		return clients.find(clientId)->second;
+	} else {
+		return nullptr;
+	}
+}
 
-class Client {
-public:
-	Client(unsigned char id);
-	Client(std::string nick, Color color, unsigned char id);
+bool ServerClient::isJoined() {
+	return this->joined;
+}
 
-	static unsigned char getIdStatic(Client *client);
-	static Client* getClientFromMap(std::map<unsigned char, Client*> clients, unsigned char clientId);
+void ServerClient::join() {
+	this->joined = true;
+}
 
-	unsigned char getId(void) const;
-	std::string getNick(void) const;
-	Color getColor(void) const;
-	std::string getColorCode(void) const;
-	std::string getColoredNick(void) const;
-	unsigned short getPing(void) const;
-
-	void setNick(std::string nick);
-	void setPing(unsigned short);
-
-private:
-	std::string nick;
-	Color color;
-	unsigned char id;
-	unsigned short ping;
-};
-
-#endif
+ENetPeer* ServerClient::getPeer() {
+	return this->peer;
+}

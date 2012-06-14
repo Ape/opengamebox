@@ -34,6 +34,7 @@ Mechanics:
 		- password authentication
 		- ability to kick players
 		- uploading new packages to the server
+	- connecting to a server should clean up old objects on the client
 
 Graphics:
 	- rotate screen with 90 degree steps

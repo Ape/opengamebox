@@ -16,37 +16,26 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef SERVERCLIENT_H
+#define SERVERCLIENT_H
 
 #include <enet/enet.h>
-#include <map>
 
-#include "color.h"
+#include "client.h"
 
-class Client {
+class ServerClient : public Client {
 public:
-	Client(unsigned char id);
-	Client(std::string nick, Color color, unsigned char id);
+	ServerClient(ENetPeer *peer, unsigned char id);
 
-	static unsigned char getIdStatic(Client *client);
-	static Client* getClientFromMap(std::map<unsigned char, Client*> clients, unsigned char clientId);
+	static ServerClient* getClientFromMap(std::map<unsigned char, ServerClient*> clients, unsigned char clientId);
 
-	unsigned char getId(void) const;
-	std::string getNick(void) const;
-	Color getColor(void) const;
-	std::string getColorCode(void) const;
-	std::string getColoredNick(void) const;
-	unsigned short getPing(void) const;
-
-	void setNick(std::string nick);
-	void setPing(unsigned short);
+	bool isJoined(void);
+	void join(void);
+	ENetPeer* getPeer(void);
 
 private:
-	std::string nick;
-	Color color;
-	unsigned char id;
-	unsigned short ping;
+	ENetPeer *peer;
+	bool joined;
 };
 
 #endif

@@ -28,6 +28,7 @@
 #include "vector2.h"
 #include "object.h"
 #include "client.h"
+#include "serverClient.h"
 
 class Object;
 
@@ -72,7 +73,7 @@ namespace net {
 	const unsigned char PACKET_PINGS = 0xE0; // Broadcast ping information
 	// <<< DEPRECATED
 
-	bool isNickTaken(std::map<unsigned char, Client*> clients, std::string nick);
+	bool isNickTaken(std::map<unsigned char, ServerClient*> clients, std::string nick);
 
 	// >>> DEPRECATED: Use Packet instead
 	void sendCommand(ENetHost *connection, const char *data, size_t length, bool isReliable=true);
@@ -92,9 +93,6 @@ namespace net {
 	void dataAppendShort(std::string &data, unsigned short value);
 	void dataAppendVector2(std::string &data, Vector2 value);
 	// <<< DEPRECATED
-
-	Client* clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId);
-	unsigned char clientToClientId(Client *client);
 
 	std::string IPIntegerToString(unsigned int ip);
 	std::string AddressToString(ENetAddress address);

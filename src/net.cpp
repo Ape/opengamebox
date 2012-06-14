@@ -19,8 +19,8 @@
 #include "net.h"
 
 // Check if a nick is already used
-bool net::isNickTaken(std::map<unsigned char, Client*> clients, std::string nick) {
-	for (std::map<unsigned char, Client*>::iterator client = clients.begin(); client != clients.end(); ++client) {
+bool net::isNickTaken(std::map<unsigned char, ServerClient*> clients, std::string nick) {
+	for (std::map<unsigned char, ServerClient*>::iterator client = clients.begin(); client != clients.end(); ++client) {
 		if (client->second->isJoined() && client->second->getNick().compare(nick) == 0) {
 			return true;
 		}
@@ -117,22 +117,6 @@ void net::dataAppendVector2(std::string &data, Vector2 value) {
 
 	net::floatToBytes(bytes, value.y);
 	data.append(reinterpret_cast<char*>(bytes), 4);
-}
-
-Client* net::clientIdToClient(std::map<unsigned char, Client*> clients, unsigned char clientId) {
-	if (clients.count(clientId) != 0) {
-		return clients.find(clientId)->second;
-	} else {
-		return nullptr;
-	}
-}
-
-unsigned char net::clientToClientId(Client *client) { //Todo move this to client.cpp
-	if (client == nullptr) {
-		return 255;
-	} else {
-		return client->getId();
-	}
 }
 
 // Convert an integer format IP address to a string representation
