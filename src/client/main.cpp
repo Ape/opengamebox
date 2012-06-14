@@ -637,6 +637,12 @@ void Game::localEvents() {
 					this->selectedObjects.push_back(object.second);
 				}
 			}
+			Packet packet(this->connection);
+			packet.writeHeader(Packet::Header::SELECT);
+			for (auto object : this->selectedObjects) {
+				packet.writeShort(object->getId());
+			}
+			packet.send();
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
 		this->keyStatus.moveScreen = false;
