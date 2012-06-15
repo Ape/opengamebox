@@ -883,6 +883,7 @@ void Game::receivePacket(ENetEvent event) {
 						unsigned char length = event.packet->data[i + 15];
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
 						                                                                     static_cast<int>(length)), '.');
+
 						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
 
 						if (!this->loadingPackage && !this->missingPackages.empty()){
@@ -1459,6 +1460,7 @@ std::string Game::createObject(std::string objectId, Vector2 location) {
 	data.push_back(0x00); // Not rotated
 	data += (objectId.size());
 	data.append(objectId);
+
 	return data;
 }
 

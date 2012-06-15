@@ -56,10 +56,11 @@ public:
 		ROTATE  = 0x27, // Rotate objects
 
 		// Other commands
-		CHAT = 0x40, // Send a chat message
-		ROLL = 0x41, // Roll a die on the server
+		CHAT         = 0x40, // Send a chat message
+		CHAT_PRIVATE = 0x41, // Send a chat message to a specific client
+		ROLL         = 0x42, // Roll a die on the server
 
-		//Files and packages
+		// Files and packages
 		PACKAGE_MISSING = 0x60, // Package not found
 		FILE_TRANSFER   = 0x61, // Transfer missing file
 

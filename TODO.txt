@@ -43,6 +43,7 @@ Bug fixes:
 	- fix segmentation fault on fallback texture disposal
 	- fix shuffle
 	- (?) rotate temporary mouse coordinates when dragging an object
+	- objects are not flipped after the package was downloaded from the server
 
 Clean up:
 	- use member initialization lists

@@ -18,36 +18,49 @@
 
 #include "objectClass.h"
 
-ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages) {
-	this->package = package;
-	bool exsist = false;
-	std::stringstream settingFile(utils::getTextFile(package, "package.txt"));
-	if (settingFile.str() != "") {
-		exsist = true;
-		try{
-			this->settings = new Settings(&settingFile);
-		}
-		catch(libconfig::ParseException &e) {
-			std::cout<<"Warning: package "<<package<<"is invalid."<<std::endl;
-			missingPackages->insert(package);
-			exsist = false;
-		}
+ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages)
+: package(package),
+  objectClass(objectClass),
+  name("Object"),
+  gridSize(Vector2(0.0f, 0.0f)) {
+	if (missingPackages == nullptr) {
+		// Throw an exception if package can't be loaded
+		utils::getTextFile(package, "package.txt");
+		utils::getTextFile(package, "objects/" + this->objectClass + ".txt");
+		return;
 	}
-	this->objectClass = objectClass;
-	this->name = "Object";
-	this->gridSize = Vector2(0.0f, 0.0f);
 
-	if (exsist) {
-		std::vector<std::string> dependencies = this->settings->getList<std::string>("package/dependencies");
-		if (dependencies.size() > 0){
-			this->checkDependency(dependencies, missingPackages);
-		}
-	} else {
+	bool exist = true;
+
+	std::stringstream settingFile;
+	try {
+		settingFile.str(utils::getTextFile(package, "package.txt"));
+	} catch (IOException) {
+		std::cout << "Warning: package " << package << " couln't be opened." << std::endl;
 		missingPackages->insert(package);
+		exist = false;
+	}
+
+	try {
+		this->settings = new Settings(&settingFile);
+	} catch(libconfig::ParseException &e) {
+		std::cout << "Warning: package " << package << "is invalid." << std::endl;
+		missingPackages->insert(package);
+		exist = false;
+	}
+
+	if (!exist) {
+		return;
+	}
+
+	std::vector<std::string> dependencies = this->settings->getList<std::string>("package/dependencies");
+	if (dependencies.size() > 0){
+		this->checkDependency(dependencies, missingPackages);
 	}
 
 	std::stringstream file;
 	file.str(utils::getTextFile(package, "objects/" + this->objectClass + ".txt"));
+
 	std::string line;
 	while (file.good()) {
 		getline(file, line);

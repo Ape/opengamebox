@@ -362,6 +362,7 @@ void Server::receivePacket(ENetEvent event) {
 				std::string data;
 				data.push_back(net::PACKET_CREATE);
 				data += *id;
+
 				if (event.packet->dataLength >= 1 + 9 + 1) {
 					while (i < event.packet->dataLength - 1) {
 						ServerClient *selected = ServerClient::getClientWithId(this->clients, event.packet->data[i + 1]);
@@ -372,7 +373,17 @@ void Server::receivePacket(ENetEvent event) {
 						unsigned char length = event.packet->data[i + 13];
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 14), static_cast<int>(length)), '.');
 						if (objectData.size() == 3) {
-							ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
+							ObjectClass *objectClass;
+							try {
+								objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), nullptr);
+							} catch (IOException &e) {
+								std::cout << "Error: object " << objectData.at(0) << "." << objectData.at(1) << "." << objectData.at(2)
+								          << " is not recognized by the server!" << std::endl;
+
+								// TODO: Inform the client that the object is not recognized.
+
+								break;
+							}
 
 							unsigned short objId = utils::firstUnusedKey(this->objects);
 							Object *object = new Object(objectClass, objectData.at(2), objId, location);
@@ -382,30 +393,28 @@ void Server::receivePacket(ENetEvent event) {
 							object->rotate(rotation);
 							this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
 
-							if (! object->getName().empty()) {
-								std::string temp;
-								net::dataAppendShort(temp, objId);
-								for(char c : temp)
-								{
-									data.push_back(c);
-								}
+							std::string temp;
+							net::dataAppendShort(temp, objId);
 
-								std::string temp2(reinterpret_cast<char*>(event.packet->data + i + 1), static_cast<int>(length) + 13);
-								for(char c : temp2)
-								{
-									data.push_back(c);
-								}
-								amount++;
-							} else {
-								std::cout << "Error: object " << objectData.at(0) << "." << objectData.at(1) << "." << objectData.at(2)
-											<< " is not recognized by the server!" << std::endl;
-								this->objects.erase(objId);
+							for (char c : temp) {
+								data.push_back(c);
 							}
+
+							std::string temp2(reinterpret_cast<char*>(event.packet->data + i + 1), static_cast<int>(length) + 13);
+
+							for (char c : temp2) {
+								data.push_back(c);
+							}
+
+							amount++;
 						}
+
 						i += length + 13;
 					}
-					std::cout << this->clients[*id]->getNick() << " created " <<amount<< " objects."<<std::endl;
+
+					std::cout << this->clients[*id]->getNick() << " created " << amount << " objects." << std::endl;
 				}
+
 				net::sendCommand(this->connection, data.c_str(), data.size());
 				break;
 			}

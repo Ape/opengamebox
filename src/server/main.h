@@ -63,7 +63,6 @@ private:
 
 	std::map<unsigned char, ServerClient*> clients;
 	std::map<unsigned short, Object*> objects;
-	std::set<std::string> missingPackages;
 
 	bool exiting;
 
