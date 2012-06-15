@@ -1342,7 +1342,7 @@ void Game::chatCommand(std::string commandstr) {
 		std::string data;
 		data.push_back(net::PACKET_CREATE);
 
-		for(auto &object : this->dCreateBuffer) {
+		for (auto &object : this->dCreateBuffer) {
 			data += this->createObject(object, Vector2(x, 0.0f));
 
 			x += 4;

@@ -248,19 +248,21 @@ void Server::receivePacket(ENetEvent event) {
 						}
 
 						// Send the list of objects
-						// TODO: Send all objects in one packet
-						for (auto &object : this->objects) {
+						{
 							std::string data;
 							data += net::PACKET_CREATE;
-							data += 255;
-							net::dataAppendShort(data, object.second->getId());
-							data += Client::getIdStatic(object.second->getSelected());
-							data += Client::getIdStatic(object.second->getOwner());
-							data += object.second->isFlipped();
-							net::dataAppendVector2(data, object.second->getLocation());
-							data.push_back(floor(object.second->getRotation() / (utils::PI / 8.0f) + 0.5f));
-							data.push_back(static_cast<char>(object.second->getFullId().size()));
-							data.append(object.second->getFullId());
+							data += 255; // The objects are now new
+
+							for (auto &object : this->objects) {
+								net::dataAppendShort(data, object.second->getId());
+								data += Client::getIdStatic(object.second->getSelected());
+								data += Client::getIdStatic(object.second->getOwner());
+								data += object.second->isFlipped();
+								net::dataAppendVector2(data, object.second->getLocation());
+								data.push_back(floor(object.second->getRotation() / (utils::PI / 8.0f) + 0.5f));
+								data.push_back(static_cast<char>(object.second->getFullId().size()));
+								data.append(object.second->getFullId());
+							}
 
 							net::sendCommand(event.peer, data.c_str(), data.length());
 						}

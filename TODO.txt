@@ -38,7 +38,6 @@ Improvements:
 	- rotate screen with 90 degree steps
 	- remove color codes from terminal output
 	- add meaningful default values for config files
-	- when a new client joins, the server should send the list of objects in one packet
 
 Bug fixes:
 	- fix segmentation fault on fallback texture disposal
