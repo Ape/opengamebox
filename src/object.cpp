@@ -94,10 +94,15 @@ float Object::getRotation() const {
 }
 
 bool Object::testLocation(Vector2 location) const {
-	if (location.x >= this->getTargetLocation().x - abs((this->getSize()/2.0f).rotate(this->rotation).x)
-		&& location.x <= this->getTargetLocation().x + abs((this->getSize()/2.0f).rotate(this->rotation).x)
-	    && location.y >= this->getTargetLocation().y - abs((this->getSize()/2.0f).rotate(this->rotation).y)
-		&& location.y <= this->getTargetLocation().y + abs((this->getSize()/2.0f).rotate(this->rotation).y)) {
+	const Vector2 targetLocation = this->getTargetLocation();
+	const Vector2 rotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
+	const float rotatedSizeAbsX = abs(rotatedSize.x);
+	const float rotatedSizeAbsY = abs(rotatedSize.y);
+
+	if (location.x >= targetLocation.x - rotatedSizeAbsX
+			&& location.x <= targetLocation.x + rotatedSizeAbsX
+			&& location.y >= targetLocation.y - rotatedSizeAbsY
+			&& location.y <= targetLocation.y + rotatedSizeAbsY) {
 		return true;
 	} else {
 		return false;
@@ -105,13 +110,17 @@ bool Object::testLocation(Vector2 location) const {
 }
 
 bool Object::testCollision(const Object *object, bool second) const {
-	if (object->testLocation(this->getTargetLocation() - (this->getSize()/2.0f).rotate(this->rotation))
-			|| object->testLocation(this->getTargetLocation() + (this->getSize()/2.0f).rotate(this->rotation))
-	        || object->testLocation(Vector2(this->getTargetLocation().x - abs((this->getSize()).rotate(this->rotation).x/2.0f),
-			this->getTargetLocation().y + abs((this->getSize()).rotate(this->rotation).y/2.0f)))
-			|| object->testLocation(Vector2(this->getTargetLocation().x + abs((this->getSize()).rotate(this->rotation).x/2.0f),
-			this->getTargetLocation().y - abs((this->getSize()).rotate(this->rotation).y/2.0f)))
-	        || (! second && object->testCollision(this, true))) {
+	const Vector2 targetLocation = this->getTargetLocation();
+	const Vector2 rotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
+	const float rotatedSizeAbsX = abs(rotatedSize.x);
+	const float rotatedSizeAbsY = abs(rotatedSize.y);
+
+	// Check if any of the object's corners is inside the other object and then vice versa.
+	if (object->testLocation(targetLocation - rotatedSize)
+			|| object->testLocation(targetLocation + rotatedSize)
+			|| object->testLocation(Vector2(targetLocation.x - rotatedSizeAbsX, targetLocation.y + rotatedSizeAbsY))
+			|| object->testLocation(Vector2(targetLocation.x + rotatedSizeAbsX, targetLocation.y - rotatedSizeAbsY))
+			|| (! second && object->testCollision(this, true))) {
 		return true;
 	} else {
 		return false;
