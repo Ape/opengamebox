@@ -26,6 +26,12 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <stdexcept>
+
+class IOException : public std::runtime_error {
+public:
+	IOException(std::string message);
+};
 
 namespace utils {
 	const float PI = 3.141592653589f;

@@ -18,6 +18,9 @@
 
 #include "utils.h"
 
+IOException::IOException(std::string message)
+: std::runtime_error(message) {}
+
 std::vector<std::string> utils::splitString(std::string string, char delimeter) {
 	std::vector<std::string> items;
 	std::string item;
@@ -46,18 +49,30 @@ unsigned int utils::hexStringToInt(std::string string) {
 std::string utils::getTextFile(std::string package, std::string path){
 	PHYSFS_addToSearchPath(("data/" + package + ".zip").c_str(), 1);
 	std::string str;
+
 	if (PHYSFS_exists((package + "/" + path).c_str())) {
 		PHYSFS_file* file = PHYSFS_openRead((package + "/" + path).c_str());
+
+		if (file == nullptr) {
+			throw IOException("Failed to open data/" + package + ".zip/" + path + ".");
+		}
+
 		char *buf;
 		buf = new char[PHYSFS_fileLength(file) + 1];
 		buf[PHYSFS_fileLength(file)] = 0x00;
 		int readbytes = PHYSFS_read(file, buf, 1, PHYSFS_fileLength(file));
+
 		if (readbytes != PHYSFS_fileLength(file)) {
-			std::cout<< "failed to read data/" << package << ".zip/" << path<<std::endl;
-			return "";
+			PHYSFS_close(file);
+			throw IOException("Failed to read data/" + package + ".zip/" + path + ".");
 		}
-		str = std::string(buf);
+
 		PHYSFS_close(file);
+
+		str = std::string(buf);
+	} else {
+		throw IOException("Can't find data/" + package + ".zip/" + path + ".");
 	}
+
 	return str;
 }

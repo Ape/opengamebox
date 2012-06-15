@@ -248,6 +248,7 @@ void Server::receivePacket(ENetEvent event) {
 						}
 
 						// Send the list of objects
+						// TODO: Send all objects in one packet
 						for (auto &object : this->objects) {
 							std::string data;
 							data += net::PACKET_CREATE;
