@@ -867,8 +867,9 @@ void Game::receivePacket(ENetEvent event) {
 						float rotation = event.packet->data[i + 14] * utils::PI / 8;
 						unsigned char length = event.packet->data[i + 15];
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
-																				static_cast<int>(length)), '.');
+						                                                                     static_cast<int>(length)), '.');
 						ObjectClass *objectClass = this->objectClassManager.getObjectClass(objectData.at(0), objectData.at(1), &(this->missingPackages));
+
 						if (!this->loadingPackage && !this->missingPackages.empty()){
 							this->loadingPackage = true;
 							Packet reply(this->connection);
@@ -888,12 +889,13 @@ void Game::receivePacket(ENetEvent event) {
 						this->objectOrder.push_back(object);
 
 						amount++;
-						this->checkObjectOrder();
 
 						i += 15 + length;
 					}
 
-					if(event.packet->data[1] != 255) {
+					this->checkObjectOrder();
+
+					if (event.packet->data[1] != 255) {
 						this->addMessage(client->getColoredNick() + " created " + utils::toString(amount) + " objects.");
 					}
 				}
