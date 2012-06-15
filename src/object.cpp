@@ -215,7 +215,13 @@ void Object::select(Client* client) {
 	this->selected = client;
 }
 
-void Object::own(Client* client) {
+void Object::setOwner(Client* client) {
+	if (client == nullptr){
+		this->flipped = true;
+	} else {
+		this->flipped = false;
+	}
+
 	this->owner = client;
 }
 

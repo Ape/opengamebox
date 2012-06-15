@@ -411,9 +411,9 @@ void Game::localEvents() {
 
 					for (auto &object : this->selectedObjects) {
 						if (owned) {
-							object->own(nullptr);
+							object->setOwner(nullptr);
 						} else if (object->isOwnedBy(nullptr)) {
-							object->own(this->clients.find(localClient)->second);
+							object->setOwner(this->clients.find(localClient)->second);
 						}
 
 						net::dataAppendShort(data, object->getId());
@@ -839,7 +839,7 @@ void Game::receivePacket(ENetEvent event) {
 						}
 
 						if (object.second->isOwnedBy(this->clients[event.packet->data[1]])) {
-							object.second->own(nullptr);
+							object.second->setOwner(nullptr);
 						}
 					}
 
@@ -896,7 +896,7 @@ void Game::receivePacket(ENetEvent event) {
 						Object *object = new Object(objectClass, objectData.at(2), objId, location);
 						object->initForClient(this->renderer);
 						object->select(selected);
-						object->own(owner);
+						object->setOwner(owner);
 						object->setFlipped(flipped);
 						object->rotate(rotation);
 
@@ -1069,9 +1069,9 @@ void Game::receivePacket(ENetEvent event) {
 
 						Object *object = this->objects.find(objId)->second;
 						if (owned) {
-							object->own(client);
+							object->setOwner(client);
 						} else {
-							object->own(nullptr);
+							object->setOwner(nullptr);
 						}
 
 						lastObject = object;

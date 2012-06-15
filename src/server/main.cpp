@@ -188,7 +188,7 @@ void Server::networkEvents() {
 						}
 
 						if (object.second->isOwnedBy(this->clients[*id])) {
-							object.second->own(nullptr);
+							object.second->setOwner(nullptr);
 						}
 					}
 
@@ -374,7 +374,7 @@ void Server::receivePacket(ENetEvent event) {
 							unsigned short objId = utils::firstUnusedKey(this->objects);
 							Object *object = new Object(objectClass, objectData.at(2), objId, location);
 							object->select(selected);
-							object->own(owner);
+							object->setOwner(owner);
 							object->setFlipped(flipped);
 							object->rotate(rotation);
 							this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
@@ -572,9 +572,9 @@ void Server::receivePacket(ENetEvent event) {
 
 						Object* object = this->objects.find(objId)->second;
 						if (owned) {
-							object->own(this->clients[*id]);
+							object->setOwner(this->clients[*id]);
 						} else {
-							object->own(nullptr);
+							object->setOwner(nullptr);
 						}
 
 						lastObject = object;

@@ -30,8 +30,6 @@ Improvements:
 		- server must know the order
 		- fix performance issues
 	- flip whole selection, not individual objects
-	- (dis)owning objects should also flip them
-	- owned objects should be flipped when the owner disconnects
 	- better script saving
 		- flip status, private cards as flipped, multiobject commands
 	- (?) merge move and flip packets

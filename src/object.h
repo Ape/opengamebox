@@ -62,7 +62,7 @@ public:
 
 	void setLocation(Vector2 location);
 	void select(Client *client);
-	void own(Client *client);
+	void setOwner(Client *client);
 	void flip(void);
 	void setFlipped(bool flipped);
 	void setAnimation(Vector2 target, float time);
