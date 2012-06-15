@@ -44,7 +44,6 @@ Improvements:
 Bug fixes:
 	- fix segmentation fault on fallback texture disposal
 	- fix shuffle
-	- connecting to a server should clean up old objects on the client
 	- (?) rotate temporary mouse coordinates when dragging an object
 
 Clean up:

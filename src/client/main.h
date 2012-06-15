@@ -156,6 +156,7 @@ private:
 	void disconnect(void);
 	void disconnectMasterServer(void);
 	void dispose(void);
+	void disposeGame(void);
 
 	void localEvents(void);
 

@@ -310,15 +310,8 @@ void Game::disconnectMasterServer() {
 }
 
 void Game::dispose() {
-	// Dispose client information
-	for (auto &client : this->clients) {
-		delete client.second;
-	}
-
-	// Dispose all objects
-	for (auto &object : this->objects) {
-		delete object.second;
-	}
+	// Dispose all objects and clients
+	this->disposeGame();
 
 	// Dispose enet
 	if (this->connection != nullptr) {
@@ -341,6 +334,26 @@ void Game::dispose() {
 
 	// Dispose Allegro
 	al_uninstall_system();
+}
+
+void Game::disposeGame() {
+	// Clear object order
+	this->objectOrder.clear();
+
+	// Clear selected objects
+	this->selectedObjects.clear();
+
+	// Dispose all objects
+	for (auto &object : this->objects) {
+		delete object.second;
+	}
+	this->objects.clear();
+
+	// Dispose client information
+	for (auto &client : this->clients) {
+		delete client.second;
+	}
+	this->clients.clear();
 }
 
 void Game::localEvents() {
@@ -751,6 +764,8 @@ void Game::networkEvents() {
 			case ENET_EVENT_TYPE_DISCONNECT: {
 				this->addMessage("Disconnected from the server.");
 				this->connectionState = ConnectionState::NOT_CONNECTED;
+
+				this->disposeGame();
 
 				if (this->state == State::EXITING) {
 					this->state = State::TERMINATED;
