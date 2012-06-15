@@ -841,7 +841,7 @@ void Game::receivePacket(ENetEvent event) {
 					if (event.packet->data[1] == 255) {
 						this->addMessage(std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 					} else {
-						this->addMessage(Client::getClientFromMap(this->clients, event.packet->data[1])->getColoredNick() + ": " +
+						this->addMessage(Client::getClientWithId(this->clients, event.packet->data[1])->getColoredNick() + ": " +
 											std::string(reinterpret_cast<char*>(event.packet->data + 2), event.packet->dataLength - 2));
 					}
 				}
@@ -860,8 +860,8 @@ void Game::receivePacket(ENetEvent event) {
 
 					while (i < event.packet->dataLength - 1) {
 						unsigned short objId = net::bytesToShort(event.packet->data + i + 1);
-						Client *selected = Client::getClientFromMap(this->clients, event.packet->data[i + 3]);
-						Client *owner = Client::getClientFromMap(this->clients, event.packet->data[i + 4]);
+						Client *selected = Client::getClientWithId(this->clients, event.packet->data[i + 3]);
+						Client *owner = Client::getClientWithId(this->clients, event.packet->data[i + 4]);
 						bool flipped = event.packet->data[i + 5];
 						Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
 						float rotation = event.packet->data[i + 14] * utils::PI / 8;
@@ -1265,6 +1265,12 @@ void Game::chatCommand(std::string commandstr) {
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " password");
 		}
+	} else if (parameters.at(0) == "kick") {
+		if (parameters.size() == 2) {
+			this->kick(parameters.at(1));
+		} else {
+			this->addMessage("Usage: /" + parameters.at(0) + " player");
+		}
 	} else if (parameters.at(0) == "servers") {
 		if (this->connectionState == ConnectionState::NOT_CONNECTED) {
 			this->connectMasterServer();
@@ -1350,6 +1356,19 @@ void Game::login(std::string password) {
 	Packet packet(this->connection);
 	packet.writeHeader(Packet::Header::LOGIN);
 	packet.writeString(password);
+	packet.send();
+}
+
+void Game::kick(std::string nick) {
+	Client *target = Client::getClientWithNick(this->clients, nick);
+	if (target == nullptr) {
+		this->addMessage("No such player!", MessageType::ERROR);
+		return;
+	}
+
+	Packet packet(this->connection);
+	packet.writeHeader(Packet::Header::KICK);
+	packet.writeByte(target->getId());
 	packet.send();
 }
 

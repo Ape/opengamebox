@@ -30,12 +30,22 @@ Client::Client(std::string nick, Color color, unsigned char id)
   id(id),
   ping(static_cast<unsigned short>(66535)) {}
 
-Client* Client::getClientFromMap(std::map<unsigned char, Client*> clients, unsigned char clientId) {
+Client* Client::getClientWithId(std::map<unsigned char, Client*> clients, unsigned char clientId) {
 	if (clients.count(clientId) != 0) {
 		return clients.find(clientId)->second;
 	} else {
 		return nullptr;
 	}
+}
+
+Client* Client::getClientWithNick(std::map<unsigned char, Client*> clients, std::string nick) {
+	for (auto &client : clients) {
+		if (client.second->getNick() == nick) {
+			return client.second;
+		}
+	}
+
+	return nullptr;
 }
 
 unsigned char Client::getIdStatic(Client *client) {

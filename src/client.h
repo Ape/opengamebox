@@ -30,7 +30,8 @@ public:
 	Client(std::string nick, Color color, unsigned char id);
 
 	static unsigned char getIdStatic(Client *client);
-	static Client* getClientFromMap(std::map<unsigned char, Client*> clients, unsigned char clientId);
+	static Client* getClientWithId(std::map<unsigned char, Client*> clients, unsigned char clientId);
+	static Client* getClientWithNick(std::map<unsigned char, Client*> clients, std::string nick);
 
 	unsigned char getId(void) const;
 	std::string getNick(void) const;

@@ -17,10 +17,9 @@ New features:
 		- button, textarea, dialog with text and buttons
 		- menu
 		- server list
-	- admin status for users on server
-		- password authentication (work in progress)
-		- ability to kick players
-		- uploading new packages to the server
+	- admin commands
+		- /disown and /deselect for disowning and deselecting player's objects
+		- /upload for uploading new packages to the server
 	- game server to connect to a master server
 	- animations for rotations
 		- screen and objects

@@ -21,9 +21,10 @@
 ServerClient::ServerClient(ENetPeer *peer, unsigned char id)
 : Client(id),
   peer(peer),
-  joined(joined) {}
+  joined(joined),
+  admin(false) {}
 
-ServerClient* ServerClient::getClientFromMap(std::map<unsigned char, ServerClient*> clients, unsigned char clientId) {
+ServerClient* ServerClient::getClientWithId(std::map<unsigned char, ServerClient*> clients, unsigned char clientId) {
 	if (clients.count(clientId) != 0) {
 		return clients.find(clientId)->second;
 	} else {
@@ -31,14 +32,22 @@ ServerClient* ServerClient::getClientFromMap(std::map<unsigned char, ServerClien
 	}
 }
 
-bool ServerClient::isJoined() {
+bool ServerClient::isJoined() const {
 	return this->joined;
+}
+
+ENetPeer* ServerClient::getPeer() const {
+	return this->peer;
+}
+
+bool ServerClient::isAdmin() const {
+	return this->admin;
 }
 
 void ServerClient::join() {
 	this->joined = true;
 }
 
-ENetPeer* ServerClient::getPeer() {
-	return this->peer;
+void ServerClient::grantAdmin() {
+	this->admin = true;
 }

@@ -41,6 +41,9 @@ public:
 		JOIN       = 0x03, // Inform about a joining client
 		LEAVE      = 0x04, // Inform about a leaving client
 		LOGIN      = 0x05, // Login as an admin
+		KICK       = 0x06, // Kick a client
+		DISOWN     = 0x07, // Free all objects owned by a player
+		DESELECT   = 0x08, // Deselect objects that are selected by a player
 
 		// Object commands
 		CREATE  = 0x20, // Create new objects
@@ -55,7 +58,6 @@ public:
 		// Other commands
 		CHAT = 0x40, // Send a chat message
 		ROLL = 0x41, // Roll a die on the server
-
 
 		//Files and packages
 		PACKAGE_MISSING = 0x60, // Package not found

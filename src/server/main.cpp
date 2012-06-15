@@ -216,6 +216,7 @@ void Server::receivePacket(ENetEvent event) {
 
 	try {
 		unsigned char *id = static_cast<unsigned char*>(event.peer->data);
+		ServerClient *sender = this->clients[*id];
 
 		switch (header) {
 			case Packet::Header::HANDSHAKE: {
@@ -290,9 +291,24 @@ void Server::receivePacket(ENetEvent event) {
 			case Packet::Header::LOGIN: {
 				if (this->settings->getValue<bool>("network.allowadmin")
 						&& packet.readString() == this->settings->getValue<std::string>("network.adminpassword")) {
-					std::cout << this->clients[*id]->getNick() << " logged in as an admin." << std::endl;
+					std::cout << sender->getNick() << " logged in as an admin." << std::endl;
 
-					// TODO: Make the logged user an admin.
+					// TODO: Send a chat message informing about the login.
+
+					sender->grantAdmin();
+				}
+
+				break;
+			}
+
+			case Packet::Header::KICK: {
+				if (sender->isAdmin()) {
+					ServerClient *target = ServerClient::getClientWithId(this->clients, packet.readByte());
+					if (target != nullptr) {
+						// TODO: Send a chat message informing about the kick.
+
+						enet_peer_disconnect(target->getPeer(), 0);
+					}
 				}
 
 				break;
@@ -345,8 +361,8 @@ void Server::receivePacket(ENetEvent event) {
 				data += *id;
 				if (event.packet->dataLength >= 1 + 9 + 1) {
 					while (i < event.packet->dataLength - 1) {
-						ServerClient *selected = ServerClient::getClientFromMap(this->clients, event.packet->data[i + 1]);
-						ServerClient *owner = ServerClient::getClientFromMap(this->clients, event.packet->data[i + 2]);
+						ServerClient *selected = ServerClient::getClientWithId(this->clients, event.packet->data[i + 1]);
+						ServerClient *owner = ServerClient::getClientWithId(this->clients, event.packet->data[i + 2]);
 						bool flipped = event.packet->data[i + 3];
 						Vector2 location = net::bytesToVector2(event.packet->data + i + 4);
 						float rotation = event.packet->data[i + 12] * utils::PI / 8.0f;
@@ -681,7 +697,7 @@ void Server::receivePacket(ENetEvent event) {
 			}
 		}
 	} catch (PacketException &e) {
-		std::cout << "Debug: Received an invalid packet from"
+		std::cout << "Debug: Received an invalid packet from "
 		          << net::AddressToString(event.peer->address)
 		          << ": \"" << e.what() << "\"" << std::endl;
 	}

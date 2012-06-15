@@ -27,11 +27,14 @@ class ServerClient : public Client {
 public:
 	ServerClient(ENetPeer *peer, unsigned char id);
 
-	static ServerClient* getClientFromMap(std::map<unsigned char, ServerClient*> clients, unsigned char clientId);
+	static ServerClient* getClientWithId(std::map<unsigned char, ServerClient*> clients, unsigned char clientId);
 
-	bool isJoined(void);
+	bool isJoined(void) const;
+	ENetPeer* getPeer(void) const;
+	bool isAdmin(void) const;
+
 	void join(void);
-	ENetPeer* getPeer(void);
+	void grantAdmin(void);
 
 private:
 	ENetPeer *peer;
