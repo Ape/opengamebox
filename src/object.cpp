@@ -278,9 +278,14 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 
 	if (this->owner != nullptr) {
 		const std::vector<Vector2> corners = this->getCorners(true);
-		renderer->drawLine(corners.at(0), corners.at(1), this->owner->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
-		renderer->drawCircleFilled(corners.at(0), 3.0f, this->owner->getColor(), IRenderer::Transformation::CAMERA);
-		renderer->drawCircleFilled(corners.at(1), 3.0f, this->owner->getColor(), IRenderer::Transformation::CAMERA);
+
+		Color indicatorColor = this->owner->getColor();
+		float alpha = 0.2f;
+		indicatorColor.red *= alpha;
+		indicatorColor.green *= alpha;
+		indicatorColor.blue *= alpha;
+		indicatorColor.alpha = alpha;
+		renderer->drawRectangleFilled(corners.at(0), corners.at(1), indicatorColor, IRenderer::Transformation::CAMERA);
 	}
 }
 

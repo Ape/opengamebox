@@ -35,8 +35,6 @@ Improvements:
 	- better script saving
 		- flip status, private cards as flipped, multiobject commands
 	- (?) merge move and flip packets
-	- nicer indicator for private objects
-		- (?) dashed border
 	- rotate screen with 90 degree steps
 	- remove color codes from terminal output
 	- add meaningful default values for config files
