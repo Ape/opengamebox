@@ -46,8 +46,6 @@ private:
 	Vector2 gridSize;
 	std::string flipsideImage;
 
-	Settings *settings;
-
 	bool parseLine(std::string line, std::string field, std::string &value);
 	bool parseLineFloat(std::string line, std::string field, float &value);
 	void checkDependency(std::vector<std::string> dependencies, std::set<std::string> *missingPackages);

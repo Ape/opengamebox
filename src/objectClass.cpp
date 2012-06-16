@@ -41,8 +41,9 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 		exist = false;
 	}
 
+	Settings *settings;
 	try {
-		this->settings = new Settings(&settingFile);
+		settings = new Settings(&settingFile);
 	} catch(libconfig::ParseException &e) {
 		std::cout << "Warning: package " << package << "is invalid." << std::endl;
 		missingPackages->insert(package);
@@ -53,7 +54,10 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 		return;
 	}
 
-	std::vector<std::string> dependencies = this->settings->getList<std::string>("package/dependencies");
+	std::vector<std::string> dependencies = settings->getList<std::string>("package/dependencies");
+
+	delete settings;
+
 	if (dependencies.size() > 0){
 		this->checkDependency(dependencies, missingPackages);
 	}
@@ -90,7 +94,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 }
 
 ObjectClass::~ObjectClass() {
-	delete this->settings;
+
 }
 
 std::string ObjectClass::getObjectClass() const {

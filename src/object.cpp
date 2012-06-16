@@ -262,10 +262,6 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 	}
 
 	Color tint(1.0f, 1.0f, 1.0f, 1.0f);
-	if (this->owner != nullptr) {
-		renderer->drawText(this->owner->getNick(), this->location + Vector2(0.0f, -this->getSize().y / 2.0f - 18.0f), IRenderer::Alignment::CENTER);
-		tint.alpha = 0.75f;
-	}
 
 	if (this->isUnder()) {
 		tint.red = 0.75f;
@@ -274,24 +270,44 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 	}
 
 	if (this->selected != nullptr) {
-		Vector2 pointA = this->location - (this->getSize()/2.0f).rotate(this->rotation) - Vector2(1.0f, 1.0f).rotate(this->rotation);
-		Vector2 pointB = this->location + (this->getSize()/2.0f).rotate(this->rotation) + Vector2(1.0f, 1.0f).rotate(this->rotation);
-
-		renderer->drawRectangle(pointA, pointB, this->selected->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
+		const std::vector<Vector2> corners = this->getCorners(true, 1.0f);
+		renderer->drawRectangle(corners.at(0), corners.at(1), this->selected->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
 	}
 
 	renderer->drawBitmapTinted(image, this->location, this->getSize(), tint, this->rotation);
+
+	if (this->owner != nullptr) {
+		const std::vector<Vector2> corners = this->getCorners(true);
+		renderer->drawLine(corners.at(0), corners.at(1), this->owner->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
+		renderer->drawCircleFilled(corners.at(0), 3.0f, this->owner->getColor(), IRenderer::Transformation::CAMERA);
+		renderer->drawCircleFilled(corners.at(1), 3.0f, this->owner->getColor(), IRenderer::Transformation::CAMERA);
+	}
 }
 
 void Object::rotate(float angle) {
 	this->rotation += angle;
 }
 
-std::list<Vector2> Object::getCorners(void) {
-	std::list<Vector2> corners;
-	corners.push_back(this->getLocation() + (Vector2(this->size.x, this->size.y)/2).rotate(this->rotation));
-	corners.push_back(this->getLocation() + (Vector2(this->size.x, -this->size.y)/2).rotate(this->rotation));
-	corners.push_back(this->getLocation() + (Vector2(-this->size.x, -this->size.y)/2).rotate(this->rotation));
-	corners.push_back(this->getLocation() + (Vector2(-this->size.x, this->size.y)/2).rotate(this->rotation));
+const std::vector<Vector2> Object::getCorners(bool onlyDiagonal, float margin) const {
+	const Vector2 rotatedSize1 = (Vector2(this->size.x + margin, this->size.y + margin) / 2.0f).rotate(this->rotation);
+	Vector2 rotatedSize2;
+
+	if (!onlyDiagonal) {
+		rotatedSize2 = (Vector2(this->size.x + margin, -(this->size.y + margin)) / 2.0f).rotate(this->rotation);
+	}
+
+	std::vector<Vector2> corners;
+	corners.push_back(this->getLocation() + rotatedSize1);
+
+	if (!onlyDiagonal) {
+		corners.push_back(this->getLocation() + rotatedSize2);
+	}
+
+	corners.push_back(this->getLocation() - rotatedSize1);
+
+	if (!onlyDiagonal) {
+		corners.push_back(this->getLocation() - rotatedSize2);
+	}
+
 	return corners;
 }

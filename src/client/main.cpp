@@ -643,7 +643,7 @@ void Game::localEvents() {
 			for (auto &object : this->objects) {
 				if ((object.second->isOwnedBy(this->clients.find(localClient)->second) || object.second->isSelectedBy(this->clients.find(localClient)->second))
 						|| (object.second->isOwnedBy(nullptr) && object.second->isSelectedBy(nullptr))) {
-					std::list<Vector2> corners = object.second->getCorners();
+					std::vector<Vector2> corners = object.second->getCorners();
 					bool selected = true;
 
 					for (auto &corner : corners) {

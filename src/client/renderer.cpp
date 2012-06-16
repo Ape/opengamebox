@@ -179,22 +179,29 @@ void Renderer::drawBitmapTinted(std::string texture, Vector2 dest_location, Vect
 
 }
 
+void Renderer::drawLine(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation) {
+	float thicknessFactor = this->getThicknessFactor(transformation);
+
+	al_hold_bitmap_drawing(false);
+	al_draw_line(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
+	             thicknessFactor * thickness);
+	al_hold_bitmap_drawing(true);
+}
+
 void Renderer::drawRectangle(Vector2 pointA, Vector2 pointB, Color color, float thickness, Transformation transformation) {
 	Vector2 pointAB = Vector2(pointA.x, pointB.y);
 	Vector2 pointBA = Vector2(pointB.x, pointA.y);
-
-	float thicknessFactor;
-	if (transformation == Transformation::CAMERA) {
-		thicknessFactor = 2.0f / this->screenZoom;
-	} else {
-		thicknessFactor = 1.0f;
-	}
+	float thicknessFactor = this->getThicknessFactor(transformation);
 
 	al_hold_bitmap_drawing(false);
-	al_draw_line(pointA.x, pointA.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
-	al_draw_line(pointA.x, pointA.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
-	al_draw_line(pointB.x, pointB.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
-	al_draw_line(pointB.x, pointB.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), thicknessFactor * thickness);
+	al_draw_line(pointA.x, pointA.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
+	             thicknessFactor * thickness);
+	al_draw_line(pointA.x, pointA.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
+	             thicknessFactor * thickness);
+	al_draw_line(pointB.x, pointB.y, pointAB.x, pointAB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
+	             thicknessFactor * thickness);
+	al_draw_line(pointB.x, pointB.y, pointBA.x, pointBA.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
+	             thicknessFactor * thickness);
 	al_hold_bitmap_drawing(true);
 }
 
@@ -202,6 +209,31 @@ void Renderer::drawRectangleFilled(Vector2 pointA, Vector2 pointB, Color color, 
 	al_hold_bitmap_drawing(false);
 	al_draw_filled_rectangle(pointA.x, pointA.y, pointB.x, pointB.y, al_map_rgba_f(color.red, color.green, color.blue, color.alpha));
 	al_hold_bitmap_drawing(true);
+}
+
+void Renderer::drawCircle(Vector2 location, float radius, Color color, float thickness, Transformation transformation) {
+	float thicknessFactor = this->getThicknessFactor(transformation);
+
+	al_hold_bitmap_drawing(false);
+	al_draw_circle(location.x, location.y, thicknessFactor * radius, al_map_rgba_f(color.red, color.green, color.blue, color.alpha),
+	               thicknessFactor * thickness);
+	al_hold_bitmap_drawing(true);
+}
+
+void Renderer::drawCircleFilled(Vector2 location, float radius, Color color, Transformation transformation) {
+	float thicknessFactor = this->getThicknessFactor(transformation);
+
+	al_hold_bitmap_drawing(false);
+	al_draw_filled_circle(location.x, location.y, thicknessFactor * radius, al_map_rgba_f(color.red, color.green, color.blue, color.alpha));
+	al_hold_bitmap_drawing(true);
+}
+
+float Renderer::getThicknessFactor(Transformation transformation) {
+	if (transformation == Transformation::CAMERA) {
+		return 2.0f / this->screenZoom;
+	} else {
+		return 1.0f;
+	}
 }
 
 void Renderer::drawText(std::string text, Vector2 location, Alignment alignment) {

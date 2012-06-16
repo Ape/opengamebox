@@ -71,7 +71,7 @@ public:
 	void draw(IRenderer *renderer, Client *localClient) const;
 	void rotate(float angle);
 
-	std::list<Vector2> getCorners(void);
+	const std::vector<Vector2> getCorners(bool onlyDiagonal = false, float margin = 0.0f) const;
 
 private:
 	ObjectClass *objectClass;
