@@ -18,6 +18,8 @@
 
 #include "net.h"
 
+#include <iomanip>
+
 // Check if a nick is already used
 bool net::isNickTaken(std::map<unsigned char, ServerClient*> clients, std::string nick) {
 	for (std::map<unsigned char, ServerClient*>::iterator client = clients.begin(); client != clients.end(); ++client) {
@@ -139,6 +141,23 @@ std::string net::AddressToString(ENetAddress address) {
 	string << net::IPIntegerToString(address.host) << ":" << address.port;
 
 	return string.str();
+}
+
+std::string net::getPrettyFileSize(unsigned int size) {
+	std::ostringstream message("");
+	message << std::setprecision(3);
+
+	if (size < 1 << 10) {
+		message << size << " B";
+	} else if (size < 1 << 20) {
+		message << size / 1024.0f << " KiB";
+	} else if (size < 1 << 30) {
+		message << size / (1024.0f * 1024.0f) << " MiB";
+	} else {
+		message << size / (1024.0 * 1024.0f * 1024.0f) << " GiB";
+	}
+
+	return message.str();
 }
 
 void net::removeObject(std::vector<Object*> &objectOrder, Object* object) {

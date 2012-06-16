@@ -36,7 +36,7 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 	try {
 		settingFile.str(utils::getTextFile(package, "package.txt"));
 	} catch (IOException) {
-		std::cout << "Warning: package " << package << " couln't be opened." << std::endl;
+		std::cout << "Warning: package " << package << " couldn't be opened." << std::endl;
 		missingPackages->insert(package);
 		exist = false;
 	}

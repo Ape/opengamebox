@@ -15,39 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef INPUTBOX_H
-#define INPUTBOX_H
+#include "progressBar.h"
+#include <iostream>
 
-#include <string>
-#include <sstream>
+ProgressBar::ProgressBar(Vector2 location, Vector2 size, float progress)
+: Widget(location, size),
+  progress(progress) {}
 
-#include "../widget.h"
+ProgressBar::~ProgressBar() {}
 
-class Game;
+void ProgressBar::draw(IRenderer *renderer) {
+	renderer->drawRectangleFilled(this->location, this->location + Vector2(this->progress * this->size.x, this->size.y), Color(0.15f, 0.85f, 0.15f));
+	renderer->drawRectangleFilled(this->location + Vector2(this->progress * this->size.x, 0.0f), this->location + this->size, Color(0.15f, 0.15f, 0.15f));
+}
 
-class InputBox : public Widget {
-public:
-	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen);
-	virtual ~InputBox();
-
-	virtual void draw(IRenderer *renderer);
-	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
-	std::string getText();
-
-	ALLEGRO_USTR* getTextUstr();
-
-private:
-	Game *game;
-	void (Game::*send)(std::string);
-
-	std::string caption;
-	ALLEGRO_FONT *font;
-	ALLEGRO_USTR *text;
-	size_t inputLocation;
-	unsigned char maxLength;
-	size_t historyIndex;
-};
-
-#include "../main.h"
-
-#endif
+void ProgressBar::setProgress(float progress) {
+	this->progress = progress;
+}

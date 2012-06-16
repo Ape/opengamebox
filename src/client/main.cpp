@@ -19,6 +19,8 @@
 
 #include "main.h"
 
+#include "widgets/progressBar.h"
+
 int main(int argc, char **argv) {
 	// Get host address and port from command line arguments
 	std::string address;
@@ -78,6 +80,7 @@ Game::Game() {
 	this->nextFrame = true;
 	this->deltaTime = 0.0f;
 	this->input = nullptr;
+	this->fileTransferProgress = nullptr;
 	this->localClient = net::MAX_CLIENTS;
 
 	this->dragging = false;
@@ -1147,22 +1150,45 @@ void Game::receivePacket(ENetEvent event) {
 					this->loadingfile.size = packet.readInt();
 					this->loadingfile.data = new char[this->loadingfile.size];
 					this->loadingfile.name = packet.readString();
-					this->loadingfile.recieved = 0;
+					this->loadingfile.received = 0;
+					this->loadingfile.startTime = this->previousTime;
+
+					std::ostringstream message("");
+					message << "Downloading package " << this->loadingfile.name << " (" << net::getPrettyFileSize(this->loadingfile.size) << ").";
+					this->addMessage(message.str());
+
+					const Vector2 progressBarSize(300.0f, 50.0f);
+					this->fileTransferProgress = new ProgressBar(Vector2(this->renderer->getDisplaySize().x / 2.0f - progressBarSize.x / 2.0f,
+					                                                     this->renderer->getDisplaySize().y / 2.0f - progressBarSize.y / 2.0f),
+					                                             progressBarSize, 0.0f);
 				} else {
 					int ofset = packet.readInt();
 					int size = packet.readInt();
 					std::string tmp = packet.readString();
+
 					for (unsigned int i = 0; i < tmp.size(); i++) {
 						this->loadingfile.data[ofset + i] = tmp.at(i);
 					}
-					this->loadingfile.recieved += size;
+
+					this->loadingfile.received += size;
+
+					this->fileTransferProgress->setProgress(1.0f * this->loadingfile.received / this->loadingfile.size);
 				}
-				if (this->loadingfile.size == this->loadingfile.recieved) {
+
+				if (this->loadingfile.size == this->loadingfile.received) {
+					delete this->fileTransferProgress;
+					this->fileTransferProgress = nullptr;
+
 					std::ofstream file;
 					file.open("data/" + this->loadingfile.name + ".zip", std::ios::out | std::ios::binary);
 					file << std::string(this->loadingfile.data, this->loadingfile.size);
 					file.close();
-					this->addMessage("Downloaded package " + this->loadingfile.name);
+
+					const double time = this->previousTime - this->loadingfile.startTime;
+					std::ostringstream message("");
+					message << "Downloaded package " << this->loadingfile.name << " in " << time << " seconds.";
+					this->addMessage(message.str());
+
 					PHYSFS_addToSearchPath(("data/" + this->loadingfile.name + ".zip").c_str(), 1);
 
 					for (auto &object : this->objects) {
@@ -1176,7 +1202,7 @@ void Game::receivePacket(ENetEvent event) {
 					delete this->loadingfile.data;
 					this->loadingfile.name = "";
 					this->loadingfile.size = 0;
-					this->loadingfile.recieved = 0;
+					this->loadingfile.received = 0;
 
 					if (!this->missingPackages.empty()) {
 						this->loadingPackage = true;
@@ -1604,6 +1630,10 @@ void Game::renderUI() {
 	}
 
 	if (this->input != nullptr) {
-		input->draw(this->renderer);
+		this->input->draw(this->renderer);
+	}
+
+	if (this->fileTransferProgress != nullptr) {
+		this->fileTransferProgress->draw(this->renderer);
 	}
 }

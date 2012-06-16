@@ -15,6 +15,8 @@ New features:
 	- /calc for calculating simple arithmetic expressions
 	- widgets
 		- button, textarea, dialog with text and buttons
+		- fancier download widget
+			- progress bar + text + background box
 		- menu
 		- server list
 	- admin commands

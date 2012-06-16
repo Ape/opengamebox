@@ -15,39 +15,22 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef INPUTBOX_H
-#define INPUTBOX_H
-
-#include <string>
-#include <sstream>
+#ifndef PROGRESSBAR_H
+#define PROGRESSBAR_H
 
 #include "../widget.h"
 
-class Game;
-
-class InputBox : public Widget {
+class ProgressBar : public Widget {
 public:
-	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen);
-	virtual ~InputBox();
+	ProgressBar(Vector2 location, Vector2 size, float progress);
+	virtual ~ProgressBar();
 
 	virtual void draw(IRenderer *renderer);
-	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
-	std::string getText();
 
-	ALLEGRO_USTR* getTextUstr();
+	void setProgress(float progress);
 
 private:
-	Game *game;
-	void (Game::*send)(std::string);
-
-	std::string caption;
-	ALLEGRO_FONT *font;
-	ALLEGRO_USTR *text;
-	size_t inputLocation;
-	unsigned char maxLength;
-	size_t historyIndex;
+	float progress;
 };
-
-#include "../main.h"
 
 #endif

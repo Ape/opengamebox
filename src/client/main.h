@@ -53,6 +53,8 @@
 #include "../client.h"
 #include "../settings.h"
 
+class ProgressBar;
+
 // Workaround an issue with Windows specific preprocessor definitions
 #undef ERROR
 
@@ -109,7 +111,8 @@ private:
 		std::string name;
 		int size;
 		char* data;
-		int recieved;
+		int received;
+		double startTime;
 	};
 	File loadingfile;
 
@@ -125,8 +128,10 @@ private:
 
 	std::vector<Message> messages;
 	std::vector<Widget*> widgets;
-	InputBox* input;
+	InputBox *input;
 	std::vector<std::string> sentMessages;
+
+	ProgressBar *fileTransferProgress;
 
 	std::vector<std::string> dCreateBuffer;
 	std::list<Object*> selectedObjects;

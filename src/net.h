@@ -97,6 +97,8 @@ namespace net {
 	std::string IPIntegerToString(unsigned int ip);
 	std::string AddressToString(ENetAddress address);
 
+	std::string getPrettyFileSize(unsigned int size);
+
 	void removeObject(std::vector<Object*> &objectOrder, Object* object);
 }
 
