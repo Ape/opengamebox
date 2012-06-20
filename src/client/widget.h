@@ -25,10 +25,13 @@
 #include "../vector2.h"
 #include "../irenderer.h"
 
+#include <vector>
+
 class Widget {
 protected:
 	Vector2 location;
 	Vector2 size;
+	std::vector<Widget*> widgets;
 
 public:
 	Widget(Vector2 location, Vector2 size);
@@ -36,6 +39,8 @@ public:
 
 	virtual void draw(IRenderer *renderer);
 	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
+
+	void addWidget(Widget *widget);
 };
 
 #endif

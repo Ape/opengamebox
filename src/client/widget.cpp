@@ -23,13 +23,21 @@ Widget::Widget(Vector2 location, Vector2 size) {
 }
 
 Widget::~Widget() {
-	
+	for (auto widget : this->widgets) {
+		delete widget;
+	}
 }
 
 void Widget::draw(IRenderer *renderer) {
-
+	for (auto &widget : this->widgets) {
+		widget->draw(renderer);
+	}
 }
 
 bool Widget::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 	return false;
+}
+
+void Widget::addWidget(Widget *widget){
+	this->widgets.push_back(widget);
 }
