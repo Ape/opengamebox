@@ -18,12 +18,11 @@
 
 #include "inputBox.h"
 
-InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, ALLEGRO_FONT *font, unsigned char maxLen)
+InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, unsigned char maxLen)
 : Widget(location, Vector2(width, 20.0f)) {
 	this->game = game;
 	this->send = send;
 	this->caption = caption;
-	this->font = font;
 	this->text = al_ustr_new("");
 	this->inputLocation = 0;
 	this->maxLength = maxLen;

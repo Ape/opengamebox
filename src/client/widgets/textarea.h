@@ -1,4 +1,4 @@
-// Copyright 2012 Lauri Niskanen
+// Copyright 2012 Antti Aalto
 //
 // This file is part of OpenGamebox.
 //
@@ -15,38 +15,25 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef INPUTBOX_H
-#define INPUTBOX_H
-
-#include <string>
-#include <sstream>
+#ifndef TEXTBOX_H
+#define TEXTBOX_H
 
 #include "../widget.h"
+#include "../../utils.h"
 
-class Game;
-
-class InputBox : public Widget {
+class TextArea : public Widget{
 public:
-	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, unsigned char maxLen);
-	virtual ~InputBox();
+	TextArea(Vector2 location, Vector2 size, std::string text, ALLEGRO_FONT *font);
 
-	virtual void draw(IRenderer *renderer);
-	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
-	std::string getText();
-
-	ALLEGRO_USTR* getTextUstr();
+	virtual ~TextArea();
 
 private:
-	Game *game;
-	void (Game::*send)(std::string);
+	std::vector<std::string> text;
+	ALLEGRO_FONT *font;
 
-	std::string caption;
-	ALLEGRO_USTR *text;
-	size_t inputLocation;
-	unsigned char maxLength;
-	size_t historyIndex;
+	virtual void draw(IRenderer *renderer);
+
 };
 
-#include "../main.h"
 
 #endif

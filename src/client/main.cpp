@@ -374,8 +374,8 @@ void Game::localEvents() {
 			this->input->onKey(event.keyboard);
 		} else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 			// Create a new chat input widget
-			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f), 300.0f,
-			                           this->renderer->getFont(), 255);
+			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f),
+										300.0f, 255);
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
 		if (input == nullptr) {
@@ -1468,7 +1468,7 @@ void Game::saveScript(std::string name) {
 		this->addMessage("Could not save the script.", MessageType::ERROR);
 		return;
 	}
-	
+
 	for (auto &object : this->objectOrder) {
 		file << "create " << object->getFullId() << " " << object->getLocation().x << " " << object->getLocation().y << std::endl;
 	}
@@ -1497,8 +1497,8 @@ void Game::checkObjectOrder() {
 }
 
 void Game::askNick() {
-	this->input = new InputBox(this, &Game::identifyToServer, "Nick", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f), 225.0f,
-	                           this->renderer->getFont(), 16);
+	this->input = new InputBox(this, &Game::identifyToServer, "Nick", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f),
+								225.0f, 16);
 }
 
 void Game::identifyToServer(std::string nick) {
