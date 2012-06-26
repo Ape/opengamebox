@@ -15,29 +15,36 @@
 // You should have received a copy of the GNU General Public License
 // along with OpenGamebox.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef TEXTBOX_H
-#define TEXTBOX_H
+#ifndef CHATWIDGET_H
+#define CHATWIDGET_H
+
+#include <vector>
 
 #include "../widget.h"
 #include "../../utils.h"
+#include "textarea.h"
 
-class TextArea : public Widget{
+struct Message {
+	std::string message;
+	double time;
+};
+
+class ChatWidget : public Widget{
 public:
-	TextArea(Vector2 location, Vector2 size, std::string text, ALLEGRO_FONT *font);
+	ChatWidget(Vector2 location, Vector2 size, float messagetime, ALLEGRO_FONT *font);
 
-	virtual ~TextArea();
+	virtual ~ChatWidget();
 
 	virtual void draw(IRenderer *renderer);
 
-	int getLineCount();
-
-	void move(Vector2 location);
-	Vector2 getLocation();
+	void addMessage(Message message);
 
 private:
 	std::vector<std::string> text;
 	ALLEGRO_FONT *font;
 	int lineCount;
+	std::vector<std::pair<TextArea*, Message>> messages;
+	float messageTime;
 
 };
 

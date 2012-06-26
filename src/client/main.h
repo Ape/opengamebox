@@ -50,6 +50,8 @@
 #include "renderer.h"
 #include "widget.h"
 #include "widgets/inputBox.h"
+#include "widgets/textarea.h"
+#include "widgets/chatwidget.h"
 #include "../client.h"
 #include "../settings.h"
 
@@ -121,12 +123,8 @@ private:
 	std::map<unsigned char, Client*> clients;
 	unsigned char localClient;
 
-	struct Message {
-		std::string message;
-		double time;
-	};
+	ChatWidget *chatWidget;
 
-	std::vector<Message> messages;
 	std::vector<Widget*> widgets;
 	InputBox *input;
 	std::vector<std::string> sentMessages;

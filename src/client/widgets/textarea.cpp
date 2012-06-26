@@ -21,6 +21,21 @@ TextArea::TextArea(Vector2 location, Vector2 size, std::string text, ALLEGRO_FON
 		  : Widget(location, size),
 		    font(font) {
 	this->text = utils::splitString(text, ' ');
+	{
+		int lines = 1;
+		int width = 0;
+		for (auto &word : this->text) {
+			int textwidth = al_get_text_width(this->font, word.c_str());
+			if (width + textwidth > this->size.x) {
+				lines++;
+				width = 0;
+			} else {
+				width += al_get_text_width(this->font, " ");
+			}
+			width += textwidth;
+		}
+		this->lineCount = lines;
+	}
 }
 
 TextArea::~TextArea() {
@@ -28,18 +43,28 @@ TextArea::~TextArea() {
 }
 
 void TextArea::draw(IRenderer *renderer) {
-	Vector2 drawPos = this->location;
+	Vector2 drawPos(0.0f, 0.0f);
 	for (auto &word : this->text) {
 		int width = al_get_text_width(this->font, word.c_str());
 		if (width + drawPos.x > this->size.x) {
-			drawPos.y += 15;
+			drawPos.y += 20;
+			drawPos.x = 0;
+		} else {
+			drawPos.x += al_get_text_width(this->font, " ");
 		}
-		drawPos.x = this->location.x;
-		renderer->drawText(word, drawPos);
-		drawPos.x += al_get_text_width(this->font, " ");
-		drawPos.x += width;
-		renderer->drawText(word, drawPos);
-		drawPos.x += al_get_text_width(this->font, " ");
+		renderer->drawText(word, this->location + drawPos);
 		drawPos.x += width;
 	}
+}
+
+int TextArea::getLineCount() {
+	return this->lineCount;
+}
+
+void TextArea::move(Vector2 location) {
+	this->location = location;
+}
+
+Vector2 TextArea::getLocation() {
+	return this->location;
 }

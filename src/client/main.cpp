@@ -159,6 +159,9 @@ bool Game::init() {
 		return false;
 	}
 
+	this->chatWidget = new ChatWidget(Vector2(), Vector2(this->settings->getValue<int>("display.width") / 3,
+								this->settings->getValue<int>("display.height")/2), this->settings->getValue<float>("game.messagetime"), this->renderer->getFont());
+
 	return true;
 }
 
@@ -1247,7 +1250,7 @@ void Game::addMessage(std::string text, MessageType type) {
 	message.message = text;
 	message.time = previousTime;
 	std::cout << message.message << std::endl;
-	this->messages.push_back(message);
+	this->chatWidget->addMessage(message);
 }
 
 // Send a chat packet
@@ -1616,11 +1619,15 @@ void Game::renderUI() {
 		++i;
 	}
 
+	this->chatWidget->draw(this->renderer);
+
+/*
 	for (std::vector<Message>::size_type i = this->messages.size(); i > 0; --i) {
 		if (this->input != nullptr || al_get_time() < this->messages[i-1].time + this->settings->getValue<float>("game.messagetime")) {
 			this->renderer->drawText(this->messages[i-1].message, Vector2(0.0f, this->renderer->getDisplaySize().y / 2.0f + i * 20.0f - this->messages.size() * 20.0f));
 		}
 	}
+*/
 
 	this->renderer->drawText("FPS: " + utils::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
 	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f));
