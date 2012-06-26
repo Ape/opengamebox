@@ -44,17 +44,21 @@ TextArea::~TextArea() {
 
 void TextArea::draw(IRenderer *renderer) {
 	Vector2 drawPos(0.0f, 0.0f);
+	std::string tempText;
 	for (auto &word : this->text) {
 		int width = al_get_text_width(this->font, word.c_str());
 		if (width + drawPos.x > this->size.x) {
+			renderer->drawText(tempText, this->location + Vector2(0.0f, drawPos.y));
+			tempText = word;
 			drawPos.y += 20;
 			drawPos.x = 0;
 		} else {
 			drawPos.x += al_get_text_width(this->font, " ");
+			tempText += word + " ";
 		}
-		renderer->drawText(word, this->location + drawPos);
 		drawPos.x += width;
 	}
+	renderer->drawText(tempText, this->location + Vector2(0.0f, drawPos.y));
 }
 
 int TextArea::getLineCount() {

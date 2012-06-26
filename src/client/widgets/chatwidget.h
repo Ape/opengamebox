@@ -35,7 +35,7 @@ public:
 
 	virtual ~ChatWidget();
 
-	virtual void draw(IRenderer *renderer);
+	virtual void draw(IRenderer *renderer, bool drawAll = false);
 
 	void addMessage(Message message);
 

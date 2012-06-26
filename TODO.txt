@@ -38,12 +38,14 @@ Improvements:
 	- rotate screen with 90 degree steps
 	- remove color codes from terminal output
 	- add meaningful default values for config files
+	- (?) rescale ui when window size changes
 
 Bug fixes:
 	- fix segmentation fault on fallback texture disposal
 	- fix shuffle
 	- (?) rotate temporary mouse coordinates when dragging an object
 	- objects are not flipped after the package was downloaded from the server
+	- text turns to white after new line
 
 Clean up:
 	- use member initialization lists

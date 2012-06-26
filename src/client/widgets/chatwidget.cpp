@@ -27,16 +27,16 @@ void ChatWidget::addMessage(Message message) {
 										message.message, this->font), message);
 	int messageSize = pair.first->getLineCount();
 	pair.first->move(this->location + Vector2(0.0f, -20.0f * messageSize + this->size.y));
-	for(auto &message : this->messages) {
+	for (auto &message : this->messages) {
 		message.first->move(message.first->getLocation() + Vector2(0.0f, -20.0f * messageSize));
 	}
 	this->messages.push_back(pair);
 }
 
-void ChatWidget::draw(IRenderer *renderer) {
+void ChatWidget::draw(IRenderer *renderer, bool drawAll) {
 float time = al_get_time();
-	for(auto &pair : this->messages) {
-		if(time < pair.second.time + this->messageTime) {
+	for (auto &pair : this->messages) {
+		if (time < pair.second.time + this->messageTime || drawAll) {
 			pair.first->draw(renderer);
 		}
 	}
