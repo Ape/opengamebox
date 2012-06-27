@@ -63,10 +63,15 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 
 Renderer::~Renderer() {
 	for (auto &texture : this->textures) {
-		if (texture.second != nullptr) {
+		if (texture.second != nullptr && this->textures["gfx/error"] != texture.second) {
 			al_destroy_bitmap(texture.second);
 			texture.second = nullptr;
 		}
+	}
+
+	if (this->textures["gfx/error"] != nullptr) {
+		al_destroy_bitmap(this->textures["gfx/error"]);
+		this->textures["gfx/error"] = nullptr;
 	}
 
 	al_destroy_font(this->font);
