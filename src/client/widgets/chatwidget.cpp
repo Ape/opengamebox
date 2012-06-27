@@ -43,5 +43,7 @@ float time = al_get_time();
 }
 
 ChatWidget::~ChatWidget() {
-
+	for (auto &pair : this->messages) {
+		delete pair.first;
+	}
 }
