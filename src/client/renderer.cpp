@@ -148,7 +148,7 @@ void Renderer::loadTexture(std::string texture) {
 		if (file != nullptr) {
 			this->textures[texture] = al_load_bitmap_f(file, ".png");
 		}
-		if (this->textures[texture] == nullptr) {
+		if (this->textures[texture] == nullptr || (this->textures[texture] == this->textures["gfx/error"] && texture != "gfx/error")) {
 			std::string path = texture + ".jpg";
 			ALLEGRO_FILE *file = al_fopen(path.c_str(), "r");
 			this->textures[texture] = al_load_bitmap(path.c_str());
