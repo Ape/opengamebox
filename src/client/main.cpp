@@ -1218,6 +1218,15 @@ void Game::receivePacket(ENetEvent event) {
 				break;
 			}
 
+			case Packet::Header::ORDER: {
+				this->objectOrder.clear();
+				while(!packet.eof()) {
+					this->objectOrder.push_back(this->objects.find(packet.readShort())->second);
+				}
+				this->checkObjectOrder();
+				break;
+			}
+
 			default: {
 				throw PacketException("Invalid packet header.");
 			}

@@ -63,6 +63,7 @@ private:
 
 	std::map<unsigned char, ServerClient*> clients;
 	std::map<unsigned short, Object*> objects;
+	std::vector<Object*> objectOrder;
 
 	bool exiting;
 

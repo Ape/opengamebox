@@ -267,6 +267,18 @@ void Server::receivePacket(ENetEvent event) {
 							net::sendCommand(event.peer, data.c_str(), data.length());
 						}
 
+						// Send object order
+						{
+							if (!this->objects.empty()) {
+								Packet reply(this->connection);
+								reply.writeHeader(Packet::Header::ORDER);
+								for (auto &object : this->objectOrder) {
+									reply.writeShort(object->getId());
+								}
+								reply.send();
+							}
+						}
+
 						// Broadcast a join event
 						{
 							std::string data;
@@ -392,6 +404,7 @@ void Server::receivePacket(ENetEvent event) {
 							object->setFlipped(flipped);
 							object->rotate(rotation);
 							this->objects.insert(std::pair<unsigned short, Object*>(objId, object));
+							this->objectOrder.push_back(object);
 
 							std::string temp;
 							net::dataAppendShort(temp, objId);
@@ -442,6 +455,9 @@ void Server::receivePacket(ENetEvent event) {
 							Object *object = this->objects.find(objId)->second;
 							object->setLocation(location);
 							lastObject = object;
+
+							net::removeObject(this->objectOrder, object);
+							this->objectOrder.push_back(object);
 
 							i += 10;
 						}
@@ -506,6 +522,7 @@ void Server::receivePacket(ENetEvent event) {
 
 						Object *object = this->objects.find(objId)->second;
 						this->objects.erase(objId);
+						net::removeObject(this->objectOrder, object);
 
 						lastObject = object->getName();
 						delete object;
@@ -631,6 +648,11 @@ void Server::receivePacket(ENetEvent event) {
 						}
 
 						std::random_shuffle(objects.begin(), objects.end());
+
+						for (auto &object : objects){
+							net::removeObject(this->objectOrder, object);
+							this->objectOrder.push_back(object);
+						}
 
 						std::vector<Vector2>::size_type location = 0;
 						for (auto &object : objects) {

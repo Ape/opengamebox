@@ -54,6 +54,7 @@ public:
 		OWN     = 0x25, // Make objects private
 		SHUFFLE = 0x26, // Shuffle objects
 		ROTATE  = 0x27, // Rotate objects
+		ORDER   = 0x28, // Send object order to client
 
 		// Other commands
 		CHAT         = 0x40, // Send a chat message
