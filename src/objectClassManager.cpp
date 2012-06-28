@@ -59,3 +59,12 @@ ObjectClass* ObjectClassManager::getObjectClass(std::string package, std::string
 
 	return selectedObjectClass;
 }
+
+std::vector<ObjectClass*> ObjectClassManager::getClassesInPackage(std::string package) {
+	std::map<std::string, ObjectClass*> *packageClasses = this->packages.find(package)->second;
+	std::vector<ObjectClass*> selectedObjectClasses;
+	for (auto &pair : *packageClasses) {
+		selectedObjectClasses.push_back(pair.second);
+	}
+	return selectedObjectClasses;
+}

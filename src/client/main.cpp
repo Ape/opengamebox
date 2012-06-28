@@ -1200,6 +1200,8 @@ void Game::receivePacket(ENetEvent event) {
 						}
 					}
 
+					std::string name = this->loadingfile.name;
+
 					this->loadingPackage = false;
 					this->missingPackages.erase(this->loadingfile.name);
 					delete this->loadingfile.data;
@@ -1213,6 +1215,9 @@ void Game::receivePacket(ENetEvent event) {
 						reply.writeHeader(Packet::Header::PACKAGE_MISSING);
 						reply.writeString(*this->missingPackages.begin());
 						reply.send();
+					}
+					for (auto &objClass : this->objectClassManager.getClassesInPackage(name)) {
+						objClass->loadSettings();
 					}
 				}
 				break;

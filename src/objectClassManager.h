@@ -32,6 +32,8 @@ public:
 
 	ObjectClass* getObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages);
 
+	std::vector<ObjectClass*> getClassesInPackage(std::string package);
+
 private:
 	std::map<std::string, std::map<std::string, ObjectClass*>*> packages;
 };

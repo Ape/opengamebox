@@ -43,7 +43,6 @@ Improvements:
 Bug fixes:
 	- fix shuffle
 	- (?) rotate temporary mouse coordinates when dragging an object
-	- objects are not flipped after the package was downloaded from the server
 	- text turns to white after new line
 
 Clean up:

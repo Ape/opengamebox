@@ -62,8 +62,16 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 		this->checkDependency(dependencies, missingPackages);
 	}
 
+	this->loadSettings();
+}
+
+ObjectClass::~ObjectClass() {
+
+}
+
+void ObjectClass::loadSettings() {
 	std::stringstream file;
-	file.str(utils::getTextFile(package, "objects/" + this->objectClass + ".txt"));
+	file.str(utils::getTextFile(this->package, "objects/" + this->objectClass + ".txt"));
 
 	std::string line;
 	while (file.good()) {
@@ -91,10 +99,6 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 			std::cout << "Warning: Could not parse '" << line << "' in " << this->objectClass << ".txt" << std::endl;
 		}
 	}
-}
-
-ObjectClass::~ObjectClass() {
-
 }
 
 std::string ObjectClass::getObjectClass() const {

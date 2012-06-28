@@ -33,6 +33,8 @@ public:
 	ObjectClass(std::string package, std::string objectClass, std::set<std::string> *missingPackages);
 	~ObjectClass(void);
 
+	void loadSettings();
+
 	std::string getObjectClass(void) const;
 	std::string getPackage(void) const;
 	std::string getName(void) const;
