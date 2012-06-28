@@ -62,7 +62,7 @@ namespace net {
 
 	// Other command packets
 	const unsigned char PACKET_CHAT = 0x40; // Send a chat message
-	const unsigned char PACKET_ROLL = 0x41; // Roll a die on the server
+	const unsigned char PACKET_ROLL = 0x42; // Roll a die on the server
 
 	// Master server communication
 	const unsigned char PACKET_MS_QUERY    = 0xC0; // Request the server list
