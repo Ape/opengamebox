@@ -39,6 +39,8 @@ public:
 
 	void addMessage(Message message);
 
+	virtual void resize(Vector2 multipler);
+
 private:
 	std::vector<std::string> text;
 	ALLEGRO_FONT *font;

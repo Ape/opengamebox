@@ -41,6 +41,12 @@ public:
 	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
 
 	void addWidget(Widget *widget);
+
+	virtual void resize(Vector2 multiplier);
+	virtual void resize(Vector2 location, Vector2 size);
+
+	virtual Vector2 getLocation(void);
+	virtual Vector2 getSize(void);
 };
 
 #endif

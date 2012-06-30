@@ -47,3 +47,11 @@ ChatWidget::~ChatWidget() {
 		delete pair.first;
 	}
 }
+
+void ChatWidget::resize(Vector2 multipler) {
+	Vector2 movement(multipler.x * this->size.x - this->size.x, multipler.y * this->size.y - this->size.y);
+	Widget::resize(multipler);
+	for (auto &pair : this->messages) {
+		pair.first->move(pair.first->getLocation() + Vector2(0.0f, movement.y));
+	}
+}
