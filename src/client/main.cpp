@@ -162,6 +162,9 @@ bool Game::init() {
 	this->chatWidget = new ChatWidget(Vector2(), Vector2(this->settings->getValue<int>("display.width") * 2 / 5,
 								this->settings->getValue<int>("display.height")/2 + 15), this->settings->getValue<float>("game.messagetime"), this->renderer->getFont());
 
+	// Load command history
+	this->loadHistory();
+
 	return true;
 }
 
@@ -259,6 +262,9 @@ int Game::run() {
 
 	// Enter the main loop
 	this->mainLoop();
+
+	// Save command history
+	this->saveHistory();
 
 	// Exit the application when returned from the main loop
 	this->dispose();
@@ -360,6 +366,41 @@ void Game::disposeGame() {
 		delete client.second;
 	}
 	this->clients.clear();
+}
+
+void Game::loadHistory() {
+	std::ifstream historyFile;
+	historyFile.open(HISTORY_FILE, std::ios::in);
+
+	std::string line;
+	while (historyFile.good() && this->sentMessages.size() < HISTORY_SIZE) {
+		getline(historyFile, line);
+		if (!line.empty()) {
+			this->sentMessages.push_back(line);
+		}
+	}
+
+	historyFile.close();
+}
+
+void Game::saveHistory() {
+	std::ofstream historyFile;
+	historyFile.open(HISTORY_FILE, std::ios::out);
+
+	std::string line;
+	size_t lineNumber;
+	if (this->sentMessages.size() > HISTORY_SIZE) {
+		lineNumber = this->sentMessages.size() - HISTORY_SIZE;
+	} else {
+		lineNumber = 0;
+	}
+
+	while (historyFile.good() && lineNumber < this->sentMessages.size()) {
+		historyFile << this->sentMessages.at(lineNumber) << std::endl;
+		++lineNumber;
+	}
+
+	historyFile.close();
 }
 
 void Game::localEvents() {

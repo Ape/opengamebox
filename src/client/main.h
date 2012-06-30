@@ -60,6 +60,9 @@ class ProgressBar;
 // Workaround an issue with Windows specific preprocessor definitions
 #undef ERROR
 
+const std::string HISTORY_FILE = "history.txt";
+const size_t HISTORY_SIZE = 20;
+
 int main(int argc, char **argv);
 
 class Game {
@@ -160,6 +163,9 @@ private:
 	void disconnectMasterServer(void);
 	void dispose(void);
 	void disposeGame(void);
+
+	void loadHistory(void);
+	void saveHistory(void);
 
 	void localEvents(void);
 	void endDragging(void);

@@ -4,6 +4,7 @@ cmake_install.cmake
 CMakeFiles/
 Makefile
 lib/
+history.txt
 opengamebox
 opengamebox-server
 opengamebox-master-server

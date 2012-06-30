@@ -1,7 +1,6 @@
 New features:
 	- add README.txt and documentation
 	- ability to scroll received chat messages
-	- loading chat / command history from a file
 	- ask the player about downloading new packages
 	- make it possible to save package only temporarily
 	- save packages with a better name
