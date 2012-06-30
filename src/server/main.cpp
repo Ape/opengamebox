@@ -639,24 +639,26 @@ void Server::receivePacket(ENetEvent event) {
 						data += *id;
 
 						std::vector<Object*> objects;
-						std::vector<Vector2> locations;
+						std::vector<std::pair<int, Vector2>> locations;
+
+						// Get objects to suffle and order and locations of them
 						for (auto &object : this->objects) {
 							if (object.second->isSelectedBy(this->clients[*id])) {
 								objects.push_back(object.second);
-								locations.push_back(object.second->getLocation());
+								int orderIndex = std::distance(this->objectOrder.begin(), std::find(this->objectOrder.begin(),
+																this->objectOrder.end(), object.second));
+								locations.push_back(std::pair<int, Vector2>(orderIndex, object.second->getLocation()));
 							}
 						}
 
+						// Suffle
 						std::random_shuffle(objects.begin(), objects.end());
 
-						for (auto &object : objects){
-							net::removeObject(this->objectOrder, object);
-							this->objectOrder.push_back(object);
-						}
-
+						// Move the objects
 						std::vector<Vector2>::size_type location = 0;
 						for (auto &object : objects) {
-							object->setLocation(locations.at(location));
+							object->setLocation(locations.at(location).second);
+							this->objectOrder[locations.at(location).first] = object;
 							net::dataAppendShort(data, object->getId());
 							net::dataAppendVector2(data, object->getLocation());
 							++location;
@@ -664,14 +666,13 @@ void Server::receivePacket(ENetEvent event) {
 
 						net::sendCommand(this->connection, data.c_str(), data.length());
 
-						{
-							Packet reply(this->connection);
-							reply.writeHeader(Packet::Header::ORDER);
-							for (auto &object : this->objectOrder) {
-								reply.writeShort(object->getId());
-							}
-							reply.send();
+						// Send new obj order
+						Packet reply(this->connection);
+						reply.writeHeader(Packet::Header::ORDER);
+						for (auto &object : this->objectOrder) {
+							reply.writeShort(object->getId());
 						}
+						reply.send();
 					}
 
 					// Deselect objects
@@ -683,7 +684,6 @@ void Server::receivePacket(ENetEvent event) {
 						net::sendCommand(this->connection, data.c_str(), data.length());
 					}
 				}
-
 				break;
 			}
 
