@@ -33,6 +33,7 @@ public:
 	virtual void draw(IRenderer *renderer);
 	virtual bool onKey(ALLEGRO_KEYBOARD_EVENT keyboard);
 	std::string getText();
+	virtual void resize(Vector2 multipler);
 
 	ALLEGRO_USTR* getTextUstr();
 

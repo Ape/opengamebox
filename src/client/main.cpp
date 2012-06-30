@@ -371,7 +371,16 @@ void Game::localEvents() {
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 		this->quit();
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+		Vector2 oldSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
 		this->renderer->resize();
+		Vector2 newSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
+		Vector2 ratio = newSize/oldSize;
+		for (auto &widget : this->widgets) {
+			widget->resize(ratio);
+		}
+		this->chatWidget->resize(ratio);
+		this->input->resize(ratio);
+
 	} else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 		if (input != nullptr) {
 			this->input->onKey(event.keyboard);

@@ -109,6 +109,11 @@ bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 	return true;
 }
 
+void InputBox::resize(Vector2 multipler) {
+	Widget::resize(multipler);
+	this->size.y = 20;
+}
+
 std::string InputBox::getText() {
 	return std::string(al_cstr(this->text));
 }

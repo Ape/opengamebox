@@ -41,3 +41,23 @@ bool Widget::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 void Widget::addWidget(Widget *widget){
 	this->widgets.push_back(widget);
 }
+
+void Widget::resize(Vector2 multiplier) {
+	this->location.x *= multiplier.x;
+	this->location.y *= multiplier.y;
+	this->size.x *= multiplier.x;
+	this->size.y *= multiplier.y;
+}
+
+void Widget::resize(Vector2 location, Vector2 size) {
+	this->location = location;
+	this->size = size;
+}
+
+Vector2 Widget::getLocation(void) {
+	return this->location;
+}
+
+Vector2 Widget::getSize(void) {
+	return this->size;
+}
