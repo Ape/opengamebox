@@ -663,6 +663,15 @@ void Server::receivePacket(ENetEvent event) {
 						}
 
 						net::sendCommand(this->connection, data.c_str(), data.length());
+
+						{
+							Packet reply(this->connection);
+							reply.writeHeader(Packet::Header::ORDER);
+							for (auto &object : this->objectOrder) {
+								reply.writeShort(object->getId());
+							}
+							reply.send();
+						}
 					}
 
 					// Deselect objects

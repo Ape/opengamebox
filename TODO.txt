@@ -41,7 +41,6 @@ Improvements:
 	- (?) rescale ui when window size changes
 
 Bug fixes:
-	- fix shuffle
 	- (?) rotate temporary mouse coordinates when dragging an object
 	- text turns to white after new line
 
