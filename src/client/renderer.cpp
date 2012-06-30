@@ -32,7 +32,6 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 	if (! this->display) {
 		std::cerr << "Failed to create a display!" << std::endl;
 	}
-	al_acknowledge_resize(this->display);
 
 	// Initialize fonts
 	al_init_font_addon();
@@ -58,7 +57,7 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
-	this->updateTransformations();
+	this->resize();
 }
 
 Renderer::~Renderer() {
