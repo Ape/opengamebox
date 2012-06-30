@@ -420,7 +420,9 @@ void Game::localEvents() {
 			widget->resize(ratio);
 		}
 		this->chatWidget->resize(ratio);
-		this->input->resize(ratio);
+		if (this->input != nullptr) {
+			this->input->resize(ratio);
+		}
 
 	} else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 		if (input != nullptr) {
