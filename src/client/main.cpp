@@ -429,12 +429,11 @@ void Game::localEvents() {
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
 				if (this->selectedObjects.size() > 0) {
+					this->endDragging();
+
 					std::string data;
 					data += net::PACKET_SHUFFLE;
 					net::sendCommand(this->connection, data.c_str(), data.length());
-
-					this->selectedObjects.clear();
-					this->dragging = false;
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_F) {
 				if (this->selectedObjects.size() > 0) {
@@ -606,21 +605,7 @@ void Game::localEvents() {
 		Vector2 location(event.mouse.x, event.mouse.y);
 		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 		if (this->dragging) {
-
-
-			std::string data;
-			data.push_back(net::PACKET_MOVE);
-
-			for (auto &object : this->selectedObjects) {
-				net::dataAppendShort(data, object->getId());
-				net::dataAppendVector2(data, object->getLocation());
-
-				object->setAnimation(object->getLocation(), 0.0f);
-			}
-
-			net::sendCommand(this->connection, data.c_str(), data.length());
-
-			this->dragging = false;
+			this->endDragging();
 		} else if (this->selecting) {
 			this->selectedObjects.clear();
 			this->selecting = false;
@@ -725,6 +710,22 @@ void Game::localEvents() {
 			this->renderer->updateTransformations();
 		}
 	}
+}
+
+void Game::endDragging() {
+	std::string data;
+	data.push_back(net::PACKET_MOVE);
+
+	for (auto &object : this->selectedObjects) {
+		net::dataAppendShort(data, object->getId());
+		net::dataAppendVector2(data, object->getLocation());
+
+		object->setAnimation(object->getLocation(), 0.0f);
+	}
+
+	net::sendCommand(this->connection, data.c_str(), data.length());
+
+	this->dragging = false;
 }
 
 void Game::networkEvents() {

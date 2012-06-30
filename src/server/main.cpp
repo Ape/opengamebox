@@ -674,16 +674,8 @@ void Server::receivePacket(ENetEvent event) {
 						}
 						reply.send();
 					}
-
-					// Deselect objects
-					{
-						std::string data;
-						data += net::PACKET_SELECT;
-						data += *id;
-
-						net::sendCommand(this->connection, data.c_str(), data.length());
-					}
 				}
+
 				break;
 			}
 

@@ -162,6 +162,7 @@ private:
 	void disposeGame(void);
 
 	void localEvents(void);
+	void endDragging(void);
 
 	void networkEvents(void);
 	void receivePacket(ENetEvent event);
