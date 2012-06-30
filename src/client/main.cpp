@@ -429,7 +429,9 @@ void Game::localEvents() {
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
 				if (this->selectedObjects.size() > 0) {
-					this->endDragging();
+					if (this->dragging) {
+						this->endDragging();
+					}
 
 					std::string data;
 					data += net::PACKET_SHUFFLE;
@@ -489,7 +491,6 @@ void Game::localEvents() {
 						data.push_back(0x04);
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
-						//object->rotate(-utils::PI / 2);
 					}
 				}
 			}
@@ -1217,6 +1218,7 @@ void Game::receivePacket(ENetEvent event) {
 						reply.writeString(*this->missingPackages.begin());
 						reply.send();
 					}
+
 					for (auto &objClass : this->objectClassManager.getClassesInPackage(name)) {
 						objClass->loadSettings();
 					}
@@ -1226,10 +1228,12 @@ void Game::receivePacket(ENetEvent event) {
 
 			case Packet::Header::ORDER: {
 				this->objectOrder.clear();
-				while(!packet.eof()) {
+				while (!packet.eof()) {
 					this->objectOrder.push_back(this->objects.find(packet.readShort())->second);
 				}
+
 				this->checkObjectOrder();
+
 				break;
 			}
 
