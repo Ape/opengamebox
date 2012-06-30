@@ -159,8 +159,8 @@ bool Game::init() {
 		return false;
 	}
 
-	this->chatWidget = new ChatWidget(Vector2(), Vector2(this->settings->getValue<int>("display.width") * 2 / 5,
-								this->settings->getValue<int>("display.height")/2 + 15), this->settings->getValue<float>("game.messagetime"), this->renderer->getFont());
+	this->chatWidget = new ChatWidget(Vector2(), Vector2(this->renderer->getDisplaySize().x * 2 / 5,
+								this->renderer->getDisplaySize().y/2 + 15), this->settings->getValue<float>("game.messagetime"), this->renderer->getFont());
 
 	// Load command history
 	this->loadHistory();
@@ -429,7 +429,7 @@ void Game::localEvents() {
 			this->input->onKey(event.keyboard);
 		} else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 			// Create a new chat input widget
-			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f),
+			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20),
 										300.0f, 255);
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
