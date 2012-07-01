@@ -1410,12 +1410,18 @@ void Game::chatCommand(std::string commandstr) {
 			this->addMessage("Usage: /" + parameters.at(0) + " name");
 		}
 	} else if (parameters.at(0) == "create") {
-		if (parameters.size() == 2) {
+		if (parameters.size() == 2 || parameters.size() == 3) {
 			std::string data;
 			data.push_back(net::PACKET_CREATE);
-			data += this->createObject(parameters.at(1));
+			if (parameters.size() == 2) {
+				data += this->createObject(parameters.at(1));
+			} else if (parameters.at(2) == "flipped") {
+				data += this->createObject(parameters.at(1), Vector2(), true);
+			} else {
+				this->addMessage("Usage: /" + parameters.at(0) + " object [x y] [flipped]");
+			}
 			net::sendCommand(this->connection, data.c_str(), data.size());
-		} else if (parameters.size() == 4) {
+		} else if (parameters.size() == 4 || parameters.size() == 5) {
 			Vector2 location;
 			{
 				std::istringstream stream(parameters.at(2));
@@ -1427,10 +1433,16 @@ void Game::chatCommand(std::string commandstr) {
 			}
 			std::string data;
 			data.push_back(net::PACKET_CREATE);
-			data += this->createObject(parameters.at(1), location);
+			if (parameters.size() == 4) {
+				data += this->createObject(parameters.at(1), location);
+			} else if (parameters.at(4) == "flipped") {
+				data += this->createObject(parameters.at(1), location, true);
+			} else {
+				this->addMessage("Usage: /" + parameters.at(0) + " object [x y] [flipped]");
+			}
 			net::sendCommand(this->connection, data.c_str(), data.size());
 		} else {
-			this->addMessage("Usage: /" + parameters.at(0) + " object [x y]");
+			this->addMessage("Usage: /" + parameters.at(0) + " object [x y] [flipped]");
 		}
 	} else if (parameters.at(0) == "dcreate") {
 		if (parameters.size() == 2) {
@@ -1544,18 +1556,22 @@ void Game::saveScript(std::string name) {
 	}
 
 	for (auto &object : this->objectOrder) {
-		file << "create " << object->getFullId() << " " << object->getLocation().x << " " << object->getLocation().y << std::endl;
+		file << "create " << object->getFullId() << " " << object->getLocation().x << " " << object->getLocation().y;
+		if (object->isFlipped() || !object->isOwnedBy(nullptr)) {
+			file << " flipped" << std::endl;
+		} else {
+			file << std::endl;
+		}
 	}
 
 	file.close();
 }
 
-std::string Game::createObject(std::string objectId, Vector2 location) {
+std::string Game::createObject(std::string objectId, Vector2 location, bool flipped) {
 	std::string data;
 	data += 255; // Not selected
 	data += 255; // Not owned
-	bool flipped = false;
-	data += flipped; // Not flipped
+	data += flipped;
 	net::dataAppendVector2(data, location);
 	data.push_back(0x00); // Not rotated
 	data += (objectId.size());
