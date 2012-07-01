@@ -1445,8 +1445,29 @@ void Game::chatCommand(std::string commandstr) {
 			this->addMessage("Usage: /" + parameters.at(0) + " object [x y] [flipped]");
 		}
 	} else if (parameters.at(0) == "dcreate") {
-		if (parameters.size() == 2) {
-			this->dCreateBuffer.push_back(parameters.at(1));
+		if (parameters.size() >= 2) {
+			if (parameters.size() == 2) {
+				this->dCreateBuffer.push_back(std::make_tuple(parameters.at(1), Vector2(0.0f, 0.0f), false));
+			} else if (parameters.size() == 3 && parameters.at(2) == "flipped") {
+				this->dCreateBuffer.push_back(std::make_tuple(parameters.at(1), Vector2(0.0f, 0.0f), true));
+			} else if (parameters.size() == 4 || parameters.size() == 5) {
+				Vector2 location;
+				{
+					std::istringstream stream(parameters.at(2));
+					stream >> location.x;
+				}
+				{
+					std::istringstream stream(parameters.at(3));
+					stream >> location.y;
+				}
+				if (parameters.size() == 4) {
+					this->dCreateBuffer.push_back(std::make_tuple(parameters.at(1), location, false));
+				} else if (parameters.size() == 5 && parameters.at(4) == "flipped") {
+					this->dCreateBuffer.push_back(std::make_tuple(parameters.at(1), location, true));
+				}
+			}
+
+
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " object");
 		}
@@ -1456,10 +1477,18 @@ void Game::chatCommand(std::string commandstr) {
 		data.push_back(net::PACKET_CREATE);
 
 		for (auto &object : this->dCreateBuffer) {
-			data += this->createObject(object, Vector2(x, 0.0f));
-
-			x += 4;
+			std::string name;
+			Vector2 location;
+			bool flipped;
+			std::tie(name, location, flipped) = object;
+			if (location == Vector2(0.0f, 0.0f)) {
+				data += this->createObject(name, Vector2(x, 0.0f), flipped);
+				x += 4;
+			} else {
+				data += this->createObject(name, location, flipped);
+			}
 		}
+		std::cout<<"testi"<<std::endl;
 
 		net::sendCommand(this->connection, data.c_str(), data.size());
 		this->dCreateBuffer.clear();
@@ -1556,14 +1585,14 @@ void Game::saveScript(std::string name) {
 	}
 
 	for (auto &object : this->objectOrder) {
-		file << "create " << object->getFullId() << " " << object->getLocation().x << " " << object->getLocation().y;
+		file << "dcreate " << object->getFullId() << " " << object->getLocation().x << " " << object->getLocation().y;
 		if (object->isFlipped() || !object->isOwnedBy(nullptr)) {
 			file << " flipped" << std::endl;
 		} else {
 			file << std::endl;
 		}
 	}
-
+	file << "dflush" << std::endl;
 	file.close();
 }
 

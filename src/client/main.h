@@ -30,6 +30,7 @@
 #include <iostream>
 #include <iterator>
 #include <csignal>
+#include <tuple>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -134,7 +135,7 @@ private:
 
 	ProgressBar *fileTransferProgress;
 
-	std::vector<std::string> dCreateBuffer;
+	std::vector<std::tuple<std::string, Vector2, bool>> dCreateBuffer;
 	std::list<Object*> selectedObjects;
 	bool dragging;
 	bool selecting;
