@@ -11,10 +11,6 @@ if(WIN32 AND MINGW)
 	add_definitions(-DWIN32)
 endif(WIN32 AND MINGW)
 
-if(WIN32)
-	option(OPENGL "Use OpenGL instead of D3D. Leave unselected if not sure." OFF)
-endif(WIN32)
-
 ### User selectable options ###
 option(DEBUG "Show all warnings, include debug symbols, and disable optimizations" ON)
 

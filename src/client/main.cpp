@@ -118,14 +118,22 @@ bool Game::init() {
 
 	// Set the window mode
 	if (this->settings->getValue<bool>("display.fullscreen")) {
-		#if defined WIN32 && defined OPENGL
-			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_OPENGL);
+		#if defined WIN32
+			if (this->settings->getValue<bool>("display.force_opengl")) {
+				al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_OPENGL);
+			} else {
+				al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+			}
 		#else
 			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 		#endif
 	} else {
-		#if defined WIN32 && defined OPENGL
-			al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL);
+		#if defined WIN32
+			if (this->settings->getValue<bool>("display.force_opengl")) {
+				al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL);
+			} else {
+				al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);
+			}
 		#else
 			al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);
 		#endif
