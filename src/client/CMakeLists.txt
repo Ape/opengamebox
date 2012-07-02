@@ -9,3 +9,7 @@ add_subdirectory(widgets)
 add_executable(client main.cpp ${clientSources})
 set_target_properties(client PROPERTIES OUTPUT_NAME ${executableName})
 target_link_libraries(client ${executableName} ${clientLinkLibs})
+
+if(WIN32 AND OPENGL)
+	add_definitions(-DOPENGL)
+endif(WIN32 AND OPENGL)
