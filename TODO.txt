@@ -41,7 +41,6 @@ Improvements:
 
 Bug fixes:
 	- (?) rotate temporary mouse coordinates when dragging an object
-	- text turns to white after new line
 
 Clean up:
 	- use member initialization lists

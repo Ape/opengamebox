@@ -48,8 +48,15 @@ void TextArea::draw(IRenderer *renderer) {
 	for (auto &word : this->text) {
 		int width = al_get_text_width(this->font, word.c_str());
 		if (width + drawPos.x > this->size.x) {
+
 			renderer->drawText(tempText, this->location + Vector2(0.0f, drawPos.y));
-			tempText = word;
+			size_t colorPos = tempText.rfind('^');
+			if (colorPos != std::string::npos) {
+				tempText = tempText.substr(colorPos, 4);
+			} else {
+				tempText = "";
+			}
+			tempText += word;
 			drawPos.y += 20;
 			drawPos.x = 0;
 		} else {
