@@ -18,26 +18,30 @@
 
 #include "inputBox.h"
 
-InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, unsigned char maxLen)
-: Widget(location, Vector2(width, 20.0f)) {
-	this->game = game;
-	this->send = send;
-	this->caption = caption;
-	this->text = al_ustr_new("");
-	this->inputLocation = 0;
-	this->maxLength = maxLen;
-	this->historyIndex = 0;
-}
+InputBox::InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, unsigned char maxLen, ALLEGRO_FONT *font)
+: Widget(location, Vector2(width, 20.0f)),
+	game(game),
+	send(send),
+	textWidget(new TextArea(location, size, caption + ": |", font)),
+	caption(caption),
+	text(al_ustr_new("")),
+	inputLocation(0),
+	maxLength(maxLen),
+	historyIndex(0) {}
 
 InputBox::~InputBox() {
 	al_ustr_free(this->text);
+	delete this->textWidget;
 }
 
 void InputBox::draw(IRenderer *renderer) {
-	renderer->drawRectangleFilled(this->location, this->location + this->size, Color(0.15f, 0.15f, 0.15f));
-	renderer->drawRectangle(this->location, this->location + this->size, Color(1.0f, 1.0f, 1.0f), 1.0f);
 
-	std::ostringstream tmpText;
+	renderer->drawRectangleFilled(this->location, this->location + Vector2(this->size.x, this->textWidget->getLineCount() * 20), Color(0.15f, 0.15f, 0.15f));
+	renderer->drawRectangle(this->location, this->location + Vector2(this->size.x, this->textWidget->getLineCount() * 20), Color(1.0f, 1.0f, 1.0f), 1.0f);
+
+	textWidget->draw(renderer);
+
+/*	std::ostringstream tmpText;
 
 	tmpText.str(std::string());
 
@@ -55,6 +59,8 @@ void InputBox::draw(IRenderer *renderer) {
 	al_ustr_free(tmpUstr);
 
 	renderer->drawText(tmpText.str(), Vector2(this->location));
+
+*/
 }
 
 bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
@@ -106,6 +112,27 @@ bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 		++this->inputLocation;
 	}
 
+	if (keyboard.keycode != ALLEGRO_KEY_ENTER && keyboard.keycode != ALLEGRO_KEY_DELETE) {
+
+		std::ostringstream tmpText;
+
+		tmpText.str(std::string());
+
+		ALLEGRO_USTR *tmpUstr = al_ustr_dup_substr(this->text, 0, al_ustr_offset(this->text, this->inputLocation));
+
+		if (! this->caption.empty()) {
+			tmpText << this->caption << ": ";
+		}
+
+		tmpText << al_cstr(tmpUstr) << "|";
+		al_ustr_free(tmpUstr);
+
+		tmpUstr = al_ustr_dup_substr(this->text, al_ustr_offset(this->text, this->inputLocation), al_ustr_size(this->text));
+		tmpText << al_cstr(tmpUstr);
+		al_ustr_free(tmpUstr);
+
+		textWidget->setText(tmpText.str());
+	}
 	return true;
 }
 

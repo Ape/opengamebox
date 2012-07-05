@@ -31,10 +31,14 @@ public:
 
 	int getLineCount();
 
+	void setText(std::string text);
+
 	void move(Vector2 location);
 	Vector2 getLocation();
 
 private:
+	void countLines();
+
 	std::vector<std::string> text;
 	ALLEGRO_FONT *font;
 	int lineCount;

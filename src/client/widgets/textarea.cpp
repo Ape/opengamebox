@@ -20,22 +20,26 @@
 TextArea::TextArea(Vector2 location, Vector2 size, std::string text, ALLEGRO_FONT *font)
 		  : Widget(location, size),
 		    font(font) {
+
 	this->text = utils::splitString(text, ' ');
-	{
-		int lines = 1;
-		int width = 0;
-		for (auto &word : this->text) {
-			int textwidth = al_get_text_width(this->font, word.c_str());
-			if (width + textwidth > this->size.x) {
-				lines++;
-				width = 0;
-			} else {
-				width += al_get_text_width(this->font, " ");
-			}
-			width += textwidth;
+	this->countLines();
+}
+
+void TextArea::countLines()
+{
+	int lines = 1;
+	int width = 0;
+	for (auto &word : this->text) {
+		int textwidth = al_get_text_width(this->font, word.c_str());
+		if (width + textwidth > this->size.x) {
+			lines++;
+			width = 0;
+		} else {
+			width += al_get_text_width(this->font, " ");
 		}
-		this->lineCount = lines;
+		width += textwidth;
 	}
+	this->lineCount = lines;
 }
 
 TextArea::~TextArea() {
@@ -70,6 +74,11 @@ void TextArea::draw(IRenderer *renderer) {
 
 int TextArea::getLineCount() {
 	return this->lineCount;
+}
+
+void TextArea::setText(std::string text) {
+	this->text = utils::splitString(text, ' ');
+	this->countLines();
 }
 
 void TextArea::move(Vector2 location) {

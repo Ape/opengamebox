@@ -22,12 +22,13 @@
 #include <sstream>
 
 #include "../widget.h"
+#include "textarea.h"
 
 class Game;
 
 class InputBox : public Widget {
 public:
-	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, unsigned char maxLen);
+	InputBox(Game *game, void (Game::*send)(std::string), std::string caption, Vector2 location, float width, unsigned char maxLen, ALLEGRO_FONT *font);
 	virtual ~InputBox();
 
 	virtual void draw(IRenderer *renderer);
@@ -41,6 +42,7 @@ private:
 	Game *game;
 	void (Game::*send)(std::string);
 
+	TextArea *textWidget;
 	std::string caption;
 	ALLEGRO_USTR *text;
 	size_t inputLocation;

@@ -446,7 +446,7 @@ void Game::localEvents() {
 		} else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 			// Create a new chat input widget
 			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20),
-										300.0f, 255);
+										300.0f, 255, this->renderer->getFont());
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
 		if (input == nullptr) {
@@ -1633,7 +1633,7 @@ void Game::checkObjectOrder() {
 
 void Game::askNick() {
 	this->input = new InputBox(this, &Game::identifyToServer, "Nick", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20.0f),
-								225.0f, 16);
+								225.0f, 16, this->renderer->getFont());
 }
 
 void Game::identifyToServer(std::string nick) {
