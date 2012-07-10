@@ -1524,6 +1524,16 @@ void Game::chatCommand(std::string commandstr) {
 		} else {
 			this->addMessage("Usage: /" + parameters.at(0) + " [max value]");
 		}
+	} else if (parameters.at(0) == "download") {
+		if (parameters.size() == 2 && this->connectionState == ConnectionState::CONNECTED){
+			PHYSFS_delete(("data/" + parameters.at(1) + ".zip").c_str());
+			this->missingPackages.insert(parameters.at(1));
+			Packet packet(this->connection);
+			packet.writeHeader(Packet::Header::PACKAGE_MISSING);
+			packet.writeString(parameters.at(1));
+			packet.send();
+
+		}
 	} else {
 		this->addMessage(parameters.at(0) + ": command not found!", MessageType::ERROR);
 	}

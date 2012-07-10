@@ -8,7 +8,6 @@ New features:
 	- new package related commands
 		- /list for listing the available packages
 		- /verify for verifying the checksum of a package
-		- /download for downloading a package
 	- tab completion for chat commands
 	- /help for listing all the commands with brief descriptions
 	- /calc for calculating simple arithmetic expressions
