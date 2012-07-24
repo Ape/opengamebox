@@ -87,6 +87,12 @@ public:
 	size_t getSentMessageCount(void);
 	void identifyToServer(std::string nick);
 
+	void update(void);
+	void render(void);
+
+	ALLEGRO_THREAD *renderThread;
+	ALLEGRO_MUTEX *mutex;
+
 private:
 	ALLEGRO_EVENT_QUEUE *event_queue;
 	ALLEGRO_TIMER *timer;
@@ -188,8 +194,8 @@ private:
 	void askNick(void);
 	void queryMasterServer(void);
 
-	void update(void);
-	void render(void);
+	static void* renderThreadFunc(ALLEGRO_THREAD* thr, void* arg);
+
 	void renderGame(void);
 	void renderUI(void);
 };

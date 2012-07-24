@@ -112,12 +112,11 @@ bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 		++this->inputLocation;
 	}
 
-	if (keyboard.keycode != ALLEGRO_KEY_ENTER && keyboard.keycode != ALLEGRO_KEY_DELETE) {
+	if (keyboard.keycode != ALLEGRO_KEY_ENTER && keyboard.keycode != ALLEGRO_KEY_ESCAPE) {
 
 		std::ostringstream tmpText;
 
 		tmpText.str(std::string());
-
 		ALLEGRO_USTR *tmpUstr = al_ustr_dup_substr(this->text, 0, al_ustr_offset(this->text, this->inputLocation));
 
 		if (! this->caption.empty()) {
