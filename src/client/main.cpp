@@ -1774,10 +1774,8 @@ void Game::render() {
 	// Begin render
 	al_hold_bitmap_drawing(true);
 
-	al_lock_mutex(this->mutex);
 	this->renderGame();
 	this->renderUI();
-	al_unlock_mutex(this->mutex);
 
 	// Finish render
 	al_hold_bitmap_drawing(false);
