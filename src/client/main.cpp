@@ -331,6 +331,7 @@ void Game::quit() {
 		this->disconnect();
 	} else {
 		this->state = State::TERMINATED;
+		al_join_thread(this->renderThread, nullptr);
 	}
 }
 
@@ -1391,7 +1392,9 @@ void Game::addMessage(std::string text, MessageType type) {
 	message.message = text;
 	message.time = previousTime;
 	std::cout << message.message << std::endl;
+	al_lock_mutex(this->mutex);
 	this->chatWidget->addMessage(message);
+	al_unlock_mutex(this->mutex);
 }
 
 // Send a chat packet
