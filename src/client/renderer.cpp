@@ -33,8 +33,12 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 		std::cerr << "Failed to create a display!" << std::endl;
 	}
 
-	//A single display cannot be current for multiple threads simultaneously.
-	al_set_target_bitmap(nullptr);
+	#ifdef WIN32
+		//A single display cannot be current for multiple threads simultaneously.
+		if(al_get_display_flags(this->display) & ALLEGRO_OPENGL) {
+			al_set_target_bitmap(nullptr);
+		}
+	#endif
 
 	// Initialize fonts
 	al_init_font_addon();

@@ -1392,9 +1392,7 @@ void Game::addMessage(std::string text, MessageType type) {
 	message.message = text;
 	message.time = previousTime;
 	std::cout << message.message << std::endl;
-	al_lock_mutex(this->mutex);
 	this->chatWidget->addMessage(message);
-	al_unlock_mutex(this->mutex);
 }
 
 // Send a chat packet
