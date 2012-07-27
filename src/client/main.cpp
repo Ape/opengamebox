@@ -90,7 +90,8 @@ Game::Game() {
 	this->loadingPackage = false;
 
 	this->renderThread = nullptr;
-	this->mutex = al_create_mutex();
+	this->dataMutex = al_create_mutex();
+	this->displayMutex = al_create_mutex();
 }
 
 Game::~Game() {
@@ -295,19 +296,23 @@ int Game::run() {
 
 void* Game::renderThreadFunc(ALLEGRO_THREAD* thr, void* arg) {
 	Game* game = reinterpret_cast<Game*> (arg);
-	al_set_target_backbuffer(game->renderer->getDisplay());
+//	al_set_target_backbuffer(game->renderer->getDisplay());
 	while (game->state != State::TERMINATED && !al_get_thread_should_stop(thr)) {
 		// Render the screen with limited FPS
 
 		if (game->nextFrame && al_is_event_queue_empty(game->event_queue)) {
 
-			al_lock_mutex(game->mutex);
+			al_lock_mutex(game->dataMutex);
 			game->nextFrame = false;
-			al_unlock_mutex(game->mutex);
+			al_unlock_mutex(game->dataMutex);
 
 			game->update();
 
+			al_lock_mutex(game->displayMutex);
+			al_set_target_backbuffer(game->renderer->getDisplay());
 			game->render();
+			al_set_target_backbuffer(nullptr);
+			al_unlock_mutex(game->displayMutex);
 		}
 	}
 	return nullptr;
@@ -445,13 +450,13 @@ void Game::localEvents() {
 	ALLEGRO_EVENT event;
 	al_wait_for_event(event_queue, &event);
 	if (event.type == ALLEGRO_EVENT_TIMER) {
-		al_lock_mutex(this->mutex);
+		al_lock_mutex(this->dataMutex);
 		this->nextFrame = true;
-		al_unlock_mutex(this->mutex);
+		al_unlock_mutex(this->dataMutex);
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 		this->quit();
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-		al_lock_mutex(this->mutex);
+		al_lock_mutex(this->dataMutex);
 		Vector2 oldSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
 		this->renderer->resize();
 		Vector2 newSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
@@ -463,9 +468,11 @@ void Game::localEvents() {
 		if (this->input != nullptr) {
 			this->input->resize(ratio);
 		}
-		al_unlock_mutex(this->mutex);
+		al_unlock_mutex(this->dataMutex);
 
 	} else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
+		al_lock_mutex(this->displayMutex);
+		al_set_target_backbuffer(this->renderer->getDisplay());
 		if (input != nullptr) {
 			this->input->onKey(event.keyboard);
 		} else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
@@ -473,6 +480,8 @@ void Game::localEvents() {
 			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20),
 										300.0f, 255, this->renderer->getFont());
 		}
+		al_set_target_backbuffer(nullptr);
+		al_unlock_mutex(this->displayMutex);
 	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
 		if (input == nullptr) {
 			if (event.keyboard.keycode == ALLEGRO_KEY_F10) {
@@ -482,7 +491,7 @@ void Game::localEvents() {
 					std::string data;
 					data.push_back(net::PACKET_REMOVE);
 
-					al_lock_mutex(this->mutex);
+					al_lock_mutex(this->dataMutex);
 					for (auto &object : this->selectedObjects) {
 						net::dataAppendShort(data, object->getId());
 					}
@@ -490,7 +499,7 @@ void Game::localEvents() {
 					net::sendCommand(this->connection, data.c_str(), data.length());
 					this->selectedObjects.clear();
 					this->dragging = false;
-					al_unlock_mutex(this->mutex);
+					al_unlock_mutex(this->dataMutex);
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE) {
 				if (this->selectedObjects.size() > 0) {
@@ -510,7 +519,7 @@ void Game::localEvents() {
 
 					data += ! owned;
 
-					al_lock_mutex(this->mutex);
+					al_lock_mutex(this->dataMutex);
 					for (auto &object : this->selectedObjects) {
 						if (owned) {
 							object->setOwner(nullptr);
@@ -520,7 +529,7 @@ void Game::localEvents() {
 
 						net::dataAppendShort(data, object->getId());
 					}
-					al_unlock_mutex(this->mutex);
+					al_unlock_mutex(this->dataMutex);
 
 					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
@@ -539,7 +548,7 @@ void Game::localEvents() {
 					std::string data;
 					data.push_back(net::PACKET_MOVE);
 
-					al_lock_mutex(this->mutex);
+					al_lock_mutex(this->dataMutex);
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
 					for (auto &object : this->selectedObjects) {
 						net::dataAppendShort(data, object->getId());
@@ -548,7 +557,7 @@ void Game::localEvents() {
 						object->setAnimation(nextLocation, this->settings->getValue<float>("game.animationtime"));
 						nextLocation += object->getStackDelta();
 					}
-					al_unlock_mutex(this->mutex);
+					al_unlock_mutex(this->dataMutex);
 
 					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
@@ -572,7 +581,7 @@ void Game::localEvents() {
 				this->keyStatus.screenRotateClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_E) {
 				if(this->selectedObjects.size() > 0) {
-					al_lock_mutex(this->mutex);
+					al_lock_mutex(this->dataMutex);
 					for(auto &object : this->selectedObjects) {
 						std::string data;
 						data.push_back(net::PACKET_ROTATE);
@@ -581,11 +590,11 @@ void Game::localEvents() {
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
 					}
-					al_unlock_mutex(this->mutex);
+					al_unlock_mutex(this->dataMutex);
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_R) {
 				if(this->selectedObjects.size() > 0) {
-					al_lock_mutex(this->mutex);
+					al_lock_mutex(this->dataMutex);
 					for(auto &object : this->selectedObjects) {
 						std::string data;
 						data.push_back(net::PACKET_ROTATE);
@@ -594,7 +603,7 @@ void Game::localEvents() {
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
 					}
-					al_unlock_mutex(this->mutex);
+					al_unlock_mutex(this->dataMutex);
 				}
 			}
 		}
@@ -625,7 +634,7 @@ void Game::localEvents() {
 		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 		if (! this->dragging) {
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			for (auto &object : this->selectedObjects) {
 				object->select(nullptr);
 			}
@@ -656,13 +665,13 @@ void Game::localEvents() {
 					break;
 				}
 			}
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 
 			net::sendCommand(this->connection, data.c_str(), data.length());
 		}
 
 		if (!this->selectedObjects.empty()) {
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			for (auto &object : this->selectedObjects) {
 				if (object->testLocation(location)) {
 					this->dragging = true;
@@ -671,16 +680,16 @@ void Game::localEvents() {
 					break;
 				}
 			}
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 		} else { //Boxselect
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			for (auto &object : this->selectedObjects) {
 				object->select(nullptr);
 			}
 			this->selectedObjects.clear();
 			this->selecting = true;
 			this->selectingStart = location;
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 2) {
 		if (this->dragging) {
@@ -690,7 +699,7 @@ void Game::localEvents() {
 			// If even one of the selected objects isn't flipped every selected object will be flipped. If all of the
 			// objects are flipped then all of the objects will be unflipped.
 			bool flipped = true;
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			for (auto &object : this->selectedObjects) {
 				if (! object->isFlipped()) {
 					flipped = false;
@@ -706,22 +715,22 @@ void Game::localEvents() {
 
 				net::dataAppendShort(data, object->getId());
 			}
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 
 			net::sendCommand(this->connection, data.c_str(), data.length());
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3) {
-		al_lock_mutex(this->mutex);
+		al_lock_mutex(this->dataMutex);
 		this->keyStatus.moveScreen = true;
 		this->moveScreenStart = Vector2(event.mouse.x, event.mouse.y);
-		al_unlock_mutex(this->mutex);
+		al_unlock_mutex(this->dataMutex);
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1) {
 		Vector2 location(event.mouse.x, event.mouse.y);
 		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 		if (this->dragging) {
 			this->endDragging();
 		} else if (this->selecting) {
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			this->selectedObjects.clear();
 			this->selecting = false;
 			Vector2 lower;
@@ -769,19 +778,19 @@ void Game::localEvents() {
 			for (auto &object : this->selectedObjects) {
 				packet.writeShort(object->getId());
 			}
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 			packet.send();
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
 		this->keyStatus.moveScreen = false;
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_AXES) {
 		if (event.mouse.dz != 0) {
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			this->renderer->zoomScreen(1 + 0.1f * event.mouse.dz);
 			this->renderer->updateTransformations();
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 		} else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
@@ -819,18 +828,19 @@ void Game::localEvents() {
 
 				object->setLocation(destination);
 			}
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 		} else if (this->keyStatus.moveScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
-			al_lock_mutex(this->mutex);
+			al_lock_mutex(this->dataMutex);
 			Vector2 location(event.mouse.x, event.mouse.y);
 
 			this->renderer->scrollScreen(location - this->moveScreenStart);
 			this->moveScreenStart = location;
 
 			this->renderer->updateTransformations();
-			al_unlock_mutex(this->mutex);
+			al_unlock_mutex(this->dataMutex);
 		}
 	}
+
 }
 
 void Game::endDragging() {
@@ -855,7 +865,7 @@ void Game::networkEvents() {
 	while (this->connectionState != ConnectionState::NOT_CONNECTED && enet_host_service(this->connection, &event, 0) > 0) {
 		switch (event.type) {
 			case ENET_EVENT_TYPE_CONNECT: {
-				al_lock_mutex(this->mutex);
+				al_lock_mutex(this->dataMutex);
 				if (this->connectionState == ConnectionState::CONNECTING) {
 					this->addMessage("Connected! Please enter your nick.");
 
@@ -867,13 +877,13 @@ void Game::networkEvents() {
 					this->connectionState = ConnectionState::CONNECTED_MASTER_SERVER;
 					this->queryMasterServer();
 				}
-				al_unlock_mutex(this->mutex);
+				al_unlock_mutex(this->dataMutex);
 				break;
 
 			}
 
 			case ENET_EVENT_TYPE_RECEIVE: {
-				al_lock_mutex(this->mutex);
+				al_lock_mutex(this->dataMutex);
 				if (this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER) {
 					this->receivePacket(event);
 				} else if (this->connectionState == ConnectionState::CONNECTED) {
@@ -885,14 +895,14 @@ void Game::networkEvents() {
 						this->disconnectMasterServer();
 					}
 				}
-				al_unlock_mutex(this->mutex);
+				al_unlock_mutex(this->dataMutex);
 				enet_packet_destroy(event.packet);
 
 				break;
 			}
 
 			case ENET_EVENT_TYPE_DISCONNECT: {
-				al_lock_mutex(this->mutex);
+				al_lock_mutex(this->dataMutex);
 				this->addMessage("Disconnected from the server.");
 				this->connectionState = ConnectionState::NOT_CONNECTED;
 
@@ -901,7 +911,7 @@ void Game::networkEvents() {
 				if (this->state == State::EXITING) {
 					this->state = State::TERMINATED;
 				}
-				al_unlock_mutex(this->mutex);
+				al_unlock_mutex(this->dataMutex);
 				break;
 			}
 
@@ -1723,20 +1733,20 @@ void Game::queryMasterServer() {
 
 void Game::update() {
 	// Calculate deltaTime
-	al_lock_mutex(this->mutex);
+	al_lock_mutex(this->dataMutex);
 	this->deltaTime = al_get_time() - this->previousTime;
 	this->previousTime = al_get_time();
-	al_unlock_mutex(this->mutex);
+	al_unlock_mutex(this->dataMutex);
 
 	// Animate objects
-	al_lock_mutex(this->mutex);
+	al_lock_mutex(this->dataMutex);
 	for (auto &object : this->objectOrder) {
 		object->animate(this->deltaTime);
 	}
-	al_unlock_mutex(this->mutex);
+	al_unlock_mutex(this->dataMutex);
 
 	// Translate, rotate and scale the screen
-	al_lock_mutex(this->mutex);
+	al_lock_mutex(this->dataMutex);
 	if (this->keyStatus.screenZoomIn) {
 		this->renderer->zoomScreen(1.05f);
 	}
@@ -1765,10 +1775,12 @@ void Game::update() {
 	}
 
 	this->renderer->updateTransformations();
-	al_unlock_mutex(this->mutex);
+	al_unlock_mutex(this->dataMutex);
 }
 
 void Game::render() {
+
+
 	// Clear the screen
 	al_clear_to_color(al_map_rgb_f(0.1f, 0.1f, 0.1f));
 
@@ -1791,11 +1803,11 @@ void Game::renderGame() {
 	// Draw the table area
 	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), Color(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
 
-	al_lock_mutex(this->mutex);
+	al_lock_mutex(this->dataMutex);
 	for (auto &object : this->objectOrder) {
 		object->draw(this->renderer, this->clients.find(this->localClient)->second);
 	}
-	al_unlock_mutex(this->mutex);
+	al_unlock_mutex(this->dataMutex);
 }
 
 void Game::renderUI() {
@@ -1810,7 +1822,7 @@ void Game::renderUI() {
 	}
 
 	int i = 0;
-	al_lock_mutex(this->mutex);
+	al_lock_mutex(this->dataMutex);
 	for (auto &client : this->clients) {
 		std::string text;
 		if (client.second->getPing() != 65535) {
@@ -1823,20 +1835,20 @@ void Game::renderUI() {
 
 		++i;
 	}
-	al_unlock_mutex(this->mutex);
+	al_unlock_mutex(this->dataMutex);
 
-	al_lock_mutex(this->mutex);
+	al_lock_mutex(this->dataMutex);
 	if (this->input != nullptr) {
 		this->chatWidget->draw(this->renderer, true);
 	} else {
 		this->chatWidget->draw(this->renderer, false);
 	}
-	al_unlock_mutex(this->mutex);
+	al_unlock_mutex(this->dataMutex);
 
 	this->renderer->drawText("FPS: " + utils::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
 	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f));
 
-	al_lock_mutex(this->mutex);
+	al_lock_mutex(this->dataMutex);
 	for (auto &widget : this->widgets) {
 		widget->draw(this->renderer);
 	}
@@ -1844,7 +1856,7 @@ void Game::renderUI() {
 	if (this->input != nullptr) {
 		this->input->draw(this->renderer);
 	}
-	al_unlock_mutex(this->mutex);
+	al_unlock_mutex(this->dataMutex);
 
 	if (this->fileTransferProgress != nullptr) {
 		this->fileTransferProgress->draw(this->renderer);

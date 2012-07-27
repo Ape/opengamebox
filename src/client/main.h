@@ -91,7 +91,8 @@ public:
 	void render(void);
 
 	ALLEGRO_THREAD *renderThread;
-	ALLEGRO_MUTEX *mutex;
+	ALLEGRO_MUTEX *dataMutex;
+	ALLEGRO_MUTEX *displayMutex;
 
 private:
 	ALLEGRO_EVENT_QUEUE *event_queue;
