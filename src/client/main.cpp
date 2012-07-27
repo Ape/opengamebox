@@ -283,6 +283,9 @@ int Game::run() {
 	this->renderThread = al_create_thread(Game::renderThreadFunc, this);
 	al_start_thread(this->renderThread);
 
+	//A single display cannot be current for multiple threads simultaneously.
+	al_set_target_bitmap(nullptr);
+
 	// Enter the main loop
 	this->mainLoop();
 
@@ -296,11 +299,12 @@ int Game::run() {
 
 void* Game::renderThreadFunc(ALLEGRO_THREAD* thr, void* arg) {
 	Game* game = reinterpret_cast<Game*> (arg);
-//	al_set_target_backbuffer(game->renderer->getDisplay());
+	al_set_target_backbuffer(game->renderer->getDisplay());
 	while (game->state != State::TERMINATED && !al_get_thread_should_stop(thr)) {
 		// Render the screen with limited FPS
 
-		if (game->nextFrame && al_is_event_queue_empty(game->event_queue)) {
+		//Todo with OpenGL use automatic wait on al_flip_display()
+		if (game->nextFrame) {
 
 			al_lock_mutex(game->dataMutex);
 			game->nextFrame = false;
@@ -309,9 +313,7 @@ void* Game::renderThreadFunc(ALLEGRO_THREAD* thr, void* arg) {
 			game->update();
 
 			al_lock_mutex(game->displayMutex);
-			al_set_target_backbuffer(game->renderer->getDisplay());
 			game->render();
-			al_set_target_backbuffer(nullptr);
 			al_unlock_mutex(game->displayMutex);
 		}
 	}
@@ -326,7 +328,6 @@ void Game::mainLoop() {
 
 		// Handle local events
 		this->localEvents();
-
 	}
 }
 
