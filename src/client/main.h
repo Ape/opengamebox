@@ -94,6 +94,8 @@ public:
 	ALLEGRO_MUTEX *dataMutex;
 	ALLEGRO_MUTEX *displayMutex;
 
+	std::vector<Object*> uninitializedObjects;
+
 private:
 	ALLEGRO_EVENT_QUEUE *event_queue;
 	ALLEGRO_TIMER *timer;

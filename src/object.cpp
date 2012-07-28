@@ -32,6 +32,9 @@ Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, 
 	this->stackDelta = Vector2(4.0f, 0.0f);
 
 	this->animationTime = 0.0f;
+
+	//To make decks work when not yet initialised
+	this->size = Vector2(8.0f, 8.0f);
 }
 
 void Object::initForClient(IRenderer *renderer) {

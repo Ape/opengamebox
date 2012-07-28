@@ -299,6 +299,7 @@ int Game::run() {
 
 void* Game::renderThreadFunc(ALLEGRO_THREAD* thr, void* arg) {
 	Game* game = reinterpret_cast<Game*> (arg);
+	al_set_physfs_file_interface();
 	al_set_target_backbuffer(game->renderer->getDisplay());
 	while (game->state != State::TERMINATED && !al_get_thread_should_stop(thr)) {
 		// Render the screen with limited FPS
@@ -308,6 +309,13 @@ void* Game::renderThreadFunc(ALLEGRO_THREAD* thr, void* arg) {
 
 			al_lock_mutex(game->dataMutex);
 			game->nextFrame = false;
+			al_unlock_mutex(game->dataMutex);
+
+			al_lock_mutex(game->dataMutex);
+			for(auto &object : game->uninitializedObjects) {
+				object->initForClient(game->renderer);
+			}
+			game->uninitializedObjects.clear();
 			al_unlock_mutex(game->dataMutex);
 
 			game->update();
@@ -1037,7 +1045,8 @@ void Game::receivePacket(ENetEvent event) {
 						}
 
 						Object *object = new Object(objectClass, objectData.at(2), objId, location);
-						object->initForClient(this->renderer);
+						this->uninitializedObjects.push_back(object);
+//						object->initForClient(this->renderer);
 						object->select(selected);
 						object->setOwner(owner);
 						object->setFlipped(flipped);
