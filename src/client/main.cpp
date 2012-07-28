@@ -347,6 +347,7 @@ void Game::quit() {
 	} else {
 		this->state = State::TERMINATED;
 		al_join_thread(this->renderThread, nullptr);
+		al_destroy_thread(this->renderThread);
 	}
 }
 

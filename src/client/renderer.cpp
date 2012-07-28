@@ -74,6 +74,7 @@ Renderer::~Renderer() {
 	}
 
 	al_destroy_font(this->font);
+	al_destroy_font(this->rendFont);
 	al_destroy_display(this->display);
 }
 
