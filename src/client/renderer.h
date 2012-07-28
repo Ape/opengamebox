@@ -75,9 +75,12 @@ public:
 
 	virtual void hsvToRgb(float hue, float saturation, float value, Color *color);
 
+	void initRenderFont(void);
+
 private:
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_FONT *font;
+	ALLEGRO_FONT* rendFont;
 
 	ALLEGRO_TRANSFORM camera;
 	ALLEGRO_TRANSFORM camera_inverse;

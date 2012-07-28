@@ -301,6 +301,7 @@ void* Game::renderThreadFunc(ALLEGRO_THREAD* thr, void* arg) {
 	Game* game = reinterpret_cast<Game*> (arg);
 	al_set_physfs_file_interface();
 	al_set_target_backbuffer(game->renderer->getDisplay());
+	game->renderer->initRenderFont();
 	while (game->state != State::TERMINATED && !al_get_thread_should_stop(thr)) {
 		// Render the screen with limited FPS
 

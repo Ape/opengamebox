@@ -251,7 +251,7 @@ void Renderer::drawText(std::string text, Vector2 location, Alignment alignment)
 		position = text.find("^", oldposition);
 
 		if (position != std::string::npos && position + 5 <= text.length()) {
-			al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
+			al_draw_text(this->rendFont, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
 						 this->getAlignment(alignment), text.substr(oldposition, position - oldposition).c_str());
 			drawposition += al_get_text_width(this->font, text.substr(oldposition, position - oldposition).c_str());
 
@@ -263,7 +263,7 @@ void Renderer::drawText(std::string text, Vector2 location, Alignment alignment)
 				color.blue  = utils::hexStringToInt(text.substr(position + 3, 1)) / 16.0f;
 			}
 		} else {
-			al_draw_text(this->font, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
+			al_draw_text(this->rendFont, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
 			             this->getAlignment(alignment), text.substr(oldposition).c_str());
 			drawposition += al_get_text_width(this->font, text.substr(oldposition).c_str());
 			loop = false;
@@ -341,4 +341,9 @@ void Renderer::useTransformation(Transformation transformation) {
 
 void Renderer::hsvToRgb(float hue, float saturation, float value, Color *color) {
 	al_color_hsv_to_rgb(hue, saturation, value, &color->red, &color->green, &color->blue);
+}
+
+void Renderer::initRenderFont() {
+	ALLEGRO_FILE *fontFile = al_fopen("res/LiberationSans-Regular.ttf", "r");
+	this->font = al_load_ttf_font_f(fontFile, "LiberationSans-Regular", 16, 0);
 }
