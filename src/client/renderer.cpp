@@ -345,5 +345,5 @@ void Renderer::hsvToRgb(float hue, float saturation, float value, Color *color) 
 
 void Renderer::initRenderFont() {
 	ALLEGRO_FILE *fontFile = al_fopen("res/LiberationSans-Regular.ttf", "r");
-	this->font = al_load_ttf_font_f(fontFile, "LiberationSans-Regular", 16, 0);
+	this->rendFont = al_load_ttf_font_f(fontFile, "LiberationSans-Regular", 16, 0);
 }
