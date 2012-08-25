@@ -280,8 +280,7 @@ bool Game::connectMasterServer(std::string address, int port) {
 int Game::run() {
 	this->state = State::RUNNING;
 
-	this->renderThread = al_create_thread(Game::renderThreadFunc, this);
-	al_start_thread(this->renderThread);
+	this->renderThread = new std::thread(Game::renderThreadFunc, this);
 
 	//A single display cannot be current for multiple threads simultaneously.
 	al_set_target_bitmap(nullptr);
@@ -297,12 +296,11 @@ int Game::run() {
 	return EXIT_SUCCESS;
 }
 
-void* Game::renderThreadFunc(ALLEGRO_THREAD* thr, void* arg) {
-	Game* game = reinterpret_cast<Game*> (arg);
+void* Game::renderThreadFunc(Game* game) {
 	al_set_physfs_file_interface();
 	al_set_target_backbuffer(game->renderer->getDisplay());
 	game->renderer->initRenderFont();
-	while (game->state != State::TERMINATED && !al_get_thread_should_stop(thr)) {
+	while (game->state != State::TERMINATED) {
 		// Render the screen with limited FPS
 
 		//Todo with OpenGL use automatic wait on al_flip_display()
@@ -346,8 +344,7 @@ void Game::quit() {
 		this->disconnect();
 	} else {
 		this->state = State::TERMINATED;
-		al_join_thread(this->renderThread, nullptr);
-		al_destroy_thread(this->renderThread);
+		this->renderThread->join();
 	}
 }
 

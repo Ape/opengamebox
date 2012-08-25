@@ -31,6 +31,7 @@
 #include <iterator>
 #include <csignal>
 #include <tuple>
+#include <thread>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -90,7 +91,7 @@ public:
 	void update(void);
 	void render(void);
 
-	ALLEGRO_THREAD *renderThread;
+	std::thread *renderThread;
 	ALLEGRO_MUTEX *dataMutex;
 	ALLEGRO_MUTEX *displayMutex;
 
@@ -197,7 +198,7 @@ private:
 	void askNick(void);
 	void queryMasterServer(void);
 
-	static void* renderThreadFunc(ALLEGRO_THREAD* thr, void* arg);
+	static void* renderThreadFunc(Game* game);
 
 	void renderGame(void);
 	void renderUI(void);
