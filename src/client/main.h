@@ -199,7 +199,7 @@ private:
 	void askNick(void);
 	void queryMasterServer(void);
 
-	static void* renderThreadFunc(Game* game);
+	void* renderThreadFunc();
 
 	void renderGame(void);
 	void renderUI(void);

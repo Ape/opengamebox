@@ -294,32 +294,32 @@ int Game::run() {
 	return EXIT_SUCCESS;
 }
 
-void* Game::renderThreadFunc(Game* game) {
+void* Game::renderThreadFunc() {
 	al_set_physfs_file_interface();
-	al_set_target_backbuffer(game->renderer->getDisplay());
-	game->renderer->initRenderFont();
-	while (game->state != State::TERMINATED) {
+	al_set_target_backbuffer(this->renderer->getDisplay());
+	this->renderer->initRenderFont();
+	while (this->state != State::TERMINATED) {
 		// Render the screen with limited FPS
 
 		//Todo with OpenGL use automatic wait on al_flip_display()
-		if (game->nextFrame) {
+		if (this->nextFrame) {
 
-			game->dataMutex.lock();
-			game->nextFrame = false;
-			game->dataMutex.unlock();
+			this->dataMutex.lock();
+			this->nextFrame = false;
+			this->dataMutex.unlock();
 
-			game->dataMutex.lock();
-			for(auto &object : game->uninitializedObjects) {
-				object->initForClient(game->renderer);
+			this->dataMutex.lock();
+			for(auto &object : this->uninitializedObjects) {
+				object->initForClient(this->renderer);
 			}
-			game->uninitializedObjects.clear();
-			game->dataMutex.unlock();
+			this->uninitializedObjects.clear();
+			this->dataMutex.unlock();
 
-			game->update();
+			this->update();
 
-			game->displayMutex.lock();
-			game->render();
-			game->displayMutex.unlock();
+			this->displayMutex.lock();
+			this->render();
+			this->displayMutex.unlock();
 		}
 	}
 	return nullptr;
