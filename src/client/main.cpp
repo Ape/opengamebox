@@ -301,8 +301,11 @@ void* Game::renderThreadFunc() {
 	while (this->state != State::TERMINATED) {
 		// Render the screen with limited FPS
 
+		this->dataMutex.lock();
+		bool draw = this->nextFrame;
+		this->dataMutex.unlock();
 		//Todo with OpenGL use automatic wait on al_flip_display()
-		if (this->nextFrame) {
+		if (draw) {
 
 			this->dataMutex.lock();
 			this->nextFrame = false;
