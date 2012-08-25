@@ -278,7 +278,7 @@ bool Game::connectMasterServer(std::string address, int port) {
 int Game::run() {
 	this->state = State::RUNNING;
 
-	this->renderThread = new std::thread(Game::renderThreadFunc, this);
+	this->renderThread = new std::thread(&Game::renderThreadFunc, this);
 
 	//A single display cannot be current for multiple threads simultaneously.
 	al_set_target_bitmap(nullptr);
