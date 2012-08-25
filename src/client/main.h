@@ -32,6 +32,7 @@
 #include <csignal>
 #include <tuple>
 #include <thread>
+#include <mutex>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -92,8 +93,8 @@ public:
 	void render(void);
 
 	std::thread *renderThread;
-	ALLEGRO_MUTEX *dataMutex;
-	ALLEGRO_MUTEX *displayMutex;
+	std::mutex dataMutex;
+	std::mutex displayMutex;
 
 	std::vector<Object*> uninitializedObjects;
 
