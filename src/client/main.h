@@ -116,6 +116,7 @@ private:
 	enum class ConnectionState {NOT_CONNECTED, CONNECTING, CONNECTED, DISCONNECTING, CONNECTING_MASTER_SERVER, CONNECTED_MASTER_SERVER};
 	ConnectionState connectionState;
 
+	bool resize;
 	bool nextFrame;
 	double previousTime;
 	double deltaTime;

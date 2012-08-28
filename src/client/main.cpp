@@ -90,6 +90,7 @@ Game::Game() {
 	this->loadingPackage = false;
 
 	this->renderThread = nullptr;
+	this->resize = true;
 }
 
 Game::~Game() {
@@ -299,8 +300,25 @@ void* Game::renderThreadFunc() {
 	al_set_target_backbuffer(this->renderer->getDisplay());
 	this->renderer->initRenderFont();
 	while (this->state != State::TERMINATED) {
-		// Render the screen with limited FPS
 
+		if(this->resize) {
+			this->dataMutex.lock();
+			Vector2 oldSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
+			this->renderer->resize();
+			Vector2 newSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
+			Vector2 ratio = newSize/oldSize;
+			for (auto &widget : this->widgets) {
+				widget->resize(ratio);
+			}
+			this->chatWidget->resize(ratio);
+			if (this->input != nullptr) {
+				this->input->resize(ratio);
+			}
+			this->resize = false;
+			this->dataMutex.unlock();
+		}
+
+		// Render the screen with limited FPS
 		this->dataMutex.lock();
 		bool draw = this->nextFrame;
 		this->dataMutex.unlock();
@@ -466,19 +484,8 @@ void Game::localEvents() {
 		this->quit();
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 		this->dataMutex.lock();
-		Vector2 oldSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
-		this->renderer->resize();
-		Vector2 newSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
-		Vector2 ratio = newSize/oldSize;
-		for (auto &widget : this->widgets) {
-			widget->resize(ratio);
-		}
-		this->chatWidget->resize(ratio);
-		if (this->input != nullptr) {
-			this->input->resize(ratio);
-		}
+		this->resize = true;
 		this->dataMutex.unlock();
-
 	} else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 		this->displayMutex.lock();
 		al_set_target_backbuffer(this->renderer->getDisplay());
