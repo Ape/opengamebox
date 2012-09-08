@@ -319,15 +319,10 @@ void* Game::renderThreadFunc() {
 		}
 
 		// Render the screen with limited FPS
-		this->dataMutex.lock();
-		bool draw = this->nextFrame;
-		this->dataMutex.unlock();
 		//Todo with OpenGL use automatic wait on al_flip_display()
-		if (draw) {
+		if (this->nextFrame) {
 
-			this->dataMutex.lock();
 			this->nextFrame = false;
-			this->dataMutex.unlock();
 
 			this->dataMutex.lock();
 			for(auto &object : this->uninitializedObjects) {
@@ -477,15 +472,11 @@ void Game::localEvents() {
 	ALLEGRO_EVENT event;
 	al_wait_for_event(event_queue, &event);
 	if (event.type == ALLEGRO_EVENT_TIMER) {
-		this->dataMutex.lock();
 		this->nextFrame = true;
-		this->dataMutex.unlock();
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 		this->quit();
 	} else if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-		this->dataMutex.lock();
 		this->resize = true;
-		this->dataMutex.unlock();
 	} else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 		this->displayMutex.lock();
 		al_set_target_backbuffer(this->renderer->getDisplay());
@@ -1875,7 +1866,9 @@ void Game::renderUI() {
 	}
 	this->dataMutex.unlock();
 
+	this->dataMutex.lock();
 	if (this->fileTransferProgress != nullptr) {
 		this->fileTransferProgress->draw(this->renderer);
 	}
+	this->dataMutex.unlock();
 }

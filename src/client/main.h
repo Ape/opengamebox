@@ -33,6 +33,7 @@
 #include <tuple>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -93,12 +94,9 @@ public:
 	void render(void);
 
 	std::thread *renderThread;
-	std::mutex dataMutex;
-	std::mutex displayMutex;
-
-	std::vector<Object*> uninitializedObjects;
 
 private:
+	//Variables only for event thread
 	ALLEGRO_EVENT_QUEUE *event_queue;
 	ALLEGRO_TIMER *timer;
 
@@ -110,48 +108,21 @@ private:
 
 	Settings *settings;
 
-	enum class State {INITIALIZING, RUNNING, EXITING, TERMINATED};
-	State state;
-
 	enum class ConnectionState {NOT_CONNECTED, CONNECTING, CONNECTED, DISCONNECTING, CONNECTING_MASTER_SERVER, CONNECTED_MASTER_SERVER};
 	ConnectionState connectionState;
 
-	bool resize;
-	bool nextFrame;
-	double previousTime;
-	double deltaTime;
-
 	ObjectClassManager objectClassManager;
 
-	bool loadingPackage;
-	std::set<std::string> missingPackages;
-	struct File {
-		std::string name;
-		int size;
-		char* data;
-		int received;
-		double startTime;
-	};
-	File loadingfile;
-
-	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> objectOrder;
-	std::map<unsigned char, Client*> clients;
+
 	unsigned char localClient;
 
-	ChatWidget *chatWidget;
-
-	std::vector<Widget*> widgets;
-	InputBox *input;
 	std::vector<std::string> sentMessages;
-
-	ProgressBar *fileTransferProgress;
 
 	std::vector<std::tuple<std::string, Vector2, bool>> dCreateBuffer;
 	std::list<Object*> selectedObjects;
+
 	bool dragging;
-	bool selecting;
-	Vector2 selectingStart;
 	Vector2 draggingStart;
 
 	struct KeyStatus {
@@ -170,6 +141,45 @@ private:
 	KeyStatus keyStatus;
 	Vector2 moveScreenStart;
 
+	//Variables for both threads
+	//Todo: better mutex handling
+	std::mutex dataMutex;
+	std::mutex displayMutex;
+	bool loadingPackage;
+	std::set<std::string> missingPackages;
+	struct File {
+		std::string name;
+		int size;
+		char* data;
+		int received;
+		double startTime;
+	};
+	File loadingfile;
+
+	std::map<unsigned short, Object*> objects;
+	std::vector<Object*> uninitializedObjects;
+
+	Vector2 selectingStart;
+
+	ChatWidget *chatWidget;
+	ProgressBar *fileTransferProgress;
+	std::vector<Widget*> widgets;
+	InputBox *input;
+
+	//Atomic variables for both threads
+	std::atomic<bool> resize;
+	std::atomic<bool> nextFrame;
+	std::atomic<double> previousTime;
+	std::atomic<double> deltaTime;
+
+	std::atomic<bool> selecting;
+
+	std::map<unsigned char, Client*> clients;
+
+	enum class State {INITIALIZING, RUNNING, EXITING, TERMINATED};
+	std::atomic<State> state;
+
+	//Functions
 	void mainLoop(void);
 
 	void disconnect(void);
