@@ -18,10 +18,10 @@
 #ifndef INPUTBOX_H
 #define INPUTBOX_H
 
+#include <enet/enet.h>
 #include <string>
 #include <sstream>
 
-#include "../widget.h"
 #include "textarea.h"
 
 class Game;
@@ -51,5 +51,6 @@ private:
 };
 
 #include "../main.h"
+
 
 #endif
