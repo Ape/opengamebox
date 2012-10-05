@@ -20,8 +20,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <vector>
-#include <map>
 #include <list>
 #include <set>
 #include <string>
@@ -35,28 +33,21 @@
 #include <mutex>
 #include <atomic>
 
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_image.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_physfs.h>
 #include <enet/enet.h>
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_physfs.h>
 #include <physfs.h>
 
 #include "../net.h"
 #include "../packet.h"
 #include "../utils.h"
+#include "../object.h"
 #include "../objectClassManager.h"
 #include "../objectClass.h"
-#include "../object.h"
-#include "../vector2.h"
 #include "renderer.h"
-#include "widget.h"
 #include "widgets/inputBox.h"
 #include "widgets/textarea.h"
 #include "widgets/chatwidget.h"
-#include "../client.h"
 #include "../settings.h"
 
 class ProgressBar;

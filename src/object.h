@@ -26,7 +26,6 @@
 
 #include <cmath>
 
-#include "net.h"
 #include "irenderer.h"
 #include "vector2.h"
 #include "objectClass.h"

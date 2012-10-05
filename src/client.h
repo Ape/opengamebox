@@ -19,7 +19,6 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <enet/enet.h>
 #include <map>
 
 #include "color.h"
