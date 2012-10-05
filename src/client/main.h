@@ -125,20 +125,6 @@ private:
 	bool dragging;
 	Vector2 draggingStart;
 
-	struct KeyStatus {
-		bool screenZoomIn;
-		bool screenZoomOut;
-		bool screenMoveLeft;
-		bool screenMoveRight;
-		bool screenMoveUp;
-		bool screenMoveDown;
-		bool screenRotateClockwise;
-		bool screenRotateCClockwise;
-		bool snappingToGrid;
-		bool moveScreen;
-	};
-
-	KeyStatus keyStatus;
 	Vector2 moveScreenStart;
 
 	//Variables for both threads
@@ -156,25 +142,44 @@ private:
 	};
 	File loadingfile;
 
+	std::mutex objectsMutex;
 	std::map<unsigned short, Object*> objects;
 	std::vector<Object*> uninitializedObjects;
 
 	Vector2 selectingStart;
 
+	std::mutex widgetsMutex;
 	ChatWidget *chatWidget;
 	ProgressBar *fileTransferProgress;
 	std::vector<Widget*> widgets;
-	InputBox *input;
+	std::atomic<InputBox*> input;
+
+	std::mutex clientsMutex;
+	std::map<unsigned char, Client*> clients;
 
 	//Atomic variables for both threads
+
+	struct KeyStatus {
+		std::atomic<bool> screenZoomIn;
+		std::atomic<bool> screenZoomOut;
+		std::atomic<bool> screenMoveLeft;
+		std::atomic<bool> screenMoveRight;
+		std::atomic<bool> screenMoveUp;
+		std::atomic<bool> screenMoveDown;
+		std::atomic<bool> screenRotateClockwise;
+		std::atomic<bool> screenRotateCClockwise;
+		std::atomic<bool> snappingToGrid;
+		std::atomic<bool> moveScreen;
+	};
+
+	KeyStatus keyStatus;
+
 	std::atomic<bool> resize;
 	std::atomic<bool> nextFrame;
 	std::atomic<double> previousTime;
 	std::atomic<double> deltaTime;
 
 	std::atomic<bool> selecting;
-
-	std::map<unsigned char, Client*> clients;
 
 	enum class State {INITIALIZING, RUNNING, EXITING, TERMINATED};
 	std::atomic<State> state;

@@ -85,7 +85,16 @@ Game::Game() {
 
 	this->dragging = false;
 	this->selecting = false;
-	this->keyStatus = KeyStatus();
+	this->keyStatus.screenZoomIn = false;
+	this->keyStatus.screenZoomOut = false;
+	this->keyStatus.screenMoveLeft = false;
+	this->keyStatus.screenMoveRight = false;
+	this->keyStatus.screenMoveUp = false;
+	this->keyStatus.screenMoveDown = false;
+	this->keyStatus.screenRotateClockwise = false;
+	this->keyStatus.screenRotateCClockwise = false;
+	this->keyStatus.snappingToGrid = false;
+	this->keyStatus.moveScreen = false;
 
 	this->loadingPackage = false;
 
@@ -311,8 +320,8 @@ void* Game::renderThreadFunc() {
 				widget->resize(ratio);
 			}
 			this->chatWidget->resize(ratio);
-			if (this->input != nullptr) {
-				this->input->resize(ratio);
+			if (this->input.load() != nullptr) {
+				this->input.load()->resize(ratio);
 			}
 			this->resize = false;
 			this->dataMutex.unlock();
@@ -324,12 +333,12 @@ void* Game::renderThreadFunc() {
 
 			this->nextFrame = false;
 
-			this->dataMutex.lock();
+			this->objectsMutex.lock();
 			for(auto &object : this->uninitializedObjects) {
 				object->initForClient(this->renderer);
 			}
 			this->uninitializedObjects.clear();
-			this->dataMutex.unlock();
+			this->objectsMutex.unlock();
 
 			this->update();
 
@@ -480,17 +489,19 @@ void Game::localEvents() {
 	} else if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 		this->displayMutex.lock();
 		al_set_target_backbuffer(this->renderer->getDisplay());
+		this->widgetsMutex.lock();
 		if (input != nullptr) {
-			this->input->onKey(event.keyboard);
+			this->input.load()->onKey(event.keyboard);
 		} else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 			// Create a new chat input widget
 			this->input = new InputBox(this, &Game::sendChat, "Chat", Vector2(2.0f, this->renderer->getDisplaySize().y / 2.0f + 20),
 										300.0f, 255, this->renderer->getFont());
 		}
+		this->widgetsMutex.unlock();
 		al_set_target_backbuffer(nullptr);
 		this->displayMutex.unlock();
 	} else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
-		if (input == nullptr) {
+		if (this->input == nullptr) {
 			if (event.keyboard.keycode == ALLEGRO_KEY_F10) {
 				this->quit();
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_DELETE) {
@@ -498,15 +509,15 @@ void Game::localEvents() {
 					std::string data;
 					data.push_back(net::PACKET_REMOVE);
 
-					this->dataMutex.lock();
+					this->objectsMutex.lock();
 					for (auto &object : this->selectedObjects) {
 						net::dataAppendShort(data, object->getId());
 					}
 
 					net::sendCommand(this->connection, data.c_str(), data.length());
 					this->selectedObjects.clear();
+					this->objectsMutex.unlock();
 					this->dragging = false;
-					this->dataMutex.unlock();
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE) {
 				if (this->selectedObjects.size() > 0) {
@@ -516,6 +527,7 @@ void Game::localEvents() {
 					// If even one of the selected objects isn't owned by the player every selected object will be owned. If all of the
 					// objects are owned then all of the objects will be disowned.
 					bool owned = true;
+					this->objectsMutex.lock();
  					for (auto &object : this->selectedObjects) {
 						if (! object->isOwnedBy(this->clients.find(localClient)->second)) {
 							owned = false;
@@ -523,10 +535,11 @@ void Game::localEvents() {
 							break;
 						}
 					}
+					this->objectsMutex.unlock();
 
 					data += ! owned;
 
-					this->dataMutex.lock();
+					this->objectsMutex.lock();
 					for (auto &object : this->selectedObjects) {
 						if (owned) {
 							object->setOwner(nullptr);
@@ -536,7 +549,7 @@ void Game::localEvents() {
 
 						net::dataAppendShort(data, object->getId());
 					}
-					this->dataMutex.unlock();
+					this->objectsMutex.unlock();
 
 					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
@@ -555,7 +568,7 @@ void Game::localEvents() {
 					std::string data;
 					data.push_back(net::PACKET_MOVE);
 
-					this->dataMutex.lock();
+					this->objectsMutex.lock();
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
 					for (auto &object : this->selectedObjects) {
 						net::dataAppendShort(data, object->getId());
@@ -564,7 +577,7 @@ void Game::localEvents() {
 						object->setAnimation(nextLocation, this->settings->getValue<float>("game.animationtime"));
 						nextLocation += object->getStackDelta();
 					}
-					this->dataMutex.unlock();
+					this->objectsMutex.unlock();
 
 					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
@@ -588,7 +601,7 @@ void Game::localEvents() {
 				this->keyStatus.screenRotateClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_E) {
 				if(this->selectedObjects.size() > 0) {
-					this->dataMutex.lock();
+					this->objectsMutex.lock();
 					for(auto &object : this->selectedObjects) {
 						std::string data;
 						data.push_back(net::PACKET_ROTATE);
@@ -597,11 +610,11 @@ void Game::localEvents() {
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
 					}
-					this->dataMutex.unlock();
+					this->objectsMutex.unlock();
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_R) {
 				if(this->selectedObjects.size() > 0) {
-					this->dataMutex.lock();
+					this->objectsMutex.lock();
 					for(auto &object : this->selectedObjects) {
 						std::string data;
 						data.push_back(net::PACKET_ROTATE);
@@ -610,7 +623,7 @@ void Game::localEvents() {
 
 						net::sendCommand(this->connection, data.c_str(), data.size());
 					}
-					this->dataMutex.unlock();
+					this->objectsMutex.unlock();
 				}
 			}
 		}
@@ -641,7 +654,7 @@ void Game::localEvents() {
 		this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
 		if (! this->dragging) {
-			this->dataMutex.lock();
+			this->objectsMutex.lock();
 			for (auto &object : this->selectedObjects) {
 				object->select(nullptr);
 			}
@@ -672,13 +685,13 @@ void Game::localEvents() {
 					break;
 				}
 			}
-			this->dataMutex.unlock();
+			this->objectsMutex.unlock();
 
 			net::sendCommand(this->connection, data.c_str(), data.length());
 		}
 
 		if (!this->selectedObjects.empty()) {
-			this->dataMutex.lock();
+			this->objectsMutex.lock();
 			for (auto &object : this->selectedObjects) {
 				if (object->testLocation(location)) {
 					this->dragging = true;
@@ -687,16 +700,16 @@ void Game::localEvents() {
 					break;
 				}
 			}
-			this->dataMutex.unlock();
+			this->objectsMutex.unlock();
 		} else { //Boxselect
-			this->dataMutex.lock();
+			this->objectsMutex.lock();
 			for (auto &object : this->selectedObjects) {
 				object->select(nullptr);
 			}
 			this->selectedObjects.clear();
 			this->selecting = true;
 			this->selectingStart = location;
-			this->dataMutex.unlock();
+			this->objectsMutex.unlock();
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 2) {
 		if (this->dragging) {
@@ -706,7 +719,7 @@ void Game::localEvents() {
 			// If even one of the selected objects isn't flipped every selected object will be flipped. If all of the
 			// objects are flipped then all of the objects will be unflipped.
 			bool flipped = true;
-			this->dataMutex.lock();
+			this->objectsMutex.lock();
 			for (auto &object : this->selectedObjects) {
 				if (! object->isFlipped()) {
 					flipped = false;
@@ -722,13 +735,13 @@ void Game::localEvents() {
 
 				net::dataAppendShort(data, object->getId());
 			}
-			this->dataMutex.unlock();
+			this->objectsMutex.unlock();
 
 			net::sendCommand(this->connection, data.c_str(), data.length());
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 3) {
-		this->dataMutex.lock();
 		this->keyStatus.moveScreen = true;
+		this->dataMutex.lock();
 		this->moveScreenStart = Vector2(event.mouse.x, event.mouse.y);
 		this->dataMutex.unlock();
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 1) {
@@ -737,7 +750,7 @@ void Game::localEvents() {
 		if (this->dragging) {
 			this->endDragging();
 		} else if (this->selecting) {
-			this->dataMutex.lock();
+			this->objectsMutex.lock();
 			this->selectedObjects.clear();
 			this->selecting = false;
 			Vector2 lower;
@@ -785,7 +798,7 @@ void Game::localEvents() {
 			for (auto &object : this->selectedObjects) {
 				packet.writeShort(object->getId());
 			}
-			this->dataMutex.unlock();
+			this->objectsMutex.unlock();
 			packet.send();
 		}
 	} else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP && event.mouse.button == 3) {
@@ -798,6 +811,7 @@ void Game::localEvents() {
 			this->dataMutex.unlock();
 		} else if (this->dragging && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
 			this->dataMutex.lock();
+			this->objectsMutex.lock();
 			Vector2 location(event.mouse.x, event.mouse.y);
 			this->renderer->transformLocation(IRenderer::CAMERA_INVERSE, location);
 
@@ -835,6 +849,7 @@ void Game::localEvents() {
 
 				object->setLocation(destination);
 			}
+			this->objectsMutex.unlock();
 			this->dataMutex.unlock();
 		} else if (this->keyStatus.moveScreen && (event.mouse.dx != 0 || event.mouse.dy != 0)) {
 			this->dataMutex.lock();
@@ -853,14 +868,14 @@ void Game::localEvents() {
 void Game::endDragging() {
 	std::string data;
 	data.push_back(net::PACKET_MOVE);
-
+	this->objectsMutex.lock();
 	for (auto &object : this->selectedObjects) {
 		net::dataAppendShort(data, object->getId());
 		net::dataAppendVector2(data, object->getLocation());
 
 		object->setAnimation(object->getLocation(), 0.0f);
 	}
-
+	this->objectsMutex.unlock();
 	net::sendCommand(this->connection, data.c_str(), data.length());
 
 	this->dragging = false;
@@ -890,7 +905,7 @@ void Game::networkEvents() {
 			}
 
 			case ENET_EVENT_TYPE_RECEIVE: {
-				this->dataMutex.lock();
+				this->clientsMutex.lock();
 				if (this->connectionState == ConnectionState::CONNECTED_MASTER_SERVER) {
 					this->receivePacket(event);
 				} else if (this->connectionState == ConnectionState::CONNECTED) {
@@ -902,7 +917,7 @@ void Game::networkEvents() {
 						this->disconnectMasterServer();
 					}
 				}
-				this->dataMutex.unlock();
+				this->clientsMutex.unlock();
 				enet_packet_destroy(event.packet);
 
 				break;
@@ -911,6 +926,7 @@ void Game::networkEvents() {
 			case ENET_EVENT_TYPE_DISCONNECT: {
 				this->dataMutex.lock();
 				this->addMessage("Disconnected from the server.");
+				this->dataMutex.unlock();
 				this->connectionState = ConnectionState::NOT_CONNECTED;
 
 				this->disposeGame();
@@ -918,7 +934,6 @@ void Game::networkEvents() {
 				if (this->state == State::EXITING) {
 					this->state = State::TERMINATED;
 				}
-				this->dataMutex.unlock();
 				break;
 			}
 
@@ -1811,18 +1826,20 @@ void Game::renderGame() {
 	// Draw the table area
 	this->renderer->drawRectangle(Vector2(-net::MAX_FLOAT, -net::MAX_FLOAT), Vector2(net::MAX_FLOAT, net::MAX_FLOAT), Color(1.0f, 1.0f, 1.0f, 1.0f), 5.0f);
 
-	this->dataMutex.lock();
+	this->objectsMutex.lock();
 	for (auto &object : this->objectOrder) {
 		object->draw(this->renderer, this->clients.find(this->localClient)->second);
 	}
-	this->dataMutex.unlock();
+	this->objectsMutex.unlock();
 }
 
 void Game::renderUI() {
 	this->renderer->useTransformation(IRenderer::UI);
 
 	if (this->selecting) {
+		this->dataMutex.lock();
 		Vector2 location = this->selectingStart;
+		this->dataMutex.unlock();
 		ALLEGRO_MOUSE_STATE mouse;
 		al_get_mouse_state(&mouse);
 		this->renderer->transformLocation(IRenderer::CAMERA, location);
@@ -1830,7 +1847,7 @@ void Game::renderUI() {
 	}
 
 	int i = 0;
-	this->dataMutex.lock();
+	this->clientsMutex.lock();
 	for (auto &client : this->clients) {
 		std::string text;
 		if (client.second->getPing() != 65535) {
@@ -1843,32 +1860,34 @@ void Game::renderUI() {
 
 		++i;
 	}
-	this->dataMutex.unlock();
+	this->clientsMutex.unlock();
 
-	this->dataMutex.lock();
+	this->widgetsMutex.lock();
 	if (this->input != nullptr) {
 		this->chatWidget->draw(this->renderer, true);
 	} else {
 		this->chatWidget->draw(this->renderer, false);
 	}
-	this->dataMutex.unlock();
+	this->widgetsMutex.unlock();
 
 	this->renderer->drawText("FPS: " + utils::toString( static_cast<int>(1.0 / this->deltaTime + 0.25)),
 	                         Vector2(0.0f, this->renderer->getDisplaySize().y - 20.0f));
 
-	this->dataMutex.lock();
+	this->widgetsMutex.lock();
 	for (auto &widget : this->widgets) {
 		widget->draw(this->renderer);
 	}
 
 	if (this->input != nullptr) {
-		this->input->draw(this->renderer);
+		this->input.load()->draw(this->renderer);
 	}
-	this->dataMutex.unlock();
+	this->widgetsMutex.unlock();
 
+	this->widgetsMutex.lock();
 	this->dataMutex.lock();
 	if (this->fileTransferProgress != nullptr) {
 		this->fileTransferProgress->draw(this->renderer);
 	}
 	this->dataMutex.unlock();
+	this->widgetsMutex.unlock();
 }
