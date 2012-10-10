@@ -575,12 +575,16 @@ void Game::localEvents() {
 
 					this->objectsMutex.lock();
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
-					for (auto &object : this->selectedObjects) {
-						net::dataAppendShort(data, object->getId());
-						net::dataAppendVector2(data, nextLocation);
+					for (auto &object : this->objectOrder) {
+						for(auto &selected : this->selectedObjects) {
+							if(object == selected) {
+								net::dataAppendShort(data, object->getId());
+								net::dataAppendVector2(data, nextLocation);
 
-						object->setAnimation(nextLocation, this->settings->getValue<float>("game.animationtime"));
-						nextLocation += object->getStackDelta();
+								object->setAnimation(nextLocation, this->settings->getValue<float>("game.animationtime"));
+								nextLocation += object->getStackDelta();
+							}
+						}
 					}
 					this->objectsMutex.unlock();
 
