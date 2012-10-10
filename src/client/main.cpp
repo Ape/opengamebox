@@ -316,6 +316,7 @@ void* Game::renderThreadFunc() {
 			this->renderer->resize();
 			Vector2 newSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
 			Vector2 ratio = newSize/oldSize;
+			this->widgetsMutex.lock();
 			for (auto &widget : this->widgets) {
 				widget->resize(ratio);
 			}
@@ -323,6 +324,7 @@ void* Game::renderThreadFunc() {
 			if (this->input.load() != nullptr) {
 				this->input.load()->resize(ratio);
 			}
+			this->widgetsMutex.unlock();
 			this->resize = false;
 			this->dataMutex.unlock();
 		}
@@ -334,8 +336,11 @@ void* Game::renderThreadFunc() {
 			this->nextFrame = false;
 
 			this->objectsMutex.lock();
-			for(auto &object : this->uninitializedObjects) {
-				object->initForClient(this->renderer);
+			if(this->uninitializedObjects.size() > 0) {
+				for(auto &object : this->uninitializedObjects) {
+					object->initForClient(this->renderer);
+				}
+				this->checkObjectOrder();
 			}
 			this->uninitializedObjects.clear();
 			this->objectsMutex.unlock();
@@ -1059,7 +1064,6 @@ void Game::receivePacket(ENetEvent event) {
 
 						Object *object = new Object(objectClass, objectData.at(2), objId, location);
 						this->uninitializedObjects.push_back(object);
-//						object->initForClient(this->renderer);
 						object->select(selected);
 						object->setOwner(owner);
 						object->setFlipped(flipped);
