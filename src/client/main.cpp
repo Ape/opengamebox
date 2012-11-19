@@ -310,7 +310,7 @@ void* Game::renderThreadFunc() {
 	this->renderer->initRenderFont();
 	while (this->state != State::TERMINATED) {
 
-		if(this->resize) {
+		if (this->resize) {
 			this->dataMutex.lock();
 			Vector2 oldSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
 			this->renderer->resize();
@@ -330,13 +330,13 @@ void* Game::renderThreadFunc() {
 		}
 
 		// Render the screen with limited FPS
-		//Todo with OpenGL use automatic wait on al_flip_display()
+		// TODO: with OpenGL use automatic wait on al_flip_display()
 		if (this->nextFrame) {
 
 			this->nextFrame = false;
 
 			this->objectsMutex.lock();
-			if(this->uninitializedObjects.size() > 0) {
+			if (this->uninitializedObjects.size() > 0) {
 				for(auto &object : this->uninitializedObjects) {
 					object->initForClient(this->renderer);
 				}
@@ -577,7 +577,7 @@ void Game::localEvents() {
 					Vector2 nextLocation = this->selectedObjects.front()->getLocation();
 					for (auto &object : this->objectOrder) {
 						for(auto &selected : this->selectedObjects) {
-							if(object == selected) {
+							if (object == selected) {
 								net::dataAppendShort(data, object->getId());
 								net::dataAppendVector2(data, nextLocation);
 
@@ -609,7 +609,7 @@ void Game::localEvents() {
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_W) {
 				this->keyStatus.screenRotateClockwise = true;
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_E) {
-				if(this->selectedObjects.size() > 0) {
+				if (this->selectedObjects.size() > 0) {
 					this->objectsMutex.lock();
 					for(auto &object : this->selectedObjects) {
 						std::string data;
@@ -622,7 +622,7 @@ void Game::localEvents() {
 					this->objectsMutex.unlock();
 				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_R) {
-				if(this->selectedObjects.size() > 0) {
+				if (this->selectedObjects.size() > 0) {
 					this->objectsMutex.lock();
 					for(auto &object : this->selectedObjects) {
 						std::string data;
@@ -1810,8 +1810,6 @@ void Game::update() {
 }
 
 void Game::render() {
-
-
 	// Clear the screen
 	al_clear_to_color(al_map_rgb_f(0.1f, 0.1f, 0.1f));
 
