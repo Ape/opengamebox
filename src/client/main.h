@@ -87,7 +87,7 @@ public:
 	std::thread *renderThread;
 
 private:
-	//Variables only for event thread
+	// Variables only for event thread
 	ALLEGRO_EVENT_QUEUE *event_queue;
 	ALLEGRO_TIMER *timer;
 
@@ -118,8 +118,8 @@ private:
 
 	Vector2 moveScreenStart;
 
-	//Variables for both threads
-	//Todo: better mutex handling
+	// Variables for both threads
+	// TODO: better mutex handling
 	std::mutex dataMutex;
 	std::mutex displayMutex;
 	bool loadingPackage;
@@ -148,7 +148,7 @@ private:
 	std::mutex clientsMutex;
 	std::map<unsigned char, Client*> clients;
 
-	//Atomic variables for both threads
+	// Atomic variables for both threads
 
 	struct KeyStatus {
 		std::atomic<bool> screenZoomIn;
@@ -175,7 +175,7 @@ private:
 	enum class State {INITIALIZING, RUNNING, EXITING, TERMINATED};
 	std::atomic<State> state;
 
-	//Functions
+	// Functions
 	void mainLoop(void);
 
 	void disconnect(void);
