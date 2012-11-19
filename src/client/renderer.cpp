@@ -254,7 +254,7 @@ void Renderer::drawText(std::string text, Vector2 location, Alignment alignment)
 		if (position != std::string::npos && position + 5 <= text.length()) {
 			al_draw_text(this->rendFont, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
 						 this->getAlignment(alignment), text.substr(oldposition, position - oldposition).c_str());
-			drawposition += al_get_text_width(this->font, text.substr(oldposition, position - oldposition).c_str());
+			drawposition += al_get_text_width(this->rendFont, text.substr(oldposition, position - oldposition).c_str());
 
 			if (text.substr(position + 1, 1).compare("#") == 0) {
 				color.setFromId(this, utils::hexStringToInt(text.substr(position + 2, 2)));
@@ -266,7 +266,7 @@ void Renderer::drawText(std::string text, Vector2 location, Alignment alignment)
 		} else {
 			al_draw_text(this->rendFont, al_map_rgba_f(color.red, color.green, color.blue, color.alpha), location.x + drawposition, location.y,
 			             this->getAlignment(alignment), text.substr(oldposition).c_str());
-			drawposition += al_get_text_width(this->font, text.substr(oldposition).c_str());
+			drawposition += al_get_text_width(this->rendFont, text.substr(oldposition).c_str());
 			loop = false;
 		}
 
