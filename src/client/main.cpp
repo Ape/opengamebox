@@ -296,6 +296,9 @@ int Game::run() {
 	// Enter the main loop
 	this->mainLoop();
 
+	this->state == State::TERMINATED;
+	this->renderThread->join();
+
 	// Save command history
 	this->saveHistory();
 
@@ -1041,7 +1044,6 @@ void Game::receivePacket(ENetEvent event) {
 					if (event.packet->data[1] != 255) {
 						client = this->clients.find(event.packet->data[1])->second;
 					}
-
 					int amount = 0;
 					unsigned int i = 1;
 
@@ -1053,6 +1055,7 @@ void Game::receivePacket(ENetEvent event) {
 						Vector2 location = net::bytesToVector2(event.packet->data + i + 6);
 						float rotation = event.packet->data[i + 14] * utils::PI / 8;
 						unsigned char length = event.packet->data[i + 15];
+
 						std::vector<std::string> objectData = utils::splitString(std::string(reinterpret_cast<char*>(event.packet->data + i + 16),
 						                                                                     static_cast<int>(length)), '.');
 
