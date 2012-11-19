@@ -296,7 +296,7 @@ int Game::run() {
 	// Enter the main loop
 	this->mainLoop();
 
-	this->state == State::TERMINATED;
+	this->state = State::TERMINATED;
 	this->renderThread->join();
 
 	// Save command history
