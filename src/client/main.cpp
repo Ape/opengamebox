@@ -315,8 +315,9 @@ void* Game::renderThreadFunc() {
 	al_set_target_backbuffer(this->renderer->getDisplay());
 	this->renderer->initRenderFont();
 
-	while (this->state != State::TERMINATED) {
+	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
+	while (this->state != State::TERMINATED) {
 		if (this->resize) {
 			this->dataMutex.lock();
 			Vector2 oldSize(al_get_display_width(this->renderer->getDisplay()), al_get_display_height(this->renderer->getDisplay()));
