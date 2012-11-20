@@ -1140,19 +1140,18 @@ void Game::receivePacket(ENetEvent event) {
 							this->addMessage(client->getColoredNick() + " moved " + utils::toString(numberObjects) + " objects.");
 						}
 					}
-/*
+
 					for(auto &object : this->objectOrder) {
 						for(auto movedObject : movedObjects) {
 							object->checkIfUnder(movedObject);
 						}
-					}*/
+					}
 					for(std::vector<Object*>::size_type i = 0; i<movedObjects.size(); i++) {
-						/*for(std::vector<Object*>::size_type j = i + 1; j<movedObjects.size(); j++) {
+						for(std::vector<Object*>::size_type j = i + 1; j<movedObjects.size(); j++) {
 							movedObjects[i]->checkIfUnder(movedObjects[j]);
-						}*/
+						}
 						this->objectOrder.push_back(movedObjects[i]);
 					}
-					this->checkObjectOrder();
 				}
 				break;
 			}
@@ -1424,6 +1423,10 @@ void Game::receivePacket(ENetEvent event) {
 				this->objectOrder.clear();
 				while (!packet.eof()) {
 					this->objectOrder.push_back(this->objects.find(packet.readShort())->second);
+				}
+
+				for(auto &object : this->objects) {
+					object.second->clearUnder();
 				}
 
 				this->checkObjectOrder();

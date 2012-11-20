@@ -170,26 +170,6 @@ std::list<Object*> Object::getObjectsAbove(std::set<Object*> &visited) {
 	return allAbove;
 }
 
-bool Object::checkIfUnder(std::vector<Object*> objectOrder) {
-	this->objectsAbove.clear();
-	bool thisFound = false;
-	for (auto &object : objectOrder) {
-		if (! thisFound) {
-			if (object->getId() == this->getId()) {
-				thisFound = true;
-			}
-		} else if (object->owner == this->owner && this->testCollision(object)) {
-			this->objectsAbove.push_back(object);
-		}
-	}
-
-	if (this->objectsAbove.empty()) {
-		return false;
-	} else {
-		return true;
-	}
-}
-
 bool Object::checkIfUnder(Object* other) {
 	this->objectsAbove.remove(other);
 	if(other != this) {
@@ -203,6 +183,10 @@ bool Object::checkIfUnder(Object* other) {
 
 void Object::notUnder(Object* object) {
 	this->objectsAbove.remove(object);
+}
+
+void Object::clearUnder() {
+	this->objectsAbove.clear();
 }
 
 bool Object::isSelectedBy(Client* client) const {

@@ -52,8 +52,8 @@ public:
 	bool isUnder(void) const;
 	Vector2 getStackDelta(void) const;
 	std::list<Object*> getObjectsAbove(std::set<Object*> &visited);
-	bool checkIfUnder(std::vector<Object*> objectOrder);
 	bool checkIfUnder(Object* other);
+	void clearUnder();
 	void notUnder(Object* object);
 	bool isSelectedBy(Client *client) const;
 	Client* getSelected(void);
