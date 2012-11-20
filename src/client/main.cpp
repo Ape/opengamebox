@@ -1145,13 +1145,13 @@ void Game::receivePacket(ENetEvent event) {
 						for(auto movedObject : movedObjects) {
 							object->checkIfUnder(movedObject);
 						}
-					}
-					for(std::vector<Object*>::size_type i = 0; i<movedObjects.size(); i++) {
-						for(std::vector<Object*>::size_type j = i + 1; j<movedObjects.size(); j++) {
-							movedObjects[i]->checkIfUnder(movedObjects[j]);
-						}
-						this->objectOrder.push_back(movedObjects[i]);
 					}*/
+					for(std::vector<Object*>::size_type i = 0; i<movedObjects.size(); i++) {
+						/*for(std::vector<Object*>::size_type j = i + 1; j<movedObjects.size(); j++) {
+							movedObjects[i]->checkIfUnder(movedObjects[j]);
+						}*/
+						this->objectOrder.push_back(movedObjects[i]);
+					}
 					this->checkObjectOrder();
 				}
 				break;
