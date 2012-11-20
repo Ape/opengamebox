@@ -167,6 +167,7 @@ private:
 
 	std::atomic<bool> resize;
 	std::atomic<bool> nextFrame;
+	std::atomic<bool> checkOrder;
 	std::atomic<double> previousTime;
 	std::atomic<double> deltaTime;
 

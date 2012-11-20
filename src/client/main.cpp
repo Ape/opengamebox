@@ -297,8 +297,11 @@ int Game::run() {
 	this->mainLoop();
 
 	this->state = State::TERMINATED;
-	this->renderThread->join();
-
+	if(this->renderThread != nullptr) {
+		this->renderThread->join();
+		delete this->renderThread;
+		this->renderThread = nullptr;
+	}
 	// Save command history
 	this->saveHistory();
 
@@ -311,6 +314,7 @@ void* Game::renderThreadFunc() {
 	al_set_physfs_file_interface();
 	al_set_target_backbuffer(this->renderer->getDisplay());
 	this->renderer->initRenderFont();
+
 	while (this->state != State::TERMINATED) {
 
 		if (this->resize) {
@@ -343,7 +347,7 @@ void* Game::renderThreadFunc() {
 				for(auto &object : this->uninitializedObjects) {
 					object->initForClient(this->renderer);
 				}
-				this->checkObjectOrder();
+				this->checkOrder = true;
 			}
 			this->uninitializedObjects.clear();
 			this->objectsMutex.unlock();
@@ -364,6 +368,11 @@ void Game::mainLoop() {
 		// Process network events
 		this->networkEvents();
 
+		if(this->checkOrder) {
+			this->checkObjectOrder();
+			this->checkOrder = false;
+		}
+
 		// Handle local events
 		this->localEvents();
 	}
@@ -376,6 +385,8 @@ void Game::quit() {
 	} else {
 		this->state = State::TERMINATED;
 		this->renderThread->join();
+		delete this->renderThread;
+		this->renderThread = nullptr;
 	}
 }
 
@@ -1083,8 +1094,6 @@ void Game::receivePacket(ENetEvent event) {
 
 						i += 15 + length;
 					}
-
-					this->checkObjectOrder();
 
 					if (event.packet->data[1] != 255) {
 						this->addMessage(client->getColoredNick() + " created " + utils::toString(amount) + " objects.");
