@@ -1181,9 +1181,11 @@ void Game::receivePacket(ENetEvent event) {
 
 						unsigned short objId = net::bytesToShort(event.packet->data + i);
 
+						this->objectsMutex.lock();
 						Object *object = this->objects.find(objId)->second;
 						net::removeObject(this->objectOrder, object);
 						this->objects.erase(objId);
+						this->objectsMutex.unlock();
 
 						lastObject = object->getName();
 						delete object;
