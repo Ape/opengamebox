@@ -55,8 +55,6 @@ Renderer::Renderer(Coordinates screenSize, const int multisamplingSamples) {
 	this->screenLocation = Vector2(0.0f, 0.0f);
 	this->screenRotation = 0.0f;
 
-	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
-
 	this->resize();
 }
 
