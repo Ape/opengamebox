@@ -1140,7 +1140,7 @@ void Game::receivePacket(ENetEvent event) {
 							this->addMessage(client->getColoredNick() + " moved " + utils::toString(numberObjects) + " objects.");
 						}
 					}
-
+/*
 					for(auto &object : this->objectOrder) {
 						for(auto movedObject : movedObjects) {
 							object->checkIfUnder(movedObject);
@@ -1151,7 +1151,8 @@ void Game::receivePacket(ENetEvent event) {
 							movedObjects[i]->checkIfUnder(movedObjects[j]);
 						}
 						this->objectOrder.push_back(movedObjects[i]);
-					}
+					}*/
+					this->checkObjectOrder();
 				}
 				break;
 			}
