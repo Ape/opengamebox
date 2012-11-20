@@ -1108,7 +1108,7 @@ void Game::receivePacket(ENetEvent event) {
 
 					unsigned int numberObjects = 0;
 					Object *lastObject;
-
+					std::vector<Object*> movedObjects;
 					size_t i = 2;
 					while (i < event.packet->dataLength) {
 						++numberObjects;
@@ -1117,6 +1117,7 @@ void Game::receivePacket(ENetEvent event) {
 						Vector2 location = net::bytesToVector2(event.packet->data + i + 2);
 
 						Object *object = this->objects.find(objId)->second;
+						movedObjects.push_back(object);
 
 						if (this->settings->getValue<float>("game.animationtime") == 0) {
 							object->setLocation(location);
@@ -1125,7 +1126,7 @@ void Game::receivePacket(ENetEvent event) {
 						}
 
 						net::removeObject(this->objectOrder, object);
-						this->objectOrder.push_back(object);
+						//this->objectOrder.push_back(object);
 
 						lastObject = object;
 						i += 10;
@@ -1139,9 +1140,18 @@ void Game::receivePacket(ENetEvent event) {
 						}
 					}
 
-					this->checkObjectOrder();
+					for(auto &object : this->objectOrder) {
+						for(auto movedObject : movedObjects) {
+							object->checkIfUnder(movedObject);
+						}
+					}
+					for(std::vector<Object*>::size_type i = 0; i<movedObjects.size(); i++) {
+						for(std::vector<Object*>::size_type j = i + 1; j<movedObjects.size(); j++) {
+							movedObjects[i]->checkIfUnder(movedObjects[j]);
+						}
+						this->objectOrder.push_back(movedObjects[i]);
+					}
 				}
-
 				break;
 			}
 
@@ -1188,6 +1198,10 @@ void Game::receivePacket(ENetEvent event) {
 						this->objectsMutex.unlock();
 
 						lastObject = object->getName();
+
+						for(auto &otherObjects : this->objects) {
+							otherObjects.second->notUnder(object);
+						}
 						delete object;
 
 						i += 2;
@@ -1745,8 +1759,10 @@ std::string Game::createObject(std::string objectId, Vector2 location, bool flip
 }
 
 void Game::checkObjectOrder() {
-	for (auto &object : this->objectOrder) {
-		object->checkIfUnder(this->objectOrder);
+	for(std::vector<Object*>::size_type i = 0; i < this->objectOrder.size(); i++) {
+		for(std::vector<Object*>::size_type j = i + 1; j < this->objectOrder.size(); j++) {
+			this->objectOrder[i]->checkIfUnder(this->objectOrder[j]);
+		}
 	}
 }
 

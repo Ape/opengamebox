@@ -190,6 +190,21 @@ bool Object::checkIfUnder(std::vector<Object*> objectOrder) {
 	}
 }
 
+bool Object::checkIfUnder(Object* other) {
+	this->objectsAbove.remove(other);
+	if(other != this) {
+		if(other->owner == this->owner && this->testCollision(other)) {
+			this->objectsAbove.push_back(other);
+			return true;
+		}
+	}
+	return false;
+}
+
+void Object::notUnder(Object* object) {
+	this->objectsAbove.remove(object);
+}
+
 bool Object::isSelectedBy(Client* client) const {
 	return this->selected == client;
 }
