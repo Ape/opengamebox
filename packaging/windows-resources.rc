@@ -1,0 +1,3 @@
+//name         type   additional flags   source
+//icon to show on taskbar and explorer
+  main_icon    ICON   DISCARDABLE        "../../gfx/icon.ico"

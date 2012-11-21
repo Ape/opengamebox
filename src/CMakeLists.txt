@@ -7,6 +7,11 @@ endforeach(srcSource)
 add_library(${executableName} ${commonSources})
 target_link_libraries(${executableName} ${commonLinkLibs})
 
+if(WIN32)
+	ENABLE_LANGUAGE(RC)
+	set(clientSources ${clientSources} ${PROJECT_SOURCE_DIR}/packaging/windows-resources.rc)
+endif(WIN32)
+
 add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(master-server)
