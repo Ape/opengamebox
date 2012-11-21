@@ -4,7 +4,7 @@ set(executableName opengamebox)
 
 cmake_minimum_required(VERSION 2.6)
 
-add_definitions(-std=c++0x)
+set(CMAKE_CXX_FLAGS -std=c++0x)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 if(WIN32 AND MINGW)

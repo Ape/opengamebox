@@ -5,8 +5,11 @@ foreach(srcSource ${srcSources})
 endforeach(srcSource)
 
 add_subdirectory(widgets)
-
-add_executable(client main.cpp ${clientSources})
+if(MINGW AND NOT DEBUG)
+	add_executable(client WIN32 main.cpp ${clientSources})
+else(MINGW AND NOT DEBUG)
+	add_executable(client main.cpp ${clientSources})
+endif(MINGW AND NOT DEBUG)
 set_target_properties(client PROPERTIES OUTPUT_NAME ${executableName})
 target_link_libraries(client ${executableName} ${clientLinkLibs})
 
