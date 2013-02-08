@@ -96,8 +96,8 @@ float Object::getRotation() const {
 bool Object::testLocation(Vector2 location) const {
 	const Vector2 targetLocation = this->getTargetLocation();
 	const Vector2 rotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
-	const float rotatedSizeAbsX = abs(rotatedSize.x);
-	const float rotatedSizeAbsY = abs(rotatedSize.y);
+	const float rotatedSizeAbsX = std::abs(rotatedSize.x);
+	const float rotatedSizeAbsY = std::abs(rotatedSize.y);
 
 	if (location.x >= targetLocation.x - rotatedSizeAbsX
 			&& location.x <= targetLocation.x + rotatedSizeAbsX
@@ -112,8 +112,8 @@ bool Object::testLocation(Vector2 location) const {
 bool Object::testCollision(const Object *object, bool second) const {
 	const Vector2 targetLocation = this->getTargetLocation();
 	const Vector2 rotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
-	const float rotatedSizeAbsX = abs(rotatedSize.x);
-	const float rotatedSizeAbsY = abs(rotatedSize.y);
+	const float rotatedSizeAbsX = std::abs(rotatedSize.x);
+	const float rotatedSizeAbsY = std::abs(rotatedSize.y);
 
 	// Check if any of the object's corners is inside the other object and then vice versa.
 	if (object->testLocation(targetLocation - rotatedSize)
