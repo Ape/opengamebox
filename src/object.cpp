@@ -99,8 +99,8 @@ float Object::getRotation() const {
 bool Object::testLocation(Vector2 location) const {
 	const Vector2 targetLocation = this->getTargetLocation();
 	const Vector2 rotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
-	const float rotatedSizeAbsX = abs(rotatedSize.x);
-	const float rotatedSizeAbsY = abs(rotatedSize.y);
+	const float rotatedSizeAbsX = std::abs(rotatedSize.x);
+	const float rotatedSizeAbsY = std::abs(rotatedSize.y);
 
 	if (location.x >= targetLocation.x - rotatedSizeAbsX
 			&& location.x <= targetLocation.x + rotatedSizeAbsX
@@ -115,9 +115,9 @@ bool Object::testLocation(Vector2 location) const {
 bool Object::testCollision(const Object *object, bool second) const {
 	const Vector2 thisRotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
 	const Vector2 objectRotatedSize = (object->getSize() / 2.0f).rotate(object->rotation);
-	const Vector2 addedRotatedSizes = Vector2(abs(thisRotatedSize.x) + abs(objectRotatedSize.x), abs(thisRotatedSize.y) + abs(objectRotatedSize.y));
+	const Vector2 addedRotatedSizes = Vector2(std::abs(thisRotatedSize.x) + std::abs(objectRotatedSize.x), std::abs(thisRotatedSize.y) + std::abs(objectRotatedSize.y));
 	const Vector2 subtractionVector = this->location - object->location;
-	if (addedRotatedSizes.x >= abs(subtractionVector.x) and addedRotatedSizes.y >= abs(subtractionVector.y)) {
+	if (addedRotatedSizes.x >= std::abs(subtractionVector.x) and addedRotatedSizes.y >= std::abs(subtractionVector.y)) {
 		return true;
 	} else {
 		return false;
