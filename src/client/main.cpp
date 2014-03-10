@@ -1019,6 +1019,7 @@ void Game::receivePacket(ENetEvent event) {
 				if (event.packet->dataLength == 2) {
 					this->addMessage(this->clients[event.packet->data[1]]->getColoredNick() + " has left the server!");
 
+					this->objectsMutex.lock();
 					// Release selected and owned objects
 					for (auto &object : this->objects) {
 						if (object.second->isSelectedBy(this->clients[event.packet->data[1]])) {
@@ -1029,10 +1030,13 @@ void Game::receivePacket(ENetEvent event) {
 							object.second->setOwner(nullptr);
 						}
 					}
+					this->objectsMutex.unlock();
 
 					// Clear the client information
+					this->clientsMutex.lock();
 					delete this->clients.find(event.packet->data[1])->second;
 					this->clients.erase(event.packet->data[1]);
+					this->clientsMutex.unlock();
 				}
 
 				break;
