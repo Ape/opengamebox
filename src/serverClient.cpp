@@ -21,7 +21,7 @@
 ServerClient::ServerClient(ENetPeer *peer, unsigned char id)
 : Client(id),
   peer(peer),
-  joined(joined),
+  joined(false),
   admin(false) {}
 
 ServerClient* ServerClient::getClientWithId(std::map<unsigned char, ServerClient*> clients, unsigned char clientId) {
