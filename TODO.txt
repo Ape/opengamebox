@@ -48,3 +48,10 @@ Clean up:
 		- float support for Packet
 	- separate input handling to a new class from client/main.cpp
 	- check const correctness
+
+Merge features from experiment branch:
+	- Check if these commits are useful and can be merged:
+		- 4301cedc: Fixed decking after suffle
+		- cb8d7fb7: Rewroted object order checks
+			- also multiple commits continuing this
+		- 124b1098: Faster collision check for objects
