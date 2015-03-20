@@ -40,27 +40,6 @@ void InputBox::draw(IRenderer *renderer) {
 	renderer->drawRectangle(this->location, this->location + Vector2(this->size.x, this->textWidget->getLineCount() * 20), Color(1.0f, 1.0f, 1.0f), 1.0f);
 
 	textWidget->draw(renderer);
-
-/*	std::ostringstream tmpText;
-
-	tmpText.str(std::string());
-
-	ALLEGRO_USTR *tmpUstr = al_ustr_dup_substr(this->text, 0, al_ustr_offset(this->text, this->inputLocation));
-
-	if (! this->caption.empty()) {
-		tmpText << this->caption << ": ";
-	}
-
-	tmpText << al_cstr(tmpUstr) << "|";
-	al_ustr_free(tmpUstr);
-
-	tmpUstr = al_ustr_dup_substr(this->text, al_ustr_offset(this->text, this->inputLocation), al_ustr_size(this->text));
-	tmpText << al_cstr(tmpUstr);
-	al_ustr_free(tmpUstr);
-
-	renderer->drawText(tmpText.str(), Vector2(this->location));
-
-*/
 }
 
 bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
@@ -112,8 +91,7 @@ bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 		++this->inputLocation;
 	}
 
-	if (keyboard.keycode != ALLEGRO_KEY_ENTER && keyboard.keycode != ALLEGRO_KEY_DELETE) {
-
+	if (keyboard.keycode != ALLEGRO_KEY_ENTER && keyboard.keycode != ALLEGRO_KEY_ESCAPE) {
 		std::ostringstream tmpText;
 
 		tmpText.str(std::string());
@@ -133,6 +111,7 @@ bool InputBox::onKey(ALLEGRO_KEYBOARD_EVENT keyboard) {
 
 		textWidget->setText(tmpText.str());
 	}
+
 	return true;
 }
 
