@@ -495,6 +495,19 @@ void Game::localEvents() {
 
 					net::sendCommand(this->connection, data.c_str(), data.length());
 				}
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_D) {
+				if (this->selectedObjects.size() > 0) {
+					std::string data;
+					data.push_back(net::PACKET_CREATE);
+
+					for (auto &object : this->selectedObjects) {
+						data += this->createObject(object->getFullId(),
+						                           object->getLocation(),
+						                           object->isFlipped());
+					}
+
+					net::sendCommand(this->connection, data.c_str(), data.size());
+				}
 			} else if (event.keyboard.keycode == ALLEGRO_KEY_S) {
 				if (this->selectedObjects.size() > 0) {
 					if (this->dragging) {
