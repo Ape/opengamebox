@@ -17,6 +17,8 @@
 
 #include "packet.h"
 
+#define FRAC_MAX 2147483647L /* 2**31 - 1 */
+
 PacketException::PacketException(std::string message)
 : std::runtime_error(message) {}
 
@@ -75,8 +77,20 @@ void Packet::writeString(std::string value) {
 }
 
 void Packet::writeFloat(float value) {
-	// TODO
-	std::cerr << "Error: Unimplemented function 'Packet::writeFloat'!" << std::endl;
+	if(value <= 0.5 && value >= -0.5) {
+		this->writeByte(-1);
+		this->writeInt((int)(value * FRAC_MAX * 2));
+		return;
+	}
+	int exp;
+	int frac;
+	double xf = fabs(frexp(value, &exp)) - 0.5;
+	frac = 1 + (int)(xf * 2.0 * (FRAC_MAX - 1));
+	if (value < 0.0) {
+		frac = -frac;
+	}
+	this->writeByte(exp);
+	this->writeInt(frac);
 }
 
 void Packet::writeVector2(Vector2 value) {
@@ -125,9 +139,22 @@ std::string Packet::readString() {
 }
 
 float Packet::readFloat() {
-	// TODO
-	std::cerr << "Error: Unimplemented function 'Packet::readFloat'!" << std::endl;
-	return 0.0f;
+	int exp = (char)this->readByte();
+	int frac = this->readInt();
+	if(exp == -1) {
+		if(frac != 0)
+		return (float)frac / 2.0 / FRAC_MAX;
+	}
+	if (frac == 0) {
+		return 0.0;
+	}
+	double xf, x;
+	xf = ((double)(llabs((float)frac) - 1) / (FRAC_MAX - 1)) / 2.0;
+	x = ldexp(xf + 0.5, (float)exp);
+	if (frac < 0) {
+		x = -x;
+	}
+	return x;
 }
 
 Vector2 Packet::readVector2() {
