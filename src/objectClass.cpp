@@ -22,7 +22,8 @@ ObjectClass::ObjectClass(std::string package, std::string objectClass, std::set<
 : package(package),
   objectClass(objectClass),
   name("Object"),
-  gridSize(Vector2(0.0f, 0.0f)) {
+  gridSize(Vector2(0.0f, 0.0f)),
+  scale(1.0f) {
 	if (missingPackages == nullptr) {
 		// Throw an exception if package can't be loaded
 		utils::getTextFile(package, "package.txt");
@@ -95,6 +96,8 @@ void ObjectClass::loadSettings() {
 			this->gridSize.x = valueFloat;
 		} else if (this->parseLineFloat(line, "gridheight", valueFloat)) {
 			this->gridSize.y = valueFloat;
+		} else if (this->parseLineFloat(line, "scale", valueFloat)) {
+			this->scale = valueFloat;
 		} else {
 			std::cout << "Warning: Could not parse '" << line << "' in " << this->objectClass << ".txt" << std::endl;
 		}
@@ -166,4 +169,8 @@ void ObjectClass::checkDependency(std::vector<std::string> dependecies, std::set
 			this->checkDependency(newDependencies, missingPackages);
 		}
 	}
+}
+
+float ObjectClass::getScale(void) const {
+	return this->scale;
 }

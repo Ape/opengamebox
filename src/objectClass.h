@@ -40,6 +40,7 @@ public:
 	std::string getName(void) const;
 	Vector2 getGridSize(void) const;
 	std::string getFlipsideImage(void) const;
+	float getScale(void) const;
 
 private:
 	std::string package;
@@ -47,6 +48,7 @@ private:
 	std::string name;
 	Vector2 gridSize;
 	std::string flipsideImage;
+	float scale;
 
 	bool parseLine(std::string line, std::string field, std::string &value);
 	bool parseLineFloat(std::string line, std::string field, float &value);

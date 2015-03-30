@@ -95,7 +95,7 @@ float Object::getRotation() const {
 
 bool Object::testLocation(Vector2 location) const {
 	const Vector2 targetLocation = this->getTargetLocation();
-	const Vector2 rotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
+	const Vector2 rotatedSize = (this->getSize() * this->objectClass->getScale() / 2.0f).rotate(this->rotation);
 	const float rotatedSizeAbsX = std::abs(rotatedSize.x);
 	const float rotatedSizeAbsY = std::abs(rotatedSize.y);
 
@@ -111,7 +111,7 @@ bool Object::testLocation(Vector2 location) const {
 
 bool Object::testCollision(const Object *object, bool second) const {
 	const Vector2 targetLocation = this->getTargetLocation();
-	const Vector2 rotatedSize = (this->getSize() / 2.0f).rotate(this->rotation);
+	const Vector2 rotatedSize = (this->getSize() * this->objectClass->getScale() / 2.0f).rotate(this->rotation);
 	const float rotatedSizeAbsX = std::abs(rotatedSize.x);
 	const float rotatedSizeAbsY = std::abs(rotatedSize.y);
 
@@ -274,7 +274,7 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 		renderer->drawRectangle(corners.at(0), corners.at(1), this->selected->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
 	}
 
-	renderer->drawBitmapTinted(image, this->location, this->getSize(), tint, this->rotation);
+	renderer->drawBitmapTinted(image, this->location, this->getSize() * this->objectClass->getScale(), tint, this->rotation);
 
 	if (this->owner != nullptr) {
 		const std::vector<Vector2> corners = this->getCorners(true);
