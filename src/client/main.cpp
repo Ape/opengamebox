@@ -574,6 +574,28 @@ void Game::localEvents() {
 						net::sendCommand(this->connection, data.c_str(), data.size());
 					}
 				}
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_Z) {
+				if (this->selectedObjects.size() > 0) {
+					Packet packet(this->connection);
+					packet.writeHeader(Packet::Header::SCALE);
+					for(auto &object : this->selectedObjects) {
+						if(object->getScale() - 0.1f > 0) {
+							packet.writeShort(object->getId());
+							packet.writeFloat(object->getScale() - 0.1f);
+						}
+					}
+					packet.send();
+				}
+			} else if (event.keyboard.keycode == ALLEGRO_KEY_X) {
+				if (this->selectedObjects.size() > 0) {
+					Packet packet(this->connection);
+					packet.writeHeader(Packet::Header::SCALE);
+					for(auto &object : this->selectedObjects) {
+						packet.writeShort(object->getId());
+						packet.writeFloat(object->getScale() + 0.1f);
+					}
+					packet.send();
+				}
 			}
 		}
 	} else if (event.type == ALLEGRO_EVENT_KEY_UP) {
@@ -1315,6 +1337,17 @@ void Game::receivePacket(ENetEvent event) {
 
 				this->checkObjectOrder();
 
+				break;
+			}
+
+			case Packet::Header::SCALE: {
+				if (event.packet->dataLength >= 1) {
+					while(!packet.eof()) {
+						unsigned short id = packet.readShort();
+						float scale = packet.readFloat();
+						this->objects.at(id)->setScale(scale);
+					}
+				}
 				break;
 			}
 

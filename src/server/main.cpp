@@ -733,6 +733,21 @@ void Server::receivePacket(ENetEvent event) {
 
 				break;
 			}
+			case Packet::Header::SCALE: {
+				if (event.packet->dataLength >= 1) {
+					Packet reply(this->connection);
+					reply.writeHeader(Packet::Header::SCALE);
+					while(!packet.eof()) {
+						unsigned short id = packet.readShort();
+						float scale = packet.readFloat();
+						this->objects.at(id)->setScale(scale);
+						reply.writeShort(id);
+						reply.writeFloat(scale);
+					}
+					reply.send();
+				}
+				break;
+			}
 
 			default: {
 				throw PacketException("Invalid packet header.");

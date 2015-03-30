@@ -27,6 +27,7 @@ Object::Object(ObjectClass *objectClass, std::string objectId, unsigned int id, 
 	this->selected    = nullptr;
 	this->owner       = nullptr;
 	this->rotation    = 0.0f;
+	this->scale       = 1.0f;
 
 	this->image = this->objectClass->getPackage() + "/objects/" + this->objectClass->getObjectClass() + "/" + this->objectId;
 	this->stackDelta = Vector2(4.0f, 0.0f);
@@ -95,7 +96,7 @@ float Object::getRotation() const {
 
 bool Object::testLocation(Vector2 location) const {
 	const Vector2 targetLocation = this->getTargetLocation();
-	const Vector2 rotatedSize = (this->getSize() * this->objectClass->getScale() / 2.0f).rotate(this->rotation);
+	const Vector2 rotatedSize = (this->getSize() * this->objectClass->getScale() * this->scale / 2.0f).rotate(this->rotation);
 	const float rotatedSizeAbsX = std::abs(rotatedSize.x);
 	const float rotatedSizeAbsY = std::abs(rotatedSize.y);
 
@@ -111,7 +112,7 @@ bool Object::testLocation(Vector2 location) const {
 
 bool Object::testCollision(const Object *object, bool second) const {
 	const Vector2 targetLocation = this->getTargetLocation();
-	const Vector2 rotatedSize = (this->getSize() * this->objectClass->getScale() / 2.0f).rotate(this->rotation);
+	const Vector2 rotatedSize = (this->getSize() * this->objectClass->getScale() * this->scale / 2.0f).rotate(this->rotation);
 	const float rotatedSizeAbsX = std::abs(rotatedSize.x);
 	const float rotatedSizeAbsY = std::abs(rotatedSize.y);
 
@@ -269,12 +270,14 @@ void Object::draw(IRenderer *renderer, Client *localClient) const {
 		tint.blue = 0.75f;
 	}
 
+	float scale = this->scale * this->objectClass->getScale();
+
 	if (this->selected != nullptr) {
 		const std::vector<Vector2> corners = this->getCorners(true, 1.0f);
 		renderer->drawRectangle(corners.at(0), corners.at(1), this->selected->getColor(), 2.0f, IRenderer::Transformation::CAMERA);
 	}
 
-	renderer->drawBitmapTinted(image, this->location, this->getSize() * this->objectClass->getScale(), tint, this->rotation);
+	renderer->drawBitmapTinted(image, this->location, this->getSize() * scale, tint, this->rotation);
 
 	if (this->owner != nullptr) {
 		const std::vector<Vector2> corners = this->getCorners(true);
@@ -294,11 +297,12 @@ void Object::rotate(float angle) {
 }
 
 const std::vector<Vector2> Object::getCorners(bool onlyDiagonal, float margin) const {
-	const Vector2 rotatedSize1 = (Vector2(this->size.x + margin, this->size.y + margin) / 2.0f).rotate(this->rotation);
+	const float scale = this->scale * this->objectClass->getScale();
+	const Vector2 rotatedSize1 = (Vector2(this->size.x * scale + margin, this->size.y * scale + margin) / 2.0f).rotate(this->rotation);
 	Vector2 rotatedSize2;
 
 	if (!onlyDiagonal) {
-		rotatedSize2 = (Vector2(this->size.x + margin, -(this->size.y + margin)) / 2.0f).rotate(this->rotation);
+		rotatedSize2 = (Vector2(this->size.x * scale + margin, -(this->size.y * scale + margin)) / 2.0f).rotate(this->rotation);
 	}
 
 	std::vector<Vector2> corners;
@@ -315,4 +319,13 @@ const std::vector<Vector2> Object::getCorners(bool onlyDiagonal, float margin) c
 	}
 
 	return corners;
+}
+
+float Object::getScale(void) const {
+	return this->scale;
+}
+void Object::setScale(float newScale) {
+	if (newScale > 0.0f) {
+		this->scale = newScale;
+	}
 }

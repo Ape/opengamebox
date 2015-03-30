@@ -70,6 +70,9 @@ public:
 	void draw(IRenderer *renderer, Client *localClient) const;
 	void rotate(float angle);
 
+	float getScale(void) const;
+	void setScale(float);
+
 	const std::vector<Vector2> getCorners(bool onlyDiagonal = false, float margin = 0.0f) const;
 
 private:
@@ -83,6 +86,7 @@ private:
 	std::string backside;
 	Vector2 stackDelta;
 	float rotation;
+	float scale;
 
 	Client *selected;
 	Client *owner;
