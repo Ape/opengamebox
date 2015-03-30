@@ -79,13 +79,13 @@ void Packet::writeString(std::string value) {
 void Packet::writeFloat(float value) {
 	if(value <= 0.5 && value >= -0.5) {
 		this->writeByte(-1);
-		this->writeInt((int)(value * FRAC_MAX * 2));
+		this->writeInt(static_cast<int>(value * FRAC_MAX * 2));
 		return;
 	}
 	int exp;
 	int frac;
 	double xf = fabs(frexp(value, &exp)) - 0.5;
-	frac = 1 + (int)(xf * 2.0 * (FRAC_MAX - 1));
+	frac = 1 + static_cast<int>(xf * 2.0 * (FRAC_MAX - 1));
 	if (value < 0.0) {
 		frac = -frac;
 	}
@@ -139,18 +139,18 @@ std::string Packet::readString() {
 }
 
 float Packet::readFloat() {
-	int exp = (char)this->readByte();
+	int exp = static_cast<char>(this->readByte());
 	int frac = this->readInt();
 	if(exp == -1) {
 		if(frac != 0)
-		return (float)frac / 2.0 / FRAC_MAX;
+		return static_cast<float>(frac) / 2.0 / FRAC_MAX;
 	}
 	if (frac == 0) {
 		return 0.0;
 	}
 	double xf, x;
-	xf = ((double)(llabs((float)frac) - 1) / (FRAC_MAX - 1)) / 2.0;
-	x = ldexp(xf + 0.5, (float)exp);
+	xf = (static_cast<double>(llabs(static_cast<float>(frac)) - 1) / (FRAC_MAX - 1)) / 2.0;
+	x = ldexp(xf + 0.5, static_cast<float>(exp));
 	if (frac < 0) {
 		x = -x;
 	}
