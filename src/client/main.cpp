@@ -1517,7 +1517,6 @@ void Game::chatCommand(std::string commandstr) {
 				data += this->createObject(name, location, flipped);
 			}
 		}
-		std::cout<<"testi"<<std::endl;
 
 		net::sendCommand(this->connection, data.c_str(), data.size());
 		this->dCreateBuffer.clear();
