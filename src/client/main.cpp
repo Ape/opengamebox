@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
 	// Unix-like systems such as Linux _need_ to pass argv[0] from main() in here.
 	if (PHYSFS_init(argv[0]) == 0) {
-		std::cout << "Failed to initialize physfs" << std::cout;
+		std::cout << "Failed to initialize physfs" << std::endl;
 		return EXIT_FAILURE;
 	}
 
