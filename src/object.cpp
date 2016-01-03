@@ -80,11 +80,11 @@ Vector2 Object::getGridSize() const {
 	Vector2 gridSize = this->objectClass->getGridSize();
 
 	if (gridSize.x == 0.0f) {
-		gridSize.x = this->size.x;
+		gridSize.x = this->size.x * this->objectClass->getScale() * this->scale;
 	}
 
 	if (gridSize.y == 0.0f) {
-		gridSize.y = this->size.y;
+		gridSize.y = this->size.y * this->objectClass->getScale() * this->scale;
 	}
 
 	return gridSize;
